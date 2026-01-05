@@ -1,17 +1,47 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Header } from "@/components/layout/header"
+import {
+  Hero,
+  Stats,
+  Guarantees,
+  Prices,
+  Testimonials,
+  LeadForm,
+  Faq,
+  Footer,
+} from "@/components/landing"
+import { getLandingPageData } from "@/lib/api/landing"
 
-export default function Home() {
+export default async function Home() {
+  const { stats, testimonials, faq, prices, guarantees } = await getLandingPageData()
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 gap-6">
-      <h1 className="text-4xl font-bold">Serenio</h1>
-      <p className="text-muted-foreground text-center max-w-xl">
-        Une plateforme de confiance pour trouver un serrurier vérifié à Lyon,
-        avec un prix cadré et sans surprise.
-      </p>
-      <Button asChild>
-        <Link href="/demande">Créer une demande</Link>
-      </Button>
-    </main>
+    <>
+      <Header />
+      <main className="min-h-screen">
+        {/* Hero : CTA principal */}
+        <Hero />
+
+        {/* Stats : preuves sociales rapides */}
+        <Stats stats={stats} />
+
+        {/* Garanties : pourquoi nous faire confiance */}
+        <Guarantees guarantees={guarantees} />
+
+        {/* Prix : transparence totale */}
+        <Prices prices={prices} />
+
+        {/* Témoignages : validation sociale */}
+        <Testimonials testimonials={testimonials} />
+
+        {/* Lead form : capture */}
+        <LeadForm />
+
+        {/* FAQ : lever les objections */}
+        <Faq faq={faq} />
+
+        {/* Footer */}
+        <Footer />
+      </main>
+    </>
   )
 }

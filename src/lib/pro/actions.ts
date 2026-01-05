@@ -1,0 +1,134 @@
+"use server"
+
+import { revalidatePath } from "next/cache"
+import { createClient } from "@/lib/supabase/server"
+
+interface ActionResult {
+  success: boolean
+  error?: string
+}
+
+/**
+ * Met à jour les infos entreprise de l'artisan
+ */
+export async function updateArtisanCompany(data: {
+  companyName: string
+  siret: string
+  experience?: string
+}): Promise<ActionResult> {
+  const supabase = await createClient()
+  const { data: userData } = await supabase.auth.getUser()
+
+  if (!userData.user) {
+    return { success: false, error: "Non connecté" }
+  }
+
+  // Mise à jour auth metadata
+  const { error } = await supabase.auth.updateUser({
+    data: {
+      company_name: data.companyName,
+      experience: data.experience,
+    },
+  })
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  // Mise à jour table artisans
+  await supabase
+    .from("artisans")
+    .update({
+      company_name: data.companyName,
+      experience: data.experience,
+    })
+    .eq("id", userData.user.id)
+
+  revalidatePath("/pro/compte")
+  return { success: true }
+}
+
+/**
+ * Met à jour les infos contact de l'artisan
+ */
+export async function updateArtisanContact(data: {
+  firstName: string
+  lastName: string
+  phone: string
+}): Promise<ActionResult> {
+  const supabase = await createClient()
+  const { data: userData } = await supabase.auth.getUser()
+
+  if (!userData.user) {
+    return { success: false, error: "Non connecté" }
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    data: {
+      first_name: data.firstName,
+      last_name: data.lastName,
+      full_name: `${data.firstName} ${data.lastName}`,
+      phone: data.phone,
+    },
+  })
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  await supabase
+    .from("artisans")
+    .update({
+      first_name: data.firstName,
+      last_name: data.lastName,
+      phone: data.phone,
+    })
+    .eq("id", userData.user.id)
+
+  revalidatePath("/pro/compte")
+  return { success: true }
+}
+
+/**
+ * Met à jour l'adresse et zone d'intervention
+ */
+export async function updateArtisanAddress(data: {
+  street: string
+  postalCode: string
+  city: string
+  availabilityRadius: number
+}): Promise<ActionResult> {
+  const supabase = await createClient()
+  const { data: userData } = await supabase.auth.getUser()
+
+  if (!userData.user) {
+    return { success: false, error: "Non connecté" }
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    data: {
+      street: data.street,
+      postal_code: data.postalCode,
+      city: data.city,
+      availability_radius_km: data.availabilityRadius,
+    },
+  })
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  await supabase
+    .from("artisans")
+    .update({
+      street: data.street,
+      postal_code: data.postalCode,
+      city: data.city,
+      availability_radius_km: data.availabilityRadius,
+    })
+    .eq("id", userData.user.id)
+
+  revalidatePath("/pro/compte")
+  return { success: true }
+}
+
