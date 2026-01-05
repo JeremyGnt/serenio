@@ -156,3 +156,83 @@ export async function logoutAllDevices(): Promise<ActionResult> {
   revalidatePath("/", "layout")
   redirect("/login")
 }
+
+/**
+ * Convertit un compte client en compte artisan (en attente de validation)
+ */
+export async function upgradeToArtisan(data: {
+  companyName: string
+  siret: string
+  phone: string
+  street: string
+  postalCode: string
+  city: string
+  experience?: string
+}): Promise<ActionResult> {
+  const supabase = await createClient()
+  const { data: userData } = await supabase.auth.getUser()
+
+  if (!userData.user) {
+    return { success: false, error: "Non connecté" }
+  }
+
+  // Vérifier que l'utilisateur n'est pas déjà artisan
+  const currentRole = userData.user.user_metadata?.role
+  if (currentRole === "artisan" || currentRole === "artisan_pending") {
+    return { success: false, error: "Vous avez déjà une demande en cours ou êtes déjà artisan" }
+  }
+
+  // Vérifier si le SIRET existe déjà
+  const { data: existingSiret } = await supabase
+    .from("artisans")
+    .select("id")
+    .eq("siret", data.siret)
+    .single()
+
+  if (existingSiret) {
+    return { success: false, error: "Ce numéro SIRET est déjà enregistré" }
+  }
+
+  // Mettre à jour le rôle de l'utilisateur en "artisan_pending"
+  const { error: updateError } = await supabase.auth.updateUser({
+    data: {
+      role: "artisan_pending",
+      phone: data.phone,
+      street: data.street,
+      postal_code: data.postalCode,
+      city: data.city,
+    },
+  })
+
+  if (updateError) {
+    return { success: false, error: updateError.message }
+  }
+
+  // Créer l'entrée dans la table artisans
+  const { error: insertError } = await supabase.from("artisans").insert({
+    user_id: userData.user.id,
+    company_name: data.companyName,
+    siret: data.siret,
+    first_name: userData.user.user_metadata?.first_name || "",
+    last_name: userData.user.user_metadata?.last_name || "",
+    email: userData.user.email,
+    phone: data.phone,
+    address_street: data.street,
+    address_postal_code: data.postalCode,
+    address_city: data.city,
+    experience: data.experience || "",
+    status: "pending",
+    specialty: "serrurerie",
+  })
+
+  if (insertError) {
+    // Rollback du rôle en cas d'erreur
+    await supabase.auth.updateUser({
+      data: { role: "client" },
+    })
+    return { success: false, error: "Erreur lors de la création du profil artisan" }
+  }
+
+  revalidatePath("/compte")
+  return { success: true }
+}

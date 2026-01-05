@@ -5,4 +5,6 @@ export { ProAddressSection } from "./pro-address-section"
 export { ProPasswordSection } from "./pro-password-section"
 export { ProBillingSection } from "./pro-billing-section"
 export { ProDeleteSection } from "./pro-delete-section"
+export { ProHeader } from "./pro-header"
+export { ProLogoutButton } from "./pro-logout-button"
 

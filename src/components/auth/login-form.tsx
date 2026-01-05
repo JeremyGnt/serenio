@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PasswordInput } from "@/components/ui/password-input"
+import { GoogleButton } from "./google-button"
 import { login } from "@/lib/auth/actions"
 
 export function LoginForm() {
@@ -14,10 +15,11 @@ export function LoginForm() {
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get("redirect") || "/"
   const message = searchParams.get("message")
+  const errorParam = searchParams.get("error")
   
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
+  const [error, setError] = useState(errorParam === "callback" ? "Erreur lors de la connexion. Veuillez réessayer." : "")
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,7 +45,7 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
       {/* Message de confirmation email */}
       {message === "verification" && (
         <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-sm text-emerald-700">
@@ -58,7 +60,21 @@ export function LoginForm() {
         </div>
       )}
 
-      <div className="space-y-4">
+      {/* Bouton Google */}
+      <GoogleButton mode="login" />
+
+      {/* Séparateur */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-gray-200" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-3 text-muted-foreground">ou</span>
+        </div>
+      </div>
+
+      {/* Formulaire email/password */}
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -93,16 +109,16 @@ export function LoginForm() {
             className="h-12"
           />
         </div>
-      </div>
 
-      <Button
-        type="submit"
-        size="lg"
-        className="w-full h-12"
-        disabled={loading}
-      >
-        {loading ? "Connexion..." : "Se connecter"}
-      </Button>
-    </form>
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full h-12"
+          disabled={loading}
+        >
+          {loading ? "Connexion..." : "Se connecter"}
+        </Button>
+      </form>
+    </div>
   )
 }

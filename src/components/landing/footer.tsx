@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 
 export function Footer() {
   return (
@@ -6,7 +7,15 @@ export function Footer() {
       <div className="max-w-lg mx-auto">
         <div className="text-center space-y-4">
           {/* Logo */}
-          <div className="font-bold text-lg">Serenio</div>
+          <div className="flex items-center justify-center gap-2">
+            <Image
+              src="/logo.svg"
+              alt="Serenio"
+              width={28}
+              height={28}
+            />
+            <span className="font-bold text-lg">Serenio</span>
+          </div>
           
           {/* Tagline */}
           <p className="text-xs text-muted-foreground">
@@ -16,10 +25,10 @@ export function Footer() {
           {/* Liens */}
           <div className="flex justify-center gap-6 text-xs">
             <Link
-              href="/demande"
+              href="/urgence"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              Demande
+              Urgence
             </Link>
             <a
               href="mailto:contact@serenio.fr"
@@ -44,4 +53,3 @@ export function Footer() {
     </footer>
   )
 }
-

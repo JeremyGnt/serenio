@@ -6,7 +6,7 @@ import Link from "next/link"
 import { ArrowLeft, X, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { PriceScenarioDisplay, SituationType, DiagnosticAnswers } from "@/types/intervention"
-import { URGENCE_STEPS } from "@/lib/interventions/config"
+import { URGENCE_STEPS, DIAGNOSTIC_QUESTIONS } from "@/lib/interventions/config"
 import { createIntervention, updateDiagnostic, submitIntervention } from "@/lib/interventions"
 
 import { StepSituation } from "./steps/step-situation"
@@ -25,7 +25,6 @@ interface UrgenceFlowProps {
 interface FormState {
   // Situation
   situationType: SituationType | null
-  otherDetails: string
   
   // Diagnostic
   diagnosticAnswers: DiagnosticAnswers
@@ -58,7 +57,6 @@ interface FormState {
 
 const initialFormState: FormState = {
   situationType: null,
-  otherDetails: "",
   diagnosticAnswers: {},
   doorType: null,
   lockType: null,
@@ -88,10 +86,51 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
 
   const currentStepId = URGENCE_STEPS[currentStep]?.id
 
+  // Fonction pour afficher une erreur et scroller en haut
+  const showError = (message: string) => {
+    setError(message)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
   // Mettre à jour le formulaire
   const updateForm = (updates: Partial<FormState>) => {
     setFormState((prev) => ({ ...prev, ...updates }))
     setError("")
+  }
+
+  // Vérifier si toutes les questions obligatoires du diagnostic sont remplies
+  const validateDiagnostic = (): string | null => {
+    if (!formState.situationType) return null
+    
+    const steps = DIAGNOSTIC_QUESTIONS[formState.situationType] || []
+    
+    for (const step of steps) {
+      for (const question of step.questions) {
+        if (question.required) {
+          const answer = formState.diagnosticAnswers[question.id]
+          
+          // Vérifier si la réponse existe
+          if (answer === undefined || answer === null || answer === "") {
+            return `Veuillez répondre à : "${question.question}"`
+          }
+          
+          // Si c'est un tableau vide (multiple)
+          if (Array.isArray(answer) && answer.length === 0) {
+            return `Veuillez répondre à : "${question.question}"`
+          }
+          
+          // Si "Autre" est sélectionné, vérifier le champ "Préciser"
+          if (answer === "other") {
+            const detailsAnswer = formState.diagnosticAnswers[`${question.id}_details`]
+            if (!detailsAnswer || (typeof detailsAnswer === "string" && !detailsAnswer.trim())) {
+              return `Veuillez préciser votre réponse pour : "${question.question}"`
+            }
+          }
+        }
+      }
+    }
+    
+    return null
   }
 
   // Aller à l'étape suivante
@@ -99,26 +138,57 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
     // Validation selon l'étape
     if (currentStepId === "situation") {
       if (!formState.situationType) {
-        setError("Veuillez sélectionner votre situation")
+        showError("Veuillez sélectionner votre situation")
         return
       }
-      // Si "autre" sélectionné, vérifier que les détails sont remplis
-      if (formState.situationType === "other" && !formState.otherDetails.trim()) {
-        setError("Veuillez préciser votre situation")
+    }
+
+    if (currentStepId === "diagnostic") {
+      const diagnosticError = validateDiagnostic()
+      if (diagnosticError) {
+        showError(diagnosticError)
         return
       }
     }
 
     if (currentStepId === "localisation") {
-      if (!formState.addressStreet || !formState.addressPostalCode || !formState.addressCity) {
-        setError("Veuillez renseigner votre adresse complète")
+      if (!formState.addressStreet.trim()) {
+        showError("Veuillez renseigner votre rue")
+        return
+      }
+      if (!formState.addressPostalCode.trim()) {
+        showError("Veuillez renseigner votre code postal")
+        return
+      }
+      if (!formState.addressCity.trim()) {
+        showError("Veuillez renseigner votre ville")
+        return
+      }
+      // Vérifier le format du code postal (5 chiffres)
+      if (!/^\d{5}$/.test(formState.addressPostalCode.trim())) {
+        showError("Le code postal doit contenir 5 chiffres")
         return
       }
     }
 
     if (currentStepId === "contact") {
-      if (!formState.clientEmail || !formState.clientPhone) {
-        setError("Email et téléphone sont requis")
+      if (!formState.clientPhone.trim()) {
+        showError("Le numéro de téléphone est requis")
+        return
+      }
+      if (!formState.clientEmail.trim()) {
+        showError("L'adresse email est requise")
+        return
+      }
+      // Vérifier le format de l'email
+      if (!formState.clientEmail.includes("@") || !formState.clientEmail.includes(".")) {
+        showError("Veuillez entrer une adresse email valide")
+        return
+      }
+      // Vérifier le format du téléphone (au moins 10 chiffres)
+      const phoneDigits = formState.clientPhone.replace(/\D/g, "")
+      if (phoneDigits.length < 10) {
+        showError("Veuillez entrer un numéro de téléphone valide")
         return
       }
       
@@ -142,7 +212,7 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
       setLoading(false)
 
       if (!result.success) {
-        setError(result.error || "Erreur lors de la création")
+        showError(result.error || "Erreur lors de la création")
         return
       }
 
@@ -155,9 +225,7 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
       if (result.intervention?.id) {
         await updateDiagnostic(result.intervention.id, {
           situationType: formState.situationType || undefined,
-          situationDetails: formState.situationType === "other" 
-            ? formState.otherDetails 
-            : formState.situationDetails,
+          situationDetails: formState.situationDetails,
           diagnosticAnswers: formState.diagnosticAnswers,
           doorType: formState.doorType as "standard" | "blindee" | "cave" | "garage" | "other" | undefined,
           lockType: formState.lockType as "standard" | "multipoint" | "electronique" | "other" | undefined,
@@ -187,7 +255,7 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
   // Soumettre la demande
   const handleSubmit = async () => {
     if (!formState.interventionId) {
-      setError("Erreur: intervention non créée")
+      showError("Erreur: intervention non créée")
       return
     }
 
@@ -196,7 +264,7 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
     setLoading(false)
 
     if (!result.success) {
-      setError(result.error || "Erreur lors de l'envoi")
+      showError(result.error || "Erreur lors de l'envoi")
       return
     }
 
@@ -206,7 +274,7 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
 
   // Trouver le scénario de prix correspondant
   const selectedScenario = formState.situationType
-    ? priceScenarios.find((s) => s.code === formState.situationType)
+    ? priceScenarios.find((s) => s.code === formState.situationType) ?? null
     : null
 
   return (
@@ -260,8 +328,6 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
             selected={formState.situationType}
             onSelect={(situationType) => updateForm({ situationType })}
             priceScenarios={priceScenarios}
-            otherDetails={formState.otherDetails}
-            onOtherDetailsChange={(otherDetails) => updateForm({ otherDetails })}
           />
         )}
 

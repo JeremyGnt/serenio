@@ -2,25 +2,96 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { headers } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
 import type { AuthResult, SignupPayload, LoginPayload } from "@/types/auth"
 
 /**
- * Inscription d'un nouvel utilisateur (client uniquement)
+ * Connexion/Inscription via Google (clients uniquement)
+ */
+export async function loginWithGoogle(): Promise<{ url: string } | { error: string }> {
+  const supabase = await createClient()
+  const headersList = await headers()
+  const origin = headersList.get("origin") || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${origin}/auth/callback?next=/`,
+      queryParams: {
+        access_type: "offline",
+        prompt: "consent",
+      },
+    },
+  })
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  return { url: data.url }
+}
+
+/**
+ * Inscription simplifiée (email + mot de passe)
+ */
+export async function simpleSignup(payload: {
+  email: string
+  password: string
+}): Promise<AuthResult> {
+  const supabase = await createClient()
+
+  if (!payload.email) {
+    return { success: false, error: "Email requis" }
+  }
+
+  if (payload.password.length < 6) {
+    return { success: false, error: "Le mot de passe doit contenir au moins 6 caractères" }
+  }
+
+  const { data, error } = await supabase.auth.signUp({
+    email: payload.email,
+    password: payload.password,
+    options: {
+      data: {
+        role: "client",
+      },
+    },
+  })
+
+  if (error) {
+    if (error.message.includes("already registered")) {
+      return { success: false, error: "Cette adresse email est déjà utilisée" }
+    }
+    return { success: false, error: error.message }
+  }
+
+  if (data.user) {
+    await supabase.from("profiles").upsert({
+      id: data.user.id,
+      email: payload.email,
+      role: "client",
+      created_at: new Date().toISOString(),
+    })
+  }
+
+  revalidatePath("/", "layout")
+  return { success: true, redirectTo: "/" }
+}
+
+/**
+ * Inscription complète d'un nouvel utilisateur (client uniquement)
  */
 export async function signup(payload: SignupPayload): Promise<AuthResult> {
   const supabase = await createClient()
 
+  // Seuls email, password, firstName, lastName et phone sont obligatoires
   if (
     !payload.email ||
     !payload.password ||
     !payload.firstName ||
     !payload.lastName ||
-    !payload.phone ||
-    !payload.street ||
-    !payload.postalCode ||
-    !payload.city ||
-    !payload.country
+    !payload.phone
   ) {
     return { success: false, error: "Tous les champs obligatoires doivent être remplis" }
   }

@@ -13,9 +13,22 @@ import {
   Star,
   FileText,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Mail,
+  StickyNote,
+  AlertTriangle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import type { LiveTrackingData } from "@/types/intervention"
 import { STATUS_LABELS } from "@/lib/interventions/config"
 import { cancelIntervention } from "@/lib/interventions"
@@ -29,6 +42,7 @@ interface TrackingViewProps {
 export function TrackingView({ data }: TrackingViewProps) {
   const { intervention, artisan, quote, statusHistory } = data
   const [cancelling, setCancelling] = useState(false)
+  const [showCancelDialog, setShowCancelDialog] = useState(false)
 
   const statusInfo = STATUS_LABELS[intervention.status] || {
     label: intervention.status,
@@ -37,11 +51,10 @@ export function TrackingView({ data }: TrackingViewProps) {
   }
 
   const handleCancel = async () => {
-    if (!confirm("Êtes-vous sûr de vouloir annuler cette demande ?")) return
-    
     setCancelling(true)
     await cancelIntervention(intervention.id, "Annulé par le client")
     setCancelling(false)
+    setShowCancelDialog(false)
     window.location.reload()
   }
 
@@ -137,9 +150,10 @@ export function TrackingView({ data }: TrackingViewProps) {
             {intervention.addressPostalCode} {intervention.addressCity}
           </p>
           {intervention.addressInstructions && (
-            <p className="text-sm text-muted-foreground mt-2">
-              📝 {intervention.addressInstructions}
-            </p>
+            <div className="flex items-start gap-2 mt-3 text-sm text-muted-foreground">
+              <StickyNote className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <span>{intervention.addressInstructions}</span>
+            </div>
           )}
         </div>
 
@@ -155,9 +169,19 @@ export function TrackingView({ data }: TrackingViewProps) {
         {/* Contact */}
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <h2 className="font-semibold text-gray-900 mb-3">Vos coordonnées</h2>
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <p>📞 {intervention.clientPhone}</p>
-            <p>✉️ {intervention.clientEmail}</p>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                <Phone className="w-4 h-4 text-gray-600" />
+              </div>
+              <span className="text-sm text-muted-foreground">{intervention.clientPhone}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                <Mail className="w-4 h-4 text-gray-600" />
+              </div>
+              <span className="text-sm text-muted-foreground">{intervention.clientEmail}</span>
+            </div>
           </div>
         </div>
 
@@ -167,10 +191,10 @@ export function TrackingView({ data }: TrackingViewProps) {
             <Button
               variant="outline"
               className="w-full text-red-600 border-red-200 hover:bg-red-50"
-              onClick={handleCancel}
+              onClick={() => setShowCancelDialog(true)}
               disabled={cancelling}
             >
-              {cancelling ? "Annulation..." : "Annuler ma demande"}
+              Annuler ma demande
             </Button>
           )}
           
@@ -181,6 +205,46 @@ export function TrackingView({ data }: TrackingViewProps) {
           </Button>
         </div>
       </main>
+
+      {/* Modal de confirmation d'annulation */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent className="max-w-md mx-4">
+          <AlertDialogHeader className="text-center sm:text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+              <AlertTriangle className="w-8 h-8 text-red-600" />
+            </div>
+            <AlertDialogTitle className="text-xl">
+              Annuler cette demande ?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base mt-2">
+              Êtes-vous sûr de vouloir annuler votre demande d'intervention ? 
+              Cette action ne peut pas être annulée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6 sm:flex-col sm:space-x-0 sm:space-y-3">
+            <AlertDialogCancel 
+              className="w-full h-12 text-base font-medium"
+              disabled={cancelling}
+            >
+              Non, garder ma demande
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancel}
+              disabled={cancelling}
+              className="w-full h-12 text-base font-medium bg-red-600 hover:bg-red-700 text-white"
+            >
+              {cancelling ? (
+                <span className="flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Annulation...
+                </span>
+              ) : (
+                "Oui, annuler ma demande"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
@@ -249,4 +313,3 @@ function StatusIcon({ status }: { status: string }) {
       )
   }
 }
-

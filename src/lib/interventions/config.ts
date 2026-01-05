@@ -48,13 +48,6 @@ export const SITUATIONS: SituationOption[] = [
     icon: "KeySquare",
     urgencyLevel: 2,
   },
-  {
-    code: "other",
-    label: "Autre situation",
-    description: "Mon problème n'est pas dans la liste",
-    icon: "MessageCircleQuestion",
-    urgencyLevel: 1,
-  },
 ]
 
 // ============================================

@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { ArtisanRegisterForm } from "@/components/auth/artisan-register-form"
 
 export const metadata = {
@@ -12,7 +13,13 @@ export default function ProRegisterPage() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-block">
+          <Link href="/" className="inline-flex items-center justify-center gap-2">
+            <Image
+              src="/logo.svg"
+              alt="Serenio"
+              width={32}
+              height={32}
+            />
             <h1 className="text-2xl font-bold">Serenio <span className="text-blue-600">Pro</span></h1>
           </Link>
           <p className="mt-2 text-muted-foreground">
@@ -38,7 +45,7 @@ export default function ProRegisterPage() {
         {/* Footer */}
         <p className="text-center text-sm text-muted-foreground mt-6">
           Déjà inscrit ?{" "}
-          <Link href="/pro/login" className="font-medium text-foreground hover:underline">
+          <Link href="/login" className="font-medium text-foreground hover:underline">
             Se connecter
           </Link>
         </p>
@@ -46,4 +53,3 @@ export default function ProRegisterPage() {
     </main>
   )
 }
-

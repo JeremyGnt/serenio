@@ -1,6 +1,6 @@
 "use client"
 
-import { Mail, Phone, User } from "lucide-react"
+import { Mail, Phone, User, Lock, CheckCircle } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
@@ -109,21 +109,26 @@ export function StepContact({
       </div>
 
       {/* Info confidentialité */}
-      <div className="p-4 bg-gray-100 rounded-xl">
+      <div className="p-4 bg-gray-100 rounded-xl flex items-start gap-3">
+        <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+          <Lock className="w-4 h-4 text-gray-600" />
+        </div>
         <p className="text-xs text-muted-foreground">
-          🔒 Vos informations sont sécurisées et ne seront utilisées que pour 
+          Vos informations sont sécurisées et ne seront utilisées que pour 
           cette intervention. Consultez notre politique de confidentialité.
         </p>
       </div>
 
       {/* Pas de compte requis */}
-      <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+      <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-start gap-3">
+        <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+          <CheckCircle className="w-4 h-4 text-emerald-600" />
+        </div>
         <p className="text-sm text-emerald-800">
-          <strong>✓ Pas de compte requis</strong> — Vous pourrez créer un compte 
+          <strong>Pas de compte requis</strong> — Vous pourrez créer un compte 
           après l'intervention pour retrouver vos factures.
         </p>
       </div>
     </div>
   )
 }
-

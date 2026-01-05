@@ -1,26 +1,20 @@
 "use client"
 
-import { useState } from "react"
 import { 
   DoorClosed, 
   KeyRound, 
   Lock, 
   ShieldAlert, 
   KeySquare, 
-  MessageCircleQuestion,
   type LucideIcon 
 } from "lucide-react"
 import type { SituationType, PriceScenarioDisplay } from "@/types/intervention"
 import { SITUATIONS } from "@/lib/interventions/config"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 
 interface StepSituationProps {
   selected: SituationType | null
   onSelect: (situation: SituationType) => void
   priceScenarios: PriceScenarioDisplay[]
-  otherDetails?: string
-  onOtherDetailsChange?: (details: string) => void
 }
 
 // Map des icônes
@@ -30,23 +24,13 @@ const ICONS: Record<string, LucideIcon> = {
   Lock,
   ShieldAlert,
   KeySquare,
-  MessageCircleQuestion,
 }
 
 export function StepSituation({ 
   selected, 
   onSelect, 
   priceScenarios,
-  otherDetails = "",
-  onOtherDetailsChange,
 }: StepSituationProps) {
-  const [localOtherDetails, setLocalOtherDetails] = useState(otherDetails)
-
-  const handleOtherDetailsChange = (value: string) => {
-    setLocalOtherDetails(value)
-    onOtherDetailsChange?.(value)
-  }
-
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -62,7 +46,7 @@ export function StepSituation({
         {SITUATIONS.map((situation) => {
           const isSelected = selected === situation.code
           const scenario = priceScenarios.find((s) => s.code === situation.code)
-          const Icon = ICONS[situation.icon] || MessageCircleQuestion
+          const Icon = ICONS[situation.icon] || DoorClosed
 
           return (
             <button
@@ -105,23 +89,6 @@ export function StepSituation({
           )
         })}
       </div>
-
-      {/* Champ "Préciser" si "Autre" sélectionné */}
-      {selected === "other" && (
-        <div className="space-y-2 p-4 bg-gray-50 rounded-xl border border-gray-200">
-          <Label htmlFor="otherDetails" className="font-medium">
-            Précisez votre situation <span className="text-red-500">*</span>
-          </Label>
-          <Textarea
-            id="otherDetails"
-            value={localOtherDetails}
-            onChange={(e) => handleOtherDetailsChange(e.target.value)}
-            placeholder="Décrivez votre problème en quelques mots..."
-            rows={3}
-            className="resize-none"
-          />
-        </div>
-      )}
 
       <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
         <p className="text-sm text-blue-800">

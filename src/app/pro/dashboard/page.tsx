@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation"
-import Link from "next/link"
-import { Clock, CheckCircle, AlertTriangle, Settings } from "lucide-react"
+import { Clock, CheckCircle, AlertTriangle, Hand } from "lucide-react"
 import { getUser } from "@/lib/supabase/server"
-import { ProLogoutButton } from "@/components/pro/pro-logout-button"
+import { ProHeader } from "@/components/pro/pro-header"
 
 export const metadata = {
   title: "Dashboard Pro | Serenio",
@@ -13,7 +12,7 @@ export default async function ProDashboardPage() {
   const user = await getUser()
 
   if (!user) {
-    redirect("/pro/login?redirect=/pro/dashboard")
+    redirect("/login?redirect=/pro/dashboard")
   }
 
   // Vérifier que c'est bien un artisan validé
@@ -48,71 +47,62 @@ export default async function ProDashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Pro */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/pro/dashboard" className="font-bold text-lg">
-            Serenio <span className="text-blue-600">Pro</span>
-          </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/pro/dashboard" className="font-medium">
-              Dashboard
-            </Link>
-            <Link href="/pro/compte" className="text-muted-foreground hover:text-foreground">
-              <Settings className="w-5 h-5" />
-            </Link>
-            <ProLogoutButton />
-          </nav>
+      <ProHeader firstName={firstName} />
+
+      <main className="max-w-6xl mx-auto px-4 py-6 md:py-8">
+        {/* Titre avec icône */}
+        <div className="flex items-center gap-3 mb-6 md:mb-8">
+          <h1 className="text-xl md:text-2xl font-bold">Bonjour {firstName}</h1>
+          <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+            <Hand className="w-4 h-4 text-amber-600" />
+          </div>
         </div>
-      </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-8">Bonjour {firstName} 👋</h1>
-
-        {/* Stats */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-amber-600" />
+        {/* Stats - Mobile: 1 colonne, Tablet+: 3 colonnes */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 md:w-6 md:h-6 text-amber-600" />
               </div>
               <div>
-                <div className="text-2xl font-bold">0</div>
-                <div className="text-sm text-muted-foreground">Demandes en attente</div>
+                <div className="text-xl md:text-2xl font-bold">0</div>
+                <div className="text-xs md:text-sm text-muted-foreground">Demandes en attente</div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <Clock className="w-6 h-6 text-blue-600" />
+          <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Clock className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
               </div>
               <div>
-                <div className="text-2xl font-bold">0</div>
-                <div className="text-sm text-muted-foreground">Interventions ce mois</div>
+                <div className="text-xl md:text-2xl font-bold">0</div>
+                <div className="text-xs md:text-sm text-muted-foreground">Interventions ce mois</div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-green-600" />
+          <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6 sm:col-span-2 md:col-span-1">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
               </div>
               <div>
-                <div className="text-2xl font-bold">0 €</div>
-                <div className="text-sm text-muted-foreground">Revenus ce mois</div>
+                <div className="text-xl md:text-2xl font-bold">0 €</div>
+                <div className="text-xs md:text-sm text-muted-foreground">Revenus ce mois</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Demandes */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="font-bold mb-4">Dernières demandes</h2>
-          <div className="text-center py-12 text-muted-foreground">
-            <p>Aucune demande pour le moment</p>
-            <p className="text-sm mt-2">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
+          <h2 className="font-bold mb-4 text-base md:text-lg">Dernières demandes</h2>
+          <div className="text-center py-8 md:py-12 text-muted-foreground">
+            <p className="text-sm md:text-base">Aucune demande pour le moment</p>
+            <p className="text-xs md:text-sm mt-2">
               Les demandes de clients dans votre zone apparaîtront ici
             </p>
           </div>
@@ -121,4 +111,3 @@ export default async function ProDashboardPage() {
     </div>
   )
 }
-

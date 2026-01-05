@@ -1,6 +1,6 @@
 "use client"
 
-import { MapPin, Phone, Mail, AlertTriangle, Clock, Euro } from "lucide-react"
+import { MapPin, Phone, Mail, AlertTriangle, Clock, Euro, User } from "lucide-react"
 import { 
   DoorClosed, 
   KeyRound, 
@@ -100,19 +100,28 @@ export function StepRecap({ formState, selectedScenario }: StepRecapProps) {
 
       {/* Contact */}
       <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <h3 className="font-semibold text-gray-900 mb-3">Contact</h3>
-        <div className="space-y-2">
-          <div className="flex items-center gap-3 text-sm">
-            <Phone className="w-4 h-4 text-gray-400" />
-            <span>{formState.clientPhone}</span>
+        <h3 className="font-semibold text-gray-900 mb-3">Vos coordonnées</h3>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+              <Phone className="w-4 h-4 text-gray-600" />
+            </div>
+            <span className="text-sm">{formState.clientPhone}</span>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <Mail className="w-4 h-4 text-gray-400" />
-            <span>{formState.clientEmail}</span>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+              <Mail className="w-4 h-4 text-gray-600" />
+            </div>
+            <span className="text-sm">{formState.clientEmail}</span>
           </div>
           {(formState.clientFirstName || formState.clientLastName) && (
-            <div className="text-sm text-muted-foreground">
-              {formState.clientFirstName} {formState.clientLastName}
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                <User className="w-4 h-4 text-gray-600" />
+              </div>
+              <span className="text-sm text-muted-foreground">
+                {formState.clientFirstName} {formState.clientLastName}
+              </span>
             </div>
           )}
         </div>

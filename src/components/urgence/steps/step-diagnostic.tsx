@@ -90,21 +90,38 @@ export function StepDiagnostic({
 
                 {/* Question type: single */}
                 {question.type === "single" && question.options && (
-                  <div className="grid gap-2">
-                    {question.options.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => handleAnswerChange(question.id, option.value)}
-                        className={`w-full text-left p-3 rounded-lg border transition-all ${
-                          currentValue === option.value
-                            ? "border-red-500 bg-red-50"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
+                  <div className="space-y-2">
+                    <div className="grid gap-2">
+                      {question.options.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => handleAnswerChange(question.id, option.value)}
+                          className={`w-full text-left p-3 rounded-lg border transition-all ${
+                            currentValue === option.value
+                              ? "border-red-500 bg-red-50"
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Champ "Préciser" si "Autre" est sélectionné */}
+                    {currentValue === "other" && (
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <Label htmlFor={`${question.id}_details`} className="text-sm font-medium">
+                          Préciser <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id={`${question.id}_details`}
+                          value={(answers[`${question.id}_details`] as string) || ""}
+                          onChange={(e) => handleAnswerChange(`${question.id}_details`, e.target.value)}
+                          placeholder="Précisez votre réponse..."
+                          className="mt-2"
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
 
