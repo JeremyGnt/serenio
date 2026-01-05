@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, X, AlertTriangle } from "lucide-react"
+import { ArrowLeft, X, AlertTriangle, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { PriceScenarioDisplay, SituationType, DiagnosticAnswers } from "@/types/intervention"
 import { URGENCE_STEPS, DIAGNOSTIC_QUESTIONS } from "@/lib/interventions/config"
@@ -281,7 +281,7 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 h-14 flex items-center justify-between">
           <button
             onClick={currentStep > 0 ? prevStep : undefined}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
@@ -289,12 +289,12 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
             {currentStep > 0 ? (
               <>
                 <ArrowLeft className="w-4 h-4" />
-                Retour
+                <span className="hidden sm:inline">Retour</span>
               </>
             ) : (
               <Link href="/" className="flex items-center gap-2">
                 <ArrowLeft className="w-4 h-4" />
-                Accueil
+                <span className="hidden sm:inline">Accueil</span>
               </Link>
             )}
           </button>
@@ -312,6 +312,14 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
 
       {/* Progress */}
       <UrgenceProgress currentStep={currentStep} steps={URGENCE_STEPS} />
+
+      {/* Indication temps */}
+      <div className="flex justify-center py-2">
+        <div className="inline-flex items-center gap-2 px-4 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
+          <Clock className="w-4 h-4 text-emerald-600" />
+          <span className="text-sm text-emerald-700">Formulaire rapide — <strong>3 min</strong></span>
+        </div>
+      </div>
 
       {/* Content */}
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-6">

@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowLeft, Wrench } from "lucide-react"
+import { ArrowLeft, ArrowRight, Wrench } from "lucide-react"
 import { SimpleSignupForm } from "@/components/auth/simple-signup-form"
 
 export const metadata = {
@@ -10,18 +10,18 @@ export const metadata = {
 
 export default function SignupPage() {
   return (
-    <main className="min-h-screen flex flex-col px-4 py-6 bg-gray-50">
+    <main className="min-h-screen flex flex-col px-4 py-6">
       {/* Retour à l'accueil */}
       <Link 
         href="/" 
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit p-2 -ml-2 rounded-lg hover:bg-white"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit p-2 -ml-2 rounded-lg hover:bg-gray-100"
       >
         <ArrowLeft className="w-5 h-5" />
         <span className="hidden sm:inline">Retour à l'accueil</span>
       </Link>
 
-      <div className="flex-1 flex flex-col items-center justify-center py-8">
-        <div className="w-full max-w-sm space-y-6">
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <div className="w-full max-w-sm space-y-8">
           {/* Logo / Titre */}
           <div className="text-center">
             <Link href="/" className="inline-flex items-center justify-center gap-2">
@@ -33,15 +33,21 @@ export default function SignupPage() {
               />
               <h1 className="text-2xl font-bold">Serenio</h1>
             </Link>
-            <p className="mt-2 text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground">
               Créez votre compte
             </p>
+            {/* Lien Artisan discret */}
+            <Link 
+              href="/pro/register" 
+              className="group inline-flex items-center gap-1.5 mt-3 text-sm text-blue-600 hover:text-blue-700 hover:underline"
+            >
+              <span>Vous êtes artisan serrurier ?</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
           </div>
 
           {/* Formulaire */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <SimpleSignupForm />
-          </div>
+          <SimpleSignupForm />
 
           {/* Lien connexion */}
           <p className="text-center text-sm text-muted-foreground">
@@ -51,10 +57,10 @@ export default function SignupPage() {
             </Link>
           </p>
 
-          {/* Lien Artisan */}
+          {/* Lien Artisan - visible sur mobile uniquement */}
           <Link
             href="/pro/register"
-            className="group flex items-center justify-center gap-3 p-4 bg-white border-2 border-blue-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all"
+            className="md:hidden group flex items-center justify-center gap-3 p-4 bg-gray-50 border-2 border-blue-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all"
           >
             <Wrench className="w-5 h-5 text-blue-600" />
             <span className="font-semibold text-blue-700 group-hover:text-blue-800">

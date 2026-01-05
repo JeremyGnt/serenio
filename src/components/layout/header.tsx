@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Shield, LogIn, UserPlus } from "lucide-react"
+import { Shield, LogIn, UserPlus, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { UserMenu } from "@/components/auth/user-menu"
 import { getUser } from "@/lib/supabase/server"
@@ -41,7 +41,16 @@ export async function Header() {
         </Link>
 
         {/* Navigation */}
-        <nav className="flex items-center gap-2 sm:gap-4">
+        <nav className="flex items-center gap-2 sm:gap-3">
+          {/* Lien SOS */}
+          <Link
+            href="/urgence"
+            className="flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
+          >
+            <Zap className="w-4 h-4" />
+            <span>SOS</span>
+          </Link>
+
           {/* Lien Admin si admin */}
           {isAdmin && (
             <Link
@@ -69,9 +78,9 @@ export async function Header() {
               {/* Créer un compte - icône sur mobile, bouton sur desktop */}
               <Link
                 href="/signup"
-                className="sm:hidden flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                className="sm:hidden flex items-center justify-center w-9 h-9 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition-colors"
               >
-                <UserPlus className="w-5 h-5" />
+                <UserPlus className="w-4 h-4" />
               </Link>
               <Button asChild size="sm" className="hidden sm:inline-flex">
                 <Link href="/signup">Créer un compte</Link>

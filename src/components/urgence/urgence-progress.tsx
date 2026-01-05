@@ -16,29 +16,30 @@ export function UrgenceProgress({ currentStep, steps }: UrgenceProgressProps) {
   return (
     <div className="bg-white border-b border-gray-100 py-4 px-4">
       <div className="max-w-2xl mx-auto">
-        {/* Barre de progression avec cercles */}
-        <div className="relative">
-          {/* Ligne de fond */}
-          <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -translate-y-1/2 rounded-full" />
-          
-          {/* Ligne de progression */}
-          <div
-            className="absolute top-1/2 left-0 h-1 bg-red-500 -translate-y-1/2 rounded-full transition-all duration-500"
-            style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
-          />
+        <div className="flex items-start">
+          {steps.map((step, index) => {
+            const isCompleted = index < currentStep
+            const isCurrent = index === currentStep
+            const isLast = index === steps.length - 1
+            const isFirst = index === 0
 
-          {/* Cercles des étapes */}
-          <div className="relative flex justify-between">
-            {steps.map((step, index) => {
-              const isCompleted = index < currentStep
-              const isCurrent = index === currentStep
-
-              return (
-                <div key={step.id} className="flex flex-col items-center">
+            return (
+              <div key={step.id} className="flex-1 flex flex-col items-center">
+                {/* Cercle + Ligne */}
+                <div className="flex items-center w-full">
+                  {/* Ligne gauche (sauf premier) */}
+                  {!isFirst && (
+                    <div 
+                      className={`flex-1 h-0.5 transition-all duration-700 ease-in-out ${
+                        index <= currentStep ? 'bg-red-500' : 'bg-gray-200'
+                      }`} 
+                    />
+                  )}
+                  
                   {/* Cercle */}
                   <div
                     className={`
-                      w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-300
+                      flex-shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-700 ease-in-out
                       ${isCompleted 
                         ? "bg-red-500 border-red-500" 
                         : isCurrent 
@@ -50,31 +51,32 @@ export function UrgenceProgress({ currentStep, steps }: UrgenceProgressProps) {
                     {isCompleted && <Check className="w-2.5 h-2.5 text-white" />}
                     {isCurrent && <div className="w-2 h-2 bg-red-500 rounded-full" />}
                   </div>
+
+                  {/* Ligne droite (sauf dernier) */}
+                  {!isLast && (
+                    <div 
+                      className={`flex-1 h-0.5 transition-all duration-700 ease-in-out ${
+                        index < currentStep ? 'bg-red-500' : 'bg-gray-200'
+                      }`} 
+                    />
+                  )}
                 </div>
-              )
-            })}
-          </div>
-        </div>
 
-        {/* Labels sous les cercles */}
-        <div className="mt-3 flex justify-between">
-          {steps.map((step, index) => {
-            const isCompleted = index < currentStep
-            const isCurrent = index === currentStep
-
-            return (
-              <div
-                key={`label-${step.id}`}
-                className={`text-xs text-center max-w-[60px] ${
-                  isCompleted
-                    ? "text-red-600 font-medium"
-                    : isCurrent
-                    ? "text-gray-900 font-semibold"
-                    : "text-gray-400"
-                }`}
-              >
-                <span className="hidden sm:block">{step.label}</span>
-                <span className="sm:hidden">{index + 1}</span>
+                {/* Label - centré sous le cercle */}
+                <div className="w-full flex justify-center mt-2">
+                  <span
+                    className={`text-xs text-center leading-tight transition-all duration-700 ease-in-out ${
+                      isCompleted
+                        ? "text-red-600 font-medium"
+                        : isCurrent
+                        ? "text-gray-900 font-semibold"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    <span className="hidden sm:block">{step.label}</span>
+                    <span className="sm:hidden">{index + 1}</span>
+                  </span>
+                </div>
               </div>
             )
           })}
