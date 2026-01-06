@@ -8,16 +8,24 @@ import {
   Faq,
   Footer,
 } from "@/components/landing"
+import { ActiveSearchBanner } from "@/components/landing/active-search-banner"
 import { getLandingPageData } from "@/lib/api/landing"
+import { getUser } from "@/lib/supabase/server"
 
 export default async function Home() {
-  const { stats, testimonials, faq, prices, guarantees } = await getLandingPageData()
+  const [{ stats, testimonials, faq, prices, guarantees }, user] = await Promise.all([
+    getLandingPageData(),
+    getUser()
+  ])
+
+  const isLoggedIn = !!user
 
   return (
     <>
       <Header />
+      <ActiveSearchBanner isLoggedIn={isLoggedIn} />
       <main className="min-h-screen">
-        <Hero />
+        <Hero isLoggedIn={isLoggedIn} />
         <Stats stats={stats} />
         <Guarantees guarantees={guarantees} />
         <Prices prices={prices} />

@@ -19,24 +19,24 @@ export async function createIntervention(
 ): Promise<InterventionResult> {
   const supabase = await createClient()
   const adminClient = createAdminClient()
-  
+
   // Vérifier si l'utilisateur est connecté (optionnel)
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   // Validation basique
   if (!payload.clientEmail || !payload.clientPhone) {
     return { success: false, error: "Email et téléphone requis" }
   }
-  
+
   if (!payload.addressStreet || !payload.addressPostalCode || !payload.addressCity) {
     return { success: false, error: "Adresse complète requise" }
   }
-  
+
   try {
     // Générer le numéro de suivi
     const { data: trackingData } = await adminClient.rpc("generate_tracking_number")
     const trackingNumber = trackingData || `SRN-${Date.now().toString(36).toUpperCase()}`
-    
+
     // Trouver la zone correspondante
     let zoneId: string | null = null
     const { data: zones } = await adminClient
@@ -44,11 +44,11 @@ export async function createIntervention(
       .select("id, slug")
       .ilike("name", `%${payload.addressCity}%`)
       .limit(1)
-    
+
     if (zones && zones.length > 0) {
       zoneId = zones[0].id
     }
-    
+
     // Trouver le scénario de prix
     let priceScenarioId: string | null = null
     if (payload.situationType) {
@@ -57,12 +57,12 @@ export async function createIntervention(
         .select("id")
         .eq("code", payload.situationType)
         .single()
-      
+
       if (scenario) {
         priceScenarioId = scenario.id
       }
     }
-    
+
     // Créer l'intervention
     const { data: intervention, error: interventionError } = await adminClient
       .from("intervention_requests")
@@ -92,12 +92,12 @@ export async function createIntervention(
       })
       .select()
       .single()
-    
+
     if (interventionError) {
       console.error("Erreur création intervention:", interventionError)
       return { success: false, error: "Erreur lors de la création de la demande" }
     }
-    
+
     // Créer le diagnostic initial
     if (payload.situationType) {
       await adminClient.from("intervention_diagnostics").insert({
@@ -106,7 +106,7 @@ export async function createIntervention(
         diagnostic_answers: {},
       })
     }
-    
+
     // Ajouter à l'historique
     await adminClient.from("intervention_status_history").insert({
       intervention_id: intervention.id,
@@ -115,7 +115,7 @@ export async function createIntervention(
       changed_by: user?.id,
       changed_by_role: user ? "client" : "system",
     })
-    
+
     return {
       success: true,
       trackingNumber,
@@ -136,7 +136,7 @@ export async function updateDiagnostic(
   payload: UpdateDiagnosticPayload
 ): Promise<InterventionResult> {
   const adminClient = createAdminClient()
-  
+
   try {
     // Vérifier que l'intervention existe et est en draft
     const { data: intervention } = await adminClient
@@ -144,15 +144,15 @@ export async function updateDiagnostic(
       .select("id, status")
       .eq("id", interventionId)
       .single()
-    
+
     if (!intervention) {
       return { success: false, error: "Intervention non trouvée" }
     }
-    
+
     if (intervention.status !== "draft") {
       return { success: false, error: "L'intervention ne peut plus être modifiée" }
     }
-    
+
     // Mettre à jour le diagnostic
     const { error } = await adminClient
       .from("intervention_diagnostics")
@@ -167,12 +167,12 @@ export async function updateDiagnostic(
         insurance_ref: payload.insuranceRef,
       })
       .eq("intervention_id", interventionId)
-    
+
     if (error) {
       console.error("Erreur mise à jour diagnostic:", error)
       return { success: false, error: "Erreur lors de la mise à jour" }
     }
-    
+
     revalidatePath(`/urgence/${interventionId}`)
     return { success: true }
   } catch (error) {
@@ -191,7 +191,7 @@ export async function submitIntervention(
   const supabase = await createClient()
   const adminClient = createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   try {
     // Récupérer l'intervention
     const { data: intervention, error: fetchError } = await adminClient
@@ -199,15 +199,15 @@ export async function submitIntervention(
       .select("*, intervention_diagnostics(*)")
       .eq("id", interventionId)
       .single()
-    
+
     if (fetchError || !intervention) {
       return { success: false, error: "Intervention non trouvée" }
     }
-    
+
     if (intervention.status !== "draft") {
       return { success: false, error: "Cette demande a déjà été soumise" }
     }
-    
+
     // Mettre à jour le statut
     const { error: updateError } = await adminClient
       .from("intervention_requests")
@@ -216,11 +216,11 @@ export async function submitIntervention(
         submitted_at: new Date().toISOString(),
       })
       .eq("id", interventionId)
-    
+
     if (updateError) {
       return { success: false, error: "Erreur lors de la soumission" }
     }
-    
+
     // Ajouter à l'historique
     await adminClient.from("intervention_status_history").insert({
       intervention_id: interventionId,
@@ -229,9 +229,9 @@ export async function submitIntervention(
       changed_by: user?.id,
       changed_by_role: user ? "client" : "system",
     })
-    
+
     revalidatePath(`/suivi/${intervention.tracking_number}`)
-    
+
     return {
       success: true,
       trackingNumber: intervention.tracking_number,
@@ -254,7 +254,7 @@ export async function updateInterventionStatus(
   const supabase = await createClient()
   const adminClient = createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   try {
     // Récupérer le statut actuel
     const { data: intervention } = await adminClient
@@ -262,31 +262,31 @@ export async function updateInterventionStatus(
       .select("id, status, tracking_number")
       .eq("id", interventionId)
       .single()
-    
+
     if (!intervention) {
       return { success: false, error: "Intervention non trouvée" }
     }
-    
+
     const previousStatus = intervention.status
-    
+
     // Mettre à jour
     const updateData: Record<string, unknown> = { status: newStatus }
-    
+
     // Ajouter les timestamps selon le statut
     if (newStatus === "accepted") updateData.accepted_at = new Date().toISOString()
     if (newStatus === "in_progress") updateData.started_at = new Date().toISOString()
     if (newStatus === "completed") updateData.completed_at = new Date().toISOString()
     if (newStatus === "cancelled") updateData.cancelled_at = new Date().toISOString()
-    
+
     const { error } = await adminClient
       .from("intervention_requests")
       .update(updateData)
       .eq("id", interventionId)
-    
+
     if (error) {
       return { success: false, error: "Erreur lors de la mise à jour" }
     }
-    
+
     // Historique
     await adminClient.from("intervention_status_history").insert({
       intervention_id: interventionId,
@@ -296,9 +296,9 @@ export async function updateInterventionStatus(
       changed_by_role: user?.user_metadata?.role?.includes("artisan") ? "artisan" : "client",
       note,
     })
-    
+
     revalidatePath(`/suivi/${intervention.tracking_number}`)
-    
+
     return { success: true }
   } catch (error) {
     console.error("Erreur changement statut:", error)
@@ -317,24 +317,24 @@ export async function cancelIntervention(
   const supabase = await createClient()
   const adminClient = createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   try {
     const { data: intervention } = await adminClient
       .from("intervention_requests")
       .select("id, status, tracking_number")
       .eq("id", interventionId)
       .single()
-    
+
     if (!intervention) {
       return { success: false, error: "Intervention non trouvée" }
     }
-    
+
     // Vérifier que l'annulation est possible
     const nonCancellableStatuses = ["completed", "cancelled", "in_progress"]
     if (nonCancellableStatuses.includes(intervention.status)) {
       return { success: false, error: "Cette intervention ne peut plus être annulée" }
     }
-    
+
     const { error } = await adminClient
       .from("intervention_requests")
       .update({
@@ -344,11 +344,11 @@ export async function cancelIntervention(
         cancelled_by: user ? "client" : "system",
       })
       .eq("id", interventionId)
-    
+
     if (error) {
       return { success: false, error: "Erreur lors de l'annulation" }
     }
-    
+
     // Historique
     await adminClient.from("intervention_status_history").insert({
       intervention_id: interventionId,
@@ -358,12 +358,222 @@ export async function cancelIntervention(
       changed_by_role: user ? "client" : "system",
       note: reason,
     })
-    
+
     revalidatePath(`/suivi/${intervention.tracking_number}`)
-    
+
     return { success: true }
   } catch (error) {
     console.error("Erreur annulation:", error)
+    return { success: false, error: "Une erreur est survenue" }
+  }
+}
+
+// ============================================
+// ACTIONS ARTISAN - ACCEPTER/REFUSER MISSION
+// ============================================
+
+/**
+ * Un artisan accepte une mission
+ * Crée l'assignation et met à jour le statut de l'intervention
+ */
+export async function acceptMission(
+  interventionId: string,
+  estimatedArrivalMinutes?: number
+): Promise<InterventionResult> {
+  const supabase = await createClient()
+  const adminClient = createAdminClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: "Utilisateur non connecté" }
+  }
+
+  // Vérifier que c'est un artisan validé
+  const role = user.user_metadata?.role
+  if (role !== "artisan") {
+    return { success: false, error: "Accès réservé aux artisans" }
+  }
+
+  try {
+    // Récupérer l'intervention
+    const { data: intervention, error: fetchError } = await adminClient
+      .from("intervention_requests")
+      .select("id, status, tracking_number")
+      .eq("id", interventionId)
+      .single()
+
+    if (fetchError || !intervention) {
+      return { success: false, error: "Intervention non trouvée" }
+    }
+
+    // Vérifier que l'intervention est disponible
+    if (!["pending", "searching"].includes(intervention.status)) {
+      return { success: false, error: "Cette intervention n'est plus disponible" }
+    }
+
+    // Vérifier que l'artisan n'a pas déjà une mission en cours
+    const { data: existingAssignment } = await adminClient
+      .from("artisan_assignments")
+      .select("id")
+      .eq("artisan_id", user.id)
+      .eq("status", "accepted")
+      .limit(1)
+
+    if (existingAssignment && existingAssignment.length > 0) {
+      return { success: false, error: "Vous avez déjà une mission en cours" }
+    }
+
+    // Créer l'assignation
+    const { error: assignError } = await adminClient
+      .from("artisan_assignments")
+      .insert({
+        intervention_id: interventionId,
+        artisan_id: user.id,
+        status: "accepted",
+        proposal_order: 1,
+        proposed_at: new Date().toISOString(),
+        responded_at: new Date().toISOString(),
+        estimated_arrival_minutes: estimatedArrivalMinutes || 30,
+      })
+
+    if (assignError) {
+      console.error("Erreur création assignation:", assignError)
+      return { success: false, error: "Erreur lors de l'acceptation" }
+    }
+
+    // Mettre à jour le statut de l'intervention
+    const { error: updateError } = await adminClient
+      .from("intervention_requests")
+      .update({
+        status: "assigned",
+        accepted_at: new Date().toISOString(),
+      })
+      .eq("id", interventionId)
+
+    if (updateError) {
+      return { success: false, error: "Erreur lors de la mise à jour" }
+    }
+
+    // Ajouter à l'historique
+    await adminClient.from("intervention_status_history").insert({
+      intervention_id: interventionId,
+      previous_status: intervention.status,
+      new_status: "assigned",
+      changed_by: user.id,
+      changed_by_role: "artisan",
+      note: "Mission acceptée par l'artisan",
+    })
+
+    revalidatePath(`/suivi/${intervention.tracking_number}`)
+    revalidatePath("/pro/dashboard")
+
+    return { success: true, trackingNumber: intervention.tracking_number }
+  } catch (error) {
+    console.error("Erreur acceptMission:", error)
+    return { success: false, error: "Une erreur est survenue" }
+  }
+}
+
+/**
+ * Un artisan refuse une mission
+ */
+export async function refuseMission(
+  interventionId: string,
+  reason?: string
+): Promise<InterventionResult> {
+  const supabase = await createClient()
+  const adminClient = createAdminClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: "Utilisateur non connecté" }
+  }
+
+  const role = user.user_metadata?.role
+  if (role !== "artisan") {
+    return { success: false, error: "Accès réservé aux artisans" }
+  }
+
+  try {
+    // Enregistrer le refus (pour statistiques et éviter de reproposer)
+    await adminClient.from("artisan_assignments").insert({
+      intervention_id: interventionId,
+      artisan_id: user.id,
+      status: "refused",
+      proposal_order: 1,
+      proposed_at: new Date().toISOString(),
+      responded_at: new Date().toISOString(),
+      refusal_reason: reason,
+    })
+
+    revalidatePath("/pro/dashboard")
+
+    return { success: true }
+  } catch (error) {
+    console.error("Erreur refuseMission:", error)
+    return { success: false, error: "Une erreur est survenue" }
+  }
+}
+
+// ============================================
+// LIAISON INTERVENTION À UN COMPTE
+// ============================================
+
+/**
+ * Lie une intervention anonyme à un compte utilisateur nouvellement créé
+ * Appelé après inscription/connexion si un tracking actif existe
+ */
+export async function linkInterventionToUser(
+  trackingNumber: string
+): Promise<InterventionResult> {
+  const supabase = await createClient()
+  const adminClient = createAdminClient()
+
+  // Vérifier que l'utilisateur est connecté
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: "Utilisateur non connecté" }
+  }
+
+  try {
+    // Récupérer l'intervention par tracking number
+    const { data: intervention, error: fetchError } = await adminClient
+      .from("intervention_requests")
+      .select("id, client_id, client_email, tracking_number")
+      .eq("tracking_number", trackingNumber)
+      .single()
+
+    if (fetchError || !intervention) {
+      return { success: false, error: "Intervention non trouvée" }
+    }
+
+    // Si l'intervention est déjà liée à un autre compte, ne rien faire
+    if (intervention.client_id && intervention.client_id !== user.id) {
+      return { success: false, error: "Cette intervention est déjà liée à un autre compte" }
+    }
+
+    // Si déjà liée au même compte, rien à faire
+    if (intervention.client_id === user.id) {
+      return { success: true }
+    }
+
+    // Lier l'intervention au compte utilisateur
+    const { error: updateError } = await adminClient
+      .from("intervention_requests")
+      .update({ client_id: user.id })
+      .eq("id", intervention.id)
+
+    if (updateError) {
+      console.error("Erreur liaison intervention:", updateError)
+      return { success: false, error: "Erreur lors de la liaison" }
+    }
+
+    revalidatePath(`/suivi/${trackingNumber}`)
+
+    return { success: true, trackingNumber }
+  } catch (error) {
+    console.error("Erreur liaison intervention:", error)
     return { success: false, error: "Une erreur est survenue" }
   }
 }

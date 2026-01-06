@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { 
-  ArrowLeft, 
-  Phone, 
-  MapPin, 
-  Clock, 
-  CheckCircle, 
+import {
+  ArrowLeft,
+  Phone,
+  MapPin,
+  Clock,
+  CheckCircle,
   Truck,
   User,
   Star,
@@ -34,6 +34,7 @@ import { STATUS_LABELS } from "@/lib/interventions/config"
 import { cancelIntervention } from "@/lib/interventions"
 import { TrackingTimeline } from "./tracking-timeline"
 import { TrackingQuote } from "./tracking-quote"
+import { clearActiveTracking } from "@/lib/active-tracking"
 
 interface TrackingViewProps {
   data: LiveTrackingData
@@ -43,6 +44,14 @@ export function TrackingView({ data }: TrackingViewProps) {
   const { intervention, artisan, quote, statusHistory } = data
   const [cancelling, setCancelling] = useState(false)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
+
+  // Nettoyer le tracking actif si l'intervention est terminée
+  useEffect(() => {
+    const finalStatuses = ["completed", "cancelled", "disputed", "quote_refused"]
+    if (finalStatuses.includes(intervention.status)) {
+      clearActiveTracking()
+    }
+  }, [intervention.status])
 
   const statusInfo = STATUS_LABELS[intervention.status] || {
     label: intervention.status,
@@ -64,15 +73,15 @@ export function TrackingView({ data }: TrackingViewProps) {
     <div className="min-h-screen">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="w-4 h-4" />
-            Accueil
+            <span className="hidden sm:inline">Accueil</span>
           </Link>
           <span className="font-mono text-sm font-medium">{intervention.trackingNumber}</span>
-          <button 
+          <button
             onClick={() => window.location.reload()}
-            className="p-2 text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -197,7 +206,7 @@ export function TrackingView({ data }: TrackingViewProps) {
               Annuler ma demande
             </Button>
           )}
-          
+
           <Button variant="ghost" className="w-full" asChild>
             <Link href="/contact">
               Besoin d'aide ?
@@ -217,12 +226,12 @@ export function TrackingView({ data }: TrackingViewProps) {
               Annuler cette demande ?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-base mt-2">
-              Êtes-vous sûr de vouloir annuler votre demande d'intervention ? 
+              Êtes-vous sûr de vouloir annuler votre demande d'intervention ?
               Cette action ne peut pas être annulée.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-6 sm:flex-col sm:space-x-0 sm:space-y-3">
-            <AlertDialogCancel 
+            <AlertDialogCancel
               className="w-full h-12 text-base font-medium"
               disabled={cancelling}
             >

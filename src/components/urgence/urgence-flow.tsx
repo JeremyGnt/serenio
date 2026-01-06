@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import type { PriceScenarioDisplay, SituationType, DiagnosticAnswers } from "@/types/intervention"
 import { URGENCE_STEPS, DIAGNOSTIC_QUESTIONS } from "@/lib/interventions/config"
 import { createIntervention, updateDiagnostic, submitIntervention } from "@/lib/interventions"
+import { setActiveTracking } from "@/lib/active-tracking"
 
 import { StepSituation } from "./steps/step-situation"
 import { StepDiagnostic } from "./steps/step-diagnostic"
@@ -19,22 +20,24 @@ import { UrgenceProgress } from "./urgence-progress"
 
 interface UrgenceFlowProps {
   priceScenarios: PriceScenarioDisplay[]
+  userEmail?: string | null
+  userName?: string | null
 }
 
 // État du formulaire
 interface FormState {
   // Situation
   situationType: SituationType | null
-  
+
   // Diagnostic
   diagnosticAnswers: DiagnosticAnswers
   doorType: string | null
   lockType: string | null
   situationDetails: string
-  
+
   // Photos
   photos: File[]
-  
+
   // Localisation
   addressStreet: string
   addressPostalCode: string
@@ -43,13 +46,13 @@ interface FormState {
   addressInstructions: string
   latitude: number | null
   longitude: number | null
-  
+
   // Contact
   clientEmail: string
   clientPhone: string
   clientFirstName: string
   clientLastName: string
-  
+
   // Intervention créée
   interventionId: string | null
   trackingNumber: string | null
@@ -77,12 +80,18 @@ const initialFormState: FormState = {
   trackingNumber: null,
 }
 
-export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
+export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlowProps) {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
-  const [formState, setFormState] = useState<FormState>(initialFormState)
+  const [formState, setFormState] = useState<FormState>(() => ({
+    ...initialFormState,
+    clientEmail: userEmail || "",
+    clientFirstName: userName || "",
+  }))
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+
+  const isLoggedIn = !!userEmail
 
   const currentStepId = URGENCE_STEPS[currentStep]?.id
 
@@ -101,24 +110,24 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
   // Vérifier si toutes les questions obligatoires du diagnostic sont remplies
   const validateDiagnostic = (): string | null => {
     if (!formState.situationType) return null
-    
+
     const steps = DIAGNOSTIC_QUESTIONS[formState.situationType] || []
-    
+
     for (const step of steps) {
       for (const question of step.questions) {
         if (question.required) {
           const answer = formState.diagnosticAnswers[question.id]
-          
+
           // Vérifier si la réponse existe
           if (answer === undefined || answer === null || answer === "") {
             return `Veuillez répondre à : "${question.question}"`
           }
-          
+
           // Si c'est un tableau vide (multiple)
           if (Array.isArray(answer) && answer.length === 0) {
             return `Veuillez répondre à : "${question.question}"`
           }
-          
+
           // Si "Autre" est sélectionné, vérifier le champ "Préciser"
           if (answer === "other") {
             const detailsAnswer = formState.diagnosticAnswers[`${question.id}_details`]
@@ -129,7 +138,7 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
         }
       }
     }
-    
+
     return null
   }
 
@@ -191,7 +200,7 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
         showError("Veuillez entrer un numéro de téléphone valide")
         return
       }
-      
+
       // Créer l'intervention
       setLoading(true)
       const result = await createIntervention({
@@ -268,6 +277,11 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
       return
     }
 
+    // Stocker le tracking pour redirection future
+    if (formState.trackingNumber) {
+      setActiveTracking(formState.trackingNumber)
+    }
+
     // Rediriger vers la page de suivi
     router.push(`/suivi/${formState.trackingNumber}`)
   }
@@ -298,12 +312,12 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
               </Link>
             )}
           </button>
-          
+
           <span className="flex items-center gap-2 font-bold text-red-600">
             <AlertTriangle className="w-4 h-4" />
             Urgence
           </span>
-          
+
           <Link href="/" className="text-muted-foreground hover:text-foreground">
             <X className="w-5 h-5" />
           </Link>
@@ -375,6 +389,7 @@ export function UrgenceFlow({ priceScenarios }: UrgenceFlowProps) {
             phone={formState.clientPhone}
             firstName={formState.clientFirstName}
             lastName={formState.clientLastName}
+            isLoggedIn={isLoggedIn}
             onUpdate={(updates) => updateForm(updates)}
           />
         )}

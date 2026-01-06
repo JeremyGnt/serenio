@@ -5,6 +5,9 @@ export {
   submitIntervention,
   updateInterventionStatus,
   cancelIntervention,
+  linkInterventionToUser,
+  acceptMission,
+  refuseMission,
 } from "./actions"
 
 // Queries (lectures)
@@ -18,3 +21,18 @@ export {
   getServiceZones,
 } from "./queries"
 
+// Queries Pro (artisans)
+export {
+  getPendingInterventions,
+  getInterventionDetailsForArtisan,
+  getArtisanStats,
+  getActiveArtisanMissions,
+} from "./pro-queries"
+
+// Types Pro
+export type {
+  AnonymizedIntervention,
+  FullInterventionDetails,
+  ArtisanStats,
+  ActiveMission,
+} from "./pro-queries"

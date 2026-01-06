@@ -9,6 +9,7 @@ interface StepContactProps {
   phone: string
   firstName: string
   lastName: string
+  isLoggedIn?: boolean
   onUpdate: (updates: {
     clientEmail?: string
     clientPhone?: string
@@ -22,6 +23,7 @@ export function StepContact({
   phone,
   firstName,
   lastName,
+  isLoggedIn = false,
   onUpdate,
 }: StepContactProps) {
   return (
@@ -73,10 +75,11 @@ export function StepContact({
               placeholder="vous@exemple.com"
               className="h-12 pl-10"
               required
+              readOnly={isLoggedIn && !!email}
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            Pour recevoir le récapitulatif et la facture
+            {isLoggedIn ? "Email de votre compte" : "Pour recevoir le récapitulatif et la facture"}
           </p>
         </div>
 
@@ -114,21 +117,23 @@ export function StepContact({
           <Lock className="w-4 h-4 text-gray-600" />
         </div>
         <p className="text-xs text-muted-foreground">
-          Vos informations sont sécurisées et ne seront utilisées que pour 
+          Vos informations sont sécurisées et ne seront utilisées que pour
           cette intervention. Consultez notre politique de confidentialité.
         </p>
       </div>
 
-      {/* Pas de compte requis */}
-      <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-start gap-3">
-        <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-          <CheckCircle className="w-4 h-4 text-emerald-600" />
+      {/* Pas de compte requis - seulement si non connecté */}
+      {!isLoggedIn && (
+        <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-start gap-3">
+          <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <CheckCircle className="w-4 h-4 text-emerald-600" />
+          </div>
+          <p className="text-sm text-emerald-800">
+            <strong>Pas de compte requis</strong> — Vous pourrez créer un compte
+            après l'intervention pour retrouver vos factures.
+          </p>
         </div>
-        <p className="text-sm text-emerald-800">
-          <strong>Pas de compte requis</strong> — Vous pourrez créer un compte 
-          après l'intervention pour retrouver vos factures.
-        </p>
-      </div>
+      )}
     </div>
   )
 }

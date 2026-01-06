@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import { UrgenceFlow } from "@/components/urgence/urgence-flow"
 import { getPriceScenarios } from "@/lib/interventions"
+import { getUser } from "@/lib/supabase/server"
 
 export const metadata: Metadata = {
   title: "Urgence Serrurier | Serenio",
@@ -8,11 +9,18 @@ export const metadata: Metadata = {
 }
 
 export default async function UrgencePage() {
-  const priceScenarios = await getPriceScenarios("urgence")
+  const [priceScenarios, user] = await Promise.all([
+    getPriceScenarios("urgence"),
+    getUser()
+  ])
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <UrgenceFlow priceScenarios={priceScenarios} />
+      <UrgenceFlow
+        priceScenarios={priceScenarios}
+        userEmail={user?.email || null}
+        userName={user?.user_metadata?.first_name || null}
+      />
     </div>
   )
 }

@@ -40,15 +40,14 @@ export function ProAccountTabs({ user }: ProAccountTabsProps) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive
                     ? isDanger
                       ? "bg-red-50 text-red-600"
                       : "bg-blue-50 text-blue-700"
                     : isDanger
-                    ? "text-red-500 hover:bg-red-50"
-                    : "text-gray-600 hover:bg-gray-50"
-                }`}
+                      ? "text-red-500 hover:bg-red-50"
+                      : "text-gray-600 hover:bg-gray-50"
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 {tab.label}
