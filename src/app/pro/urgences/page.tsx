@@ -1,4 +1,4 @@
-import { AlertTriangle, RefreshCw } from "lucide-react"
+import { Siren, RefreshCw } from "lucide-react"
 import { getPendingInterventions } from "@/lib/interventions"
 import { UrgentRequestsList } from "@/components/pro/urgent-requests-list"
 import { UrgenceInfoBanner } from "@/components/pro/urgence-info-banner"
@@ -17,7 +17,7 @@ export default async function UrgencesPage() {
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
-                        <AlertTriangle className="w-8 h-8 text-red-500" />
+                        <Siren className="w-8 h-8 text-red-500" />
                         Urgences
                     </h1>
                     <p className="text-muted-foreground mt-1">

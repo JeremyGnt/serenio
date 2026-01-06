@@ -1,4 +1,4 @@
-import { Wallet, TrendingUp, Download, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { CreditCard, TrendingUp, Download, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export const metadata = {
@@ -13,7 +13,7 @@ export default async function PaiementsPage() {
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
-                        <Wallet className="w-8 h-8 text-emerald-500" />
+                        <CreditCard className="w-8 h-8 text-emerald-500" />
                         Paiements
                     </h1>
                     <p className="text-muted-foreground mt-1">

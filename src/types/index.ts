@@ -2,4 +2,5 @@
 export * from "./landing"
 export * from "./auth"
 export * from "./intervention"
+export * from "./rdv"
 

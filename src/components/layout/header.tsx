@@ -6,6 +6,7 @@ import { UserMenu } from "@/components/auth/user-menu"
 import { getUser } from "@/lib/supabase/server"
 import { SosLink } from "./sos-link"
 import { InterventionLinker } from "@/components/auth/intervention-linker"
+import { getUserPendingRequestsCount } from "@/lib/interventions/client-queries"
 
 // Liste des admins
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim()).filter(Boolean)
@@ -14,6 +15,11 @@ export async function Header() {
   const user = await getUser()
   const isAdmin = user && ADMIN_EMAILS.includes(user.email || "")
   const isArtisan = user?.user_metadata?.role === "artisan" || user?.user_metadata?.role === "artisan_pending"
+  
+  // Récupérer le nombre de demandes en attente pour l'utilisateur
+  const pendingRequestsCount = user?.email 
+    ? await getUserPendingRequestsCount(user.email)
+    : 0
 
   return (
     <>
@@ -75,7 +81,7 @@ export async function Header() {
             )}
 
             {user ? (
-              <UserMenu user={user} />
+              <UserMenu user={user} pendingRequestsCount={pendingRequestsCount} />
             ) : (
               <>
                 {/* Connexion - icône sur mobile, texte sur desktop */}

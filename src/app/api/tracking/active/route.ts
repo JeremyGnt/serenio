@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { ACTIVE_STATUSES } from "@/lib/active-tracking"
+
+// Statuts de recherche active (uniquement pour urgences)
+const URGENCE_ACTIVE_STATUSES = ["pending", "searching"]
 
 /**
  * GET /api/tracking/active
- * Retourne l'intervention active de l'utilisateur connecté (si elle existe)
+ * Retourne l'intervention URGENCE active de l'utilisateur connecté (si elle existe)
+ * Ne retourne pas les RDV planifiés car ils ont déjà un artisan confirmé
  */
 export async function GET() {
     const supabase = await createClient()
@@ -22,12 +25,14 @@ export async function GET() {
         })
     }
 
-    // Chercher une intervention active liée à ce compte
+    // Chercher une intervention URGENCE active en recherche d'artisan
+    // On ne montre pas les RDV car ils ont déjà un artisan confirmé
     const { data: interventions, error } = await adminClient
         .from("intervention_requests")
-        .select("tracking_number, status")
+        .select("tracking_number, status, intervention_type")
         .eq("client_id", user.id)
-        .in("status", ACTIVE_STATUSES)
+        .eq("intervention_type", "urgence")
+        .in("status", URGENCE_ACTIVE_STATUSES)
         .order("created_at", { ascending: false })
         .limit(1)
 

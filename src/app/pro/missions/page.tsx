@@ -5,6 +5,7 @@ import {
     Clock,
     Phone,
     ChevronRight,
+    ListChecks,
     Navigation,
     DoorClosed,
     Key,
@@ -12,8 +13,7 @@ import {
     ShieldAlert,
     Wrench,
     CircleDot,
-    HelpCircle,
-    ArrowLeft
+    HelpCircle
 } from "lucide-react"
 import { getUser } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
@@ -22,7 +22,7 @@ import type { ActiveMission } from "@/lib/interventions"
 import type { SituationType } from "@/types/intervention"
 
 export const metadata = {
-    title: "Missions en cours | Serenio Pro",
+    title: "En cours | Serenio Pro",
     description: "Vos missions en cours",
 }
 
@@ -53,20 +53,15 @@ export default async function MissionsEnCoursPage() {
     const missions = await getActiveArtisanMissions()
 
     return (
-        <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
+        <div className="p-4 md:p-6 lg:p-8">
             {/* Header */}
-            <div className="flex items-center gap-4 mb-6">
-                <Link href="/pro/dashboard">
-                    <Button variant="ghost" size="sm" className="gap-1">
-                        <ArrowLeft className="w-4 h-4" />
-                        Retour
-                    </Button>
-                </Link>
+            <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-                        Missions en cours
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
+                        <ListChecks className="w-8 h-8 text-amber-500" />
+                        En cours
                     </h1>
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-muted-foreground mt-1">
                         {missions.length} mission{missions.length !== 1 ? "s" : ""} active{missions.length !== 1 ? "s" : ""}
                     </p>
                 </div>
@@ -74,12 +69,12 @@ export default async function MissionsEnCoursPage() {
 
             {/* Liste des missions */}
             {missions.length === 0 ? (
-                <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-                    <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Navigation className="w-7 h-7 text-gray-400" />
+                <div className="bg-white rounded-xl border border-gray-200 p-8 md:p-12 text-center">
+                    <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <ListChecks className="w-8 h-8 text-amber-600" />
                     </div>
-                    <h2 className="font-semibold text-gray-900 mb-1">Aucune mission en cours</h2>
-                    <p className="text-gray-500 text-sm mb-4">
+                    <h2 className="text-lg font-semibold mb-2">Aucune mission en cours</h2>
+                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                         Acceptez une demande urgente pour commencer une mission
                     </p>
                     <Link href="/pro/urgences">
@@ -87,7 +82,7 @@ export default async function MissionsEnCoursPage() {
                     </Link>
                 </div>
             ) : (
-                <div className="space-y-4">
+                <div className="space-y-4 max-w-4xl">
                     {missions.map((mission) => (
                         <MissionCard key={mission.id} mission={mission} />
                     ))}

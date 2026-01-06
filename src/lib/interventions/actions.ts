@@ -411,16 +411,17 @@ export async function acceptMission(
       return { success: false, error: "Cette intervention n'est plus disponible" }
     }
 
-    // Vérifier que l'artisan n'a pas déjà une mission en cours
-    const { data: existingAssignment } = await adminClient
+    // Vérifier que l'artisan n'a pas déjà accepté cette intervention spécifique
+    const { data: alreadyAccepted } = await adminClient
       .from("artisan_assignments")
       .select("id")
       .eq("artisan_id", user.id)
+      .eq("intervention_id", interventionId)
       .eq("status", "accepted")
       .limit(1)
 
-    if (existingAssignment && existingAssignment.length > 0) {
-      return { success: false, error: "Vous avez déjà une mission en cours" }
+    if (alreadyAccepted && alreadyAccepted.length > 0) {
+      return { success: false, error: "Vous avez déjà accepté cette mission" }
     }
 
     // Créer l'assignation
@@ -574,6 +575,260 @@ export async function linkInterventionToUser(
     return { success: true, trackingNumber }
   } catch (error) {
     console.error("Erreur liaison intervention:", error)
+    return { success: false, error: "Une erreur est survenue" }
+  }
+}
+
+// ============================================
+// ACTIONS ARTISAN - MISE À JOUR STATUT MISSION
+// ============================================
+
+/**
+ * Artisan signale son arrivée sur place
+ */
+export async function signalArrival(
+  interventionId: string
+): Promise<InterventionResult> {
+  const supabase = await createClient()
+  const adminClient = createAdminClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: "Utilisateur non connecté" }
+  }
+
+  const role = user.user_metadata?.role
+  if (role !== "artisan") {
+    return { success: false, error: "Accès réservé aux artisans" }
+  }
+
+  try {
+    // Vérifier que l'artisan est bien assigné à cette intervention
+    const { data: assignment } = await adminClient
+      .from("artisan_assignments")
+      .select("id")
+      .eq("intervention_id", interventionId)
+      .eq("artisan_id", user.id)
+      .eq("status", "accepted")
+      .single()
+
+    if (!assignment) {
+      return { success: false, error: "Vous n'êtes pas assigné à cette mission" }
+    }
+
+    // Récupérer l'intervention
+    const { data: intervention, error: fetchError } = await adminClient
+      .from("intervention_requests")
+      .select("id, status, tracking_number")
+      .eq("id", interventionId)
+      .single()
+
+    if (fetchError || !intervention) {
+      return { success: false, error: "Intervention non trouvée" }
+    }
+
+    // Vérifier que le statut permet de signaler l'arrivée
+    if (!["assigned", "accepted", "en_route"].includes(intervention.status)) {
+      return { success: false, error: "Vous avez déjà signalé votre arrivée" }
+    }
+
+    // Mettre à jour le statut
+    const { error: updateError } = await adminClient
+      .from("intervention_requests")
+      .update({
+        status: "arrived",
+        arrived_at: new Date().toISOString(),
+      })
+      .eq("id", interventionId)
+
+    if (updateError) {
+      return { success: false, error: "Erreur lors de la mise à jour" }
+    }
+
+    // Ajouter à l'historique
+    await adminClient.from("intervention_status_history").insert({
+      intervention_id: interventionId,
+      previous_status: intervention.status,
+      new_status: "arrived",
+      changed_by: user.id,
+      changed_by_role: "artisan",
+      note: "Artisan arrivé sur place",
+    })
+
+    revalidatePath(`/suivi/${intervention.tracking_number}`)
+    revalidatePath(`/rdv/suivi/${intervention.tracking_number}`)
+    revalidatePath(`/pro/mission/${intervention.tracking_number}`)
+    revalidatePath("/pro/missions")
+
+    return { success: true, trackingNumber: intervention.tracking_number }
+  } catch (error) {
+    console.error("Erreur signalArrival:", error)
+    return { success: false, error: "Une erreur est survenue" }
+  }
+}
+
+/**
+ * Artisan démarre l'intervention
+ */
+export async function startIntervention(
+  interventionId: string
+): Promise<InterventionResult> {
+  const supabase = await createClient()
+  const adminClient = createAdminClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: "Utilisateur non connecté" }
+  }
+
+  const role = user.user_metadata?.role
+  if (role !== "artisan") {
+    return { success: false, error: "Accès réservé aux artisans" }
+  }
+
+  try {
+    const { data: assignment } = await adminClient
+      .from("artisan_assignments")
+      .select("id")
+      .eq("intervention_id", interventionId)
+      .eq("artisan_id", user.id)
+      .eq("status", "accepted")
+      .single()
+
+    if (!assignment) {
+      return { success: false, error: "Vous n'êtes pas assigné à cette mission" }
+    }
+
+    const { data: intervention, error: fetchError } = await adminClient
+      .from("intervention_requests")
+      .select("id, status, tracking_number")
+      .eq("id", interventionId)
+      .single()
+
+    if (fetchError || !intervention) {
+      return { success: false, error: "Intervention non trouvée" }
+    }
+
+    if (!["arrived", "diagnosing", "quote_accepted"].includes(intervention.status)) {
+      return { success: false, error: "L'intervention ne peut pas être démarrée dans cet état" }
+    }
+
+    const { error: updateError } = await adminClient
+      .from("intervention_requests")
+      .update({
+        status: "in_progress",
+        started_at: new Date().toISOString(),
+      })
+      .eq("id", interventionId)
+
+    if (updateError) {
+      return { success: false, error: "Erreur lors de la mise à jour" }
+    }
+
+    await adminClient.from("intervention_status_history").insert({
+      intervention_id: interventionId,
+      previous_status: intervention.status,
+      new_status: "in_progress",
+      changed_by: user.id,
+      changed_by_role: "artisan",
+      note: "Intervention démarrée",
+    })
+
+    revalidatePath(`/suivi/${intervention.tracking_number}`)
+    revalidatePath(`/rdv/suivi/${intervention.tracking_number}`)
+    revalidatePath(`/pro/mission/${intervention.tracking_number}`)
+    revalidatePath("/pro/missions")
+
+    return { success: true, trackingNumber: intervention.tracking_number }
+  } catch (error) {
+    console.error("Erreur startIntervention:", error)
+    return { success: false, error: "Une erreur est survenue" }
+  }
+}
+
+/**
+ * Artisan termine l'intervention
+ */
+export async function completeIntervention(
+  interventionId: string,
+  finalPriceCents?: number
+): Promise<InterventionResult> {
+  const supabase = await createClient()
+  const adminClient = createAdminClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: "Utilisateur non connecté" }
+  }
+
+  const role = user.user_metadata?.role
+  if (role !== "artisan") {
+    return { success: false, error: "Accès réservé aux artisans" }
+  }
+
+  try {
+    const { data: assignment } = await adminClient
+      .from("artisan_assignments")
+      .select("id")
+      .eq("intervention_id", interventionId)
+      .eq("artisan_id", user.id)
+      .eq("status", "accepted")
+      .single()
+
+    if (!assignment) {
+      return { success: false, error: "Vous n'êtes pas assigné à cette mission" }
+    }
+
+    const { data: intervention, error: fetchError } = await adminClient
+      .from("intervention_requests")
+      .select("id, status, tracking_number")
+      .eq("id", interventionId)
+      .single()
+
+    if (fetchError || !intervention) {
+      return { success: false, error: "Intervention non trouvée" }
+    }
+
+    // On peut terminer depuis arrived, in_progress, ou diagnosing
+    if (!["arrived", "in_progress", "diagnosing", "quote_accepted"].includes(intervention.status)) {
+      return { success: false, error: "L'intervention ne peut pas être terminée dans cet état" }
+    }
+
+    const updateData: Record<string, unknown> = {
+      status: "completed",
+      completed_at: new Date().toISOString(),
+    }
+
+    if (finalPriceCents) {
+      updateData.final_price_cents = finalPriceCents
+    }
+
+    const { error: updateError } = await adminClient
+      .from("intervention_requests")
+      .update(updateData)
+      .eq("id", interventionId)
+
+    if (updateError) {
+      return { success: false, error: "Erreur lors de la mise à jour" }
+    }
+
+    await adminClient.from("intervention_status_history").insert({
+      intervention_id: interventionId,
+      previous_status: intervention.status,
+      new_status: "completed",
+      changed_by: user.id,
+      changed_by_role: "artisan",
+      note: "Intervention terminée",
+    })
+
+    revalidatePath(`/suivi/${intervention.tracking_number}`)
+    revalidatePath(`/rdv/suivi/${intervention.tracking_number}`)
+    revalidatePath(`/pro/mission/${intervention.tracking_number}`)
+    revalidatePath("/pro/missions")
+
+    return { success: true, trackingNumber: intervention.tracking_number }
+  } catch (error) {
+    console.error("Erreur completeIntervention:", error)
     return { success: false, error: "Une erreur est survenue" }
   }
 }

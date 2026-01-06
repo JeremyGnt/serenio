@@ -2,15 +2,16 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { LogOut, User, ChevronDown } from "lucide-react"
+import { LogOut, User, ChevronDown, ClipboardList } from "lucide-react"
 import { logout } from "@/lib/auth/actions"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 
 interface UserMenuProps {
   user: SupabaseUser
+  pendingRequestsCount?: number
 }
 
-export function UserMenu({ user }: UserMenuProps) {
+export function UserMenu({ user, pendingRequestsCount = 0 }: UserMenuProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -64,6 +65,20 @@ export function UserMenu({ user }: UserMenuProps) {
             >
               <User className="w-4 h-4" />
               Mon compte
+            </Link>
+            
+            <Link
+              href="/compte/demandes"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-secondary transition-colors"
+            >
+              <ClipboardList className="w-4 h-4" />
+              Mes demandes
+              {pendingRequestsCount > 0 && (
+                <span className="ml-auto bg-emerald-100 text-emerald-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {pendingRequestsCount}
+                </span>
+              )}
             </Link>
             
             <button

@@ -1,9 +1,9 @@
-import { Calendar, Plus } from "lucide-react"
+import { CalendarDays, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export const metadata = {
-    title: "Rendez-vous | Serenio Pro",
-    description: "Gérer vos rendez-vous planifiés",
+    title: "Planning | Serenio Pro",
+    description: "Gérer vos rendez-vous et disponibilités",
 }
 
 export default async function RendezVousPage() {
@@ -13,11 +13,11 @@ export default async function RendezVousPage() {
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
-                        <Calendar className="w-8 h-8 text-blue-500" />
-                        Rendez-vous
+                        <CalendarDays className="w-8 h-8 text-blue-500" />
+                        Planning
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        Vos interventions planifiées à venir
+                        Vos rendez-vous et disponibilités
                     </p>
                 </div>
                 <Button>
@@ -29,7 +29,7 @@ export default async function RendezVousPage() {
             {/* Empty state */}
             <div className="bg-white rounded-xl border border-gray-200 p-8 md:p-12 text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Calendar className="w-8 h-8 text-blue-600" />
+                    <CalendarDays className="w-8 h-8 text-blue-600" />
                 </div>
                 <h2 className="text-lg font-semibold mb-2">Aucun rendez-vous à venir</h2>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">

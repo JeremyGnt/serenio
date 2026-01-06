@@ -358,7 +358,7 @@ export async function getActiveArtisanMissions(): Promise<ActiveMission[]> {
             .eq("artisan_id", user.id)
             .eq("status", "accepted")
             .order("responded_at", { ascending: false })
-            .limit(10)
+            .limit(50)
 
         if (error || !assignments) {
             console.error("Erreur récupération missions:", error)
@@ -400,6 +400,405 @@ export async function getActiveArtisanMissions(): Promise<ActiveMission[]> {
             })
     } catch (error) {
         console.error("Erreur getActiveArtisanMissions:", error)
+        return []
+    }
+}
+
+// ============================================
+// DÉTAILS MISSION PAR TRACKING NUMBER
+// ============================================
+
+export interface MissionDetails {
+    id: string
+    trackingNumber: string
+    interventionType: "urgence" | "rdv"
+    status: string
+    
+    // Client
+    clientFirstName: string
+    clientLastName?: string
+    clientPhone: string
+    clientEmail: string
+    
+    // Adresse complète
+    addressStreet: string
+    addressComplement?: string
+    addressCity: string
+    addressPostalCode: string
+    addressInstructions?: string
+    latitude?: number
+    longitude?: number
+    
+    // Diagnostic
+    situationType: SituationType
+    situationDetails?: string
+    doorType?: DoorType
+    lockType?: LockType
+    propertyType?: string
+    accessDifficulty?: string
+    floorNumber?: number
+    hasElevator?: boolean
+    additionalNotes?: string
+    
+    // Service RDV
+    serviceType?: {
+        code: string
+        name: string
+        icon: string
+    }
+    
+    // Planning (pour RDV)
+    scheduledDate?: string
+    scheduledTimeStart?: string
+    scheduledTimeEnd?: string
+    
+    // Prix estimé
+    estimatedPriceMin?: number
+    estimatedPriceMax?: number
+    
+    // Photos
+    photos: {
+        id: string
+        url: string
+        description?: string
+    }[]
+    
+    // Timestamps
+    createdAt: string
+    submittedAt?: string
+    acceptedAt?: string
+    
+    // Assignment info
+    assignmentId?: string
+    assignedAt?: string
+}
+
+/**
+ * Récupère les détails complets d'une mission pour un artisan par tracking number
+ * Vérifie que l'artisan est bien assigné à cette intervention
+ */
+export async function getMissionDetailsByTracking(
+    trackingNumber: string
+): Promise<MissionDetails | null> {
+    const supabase = await createClient()
+    const adminClient = createAdminClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return null
+    }
+
+    try {
+        // Récupérer l'intervention par tracking number
+        const { data: intervention, error } = await adminClient
+            .from("intervention_requests")
+            .select(`
+                *,
+                intervention_diagnostics (*),
+                rdv_service_types (*),
+                intervention_photos (id, storage_path, description)
+            `)
+            .eq("tracking_number", trackingNumber)
+            .single()
+
+        if (error || !intervention) {
+            console.log("Intervention non trouvée:", trackingNumber, error)
+            return null
+        }
+
+        // Vérifier que l'artisan est assigné à cette intervention
+        // Vérifier d'abord artisan_assignments (pour tous les types)
+        // Puis rdv_selected_artisan_id (pour les RDV pré-sélectionnés par le client)
+        let assignmentId: string | null = null
+        let assignedAt: string | null = null
+        
+        // Chercher dans artisan_assignments d'abord
+        const { data: assignment } = await adminClient
+            .from("artisan_assignments")
+            .select("id, responded_at")
+            .eq("intervention_id", intervention.id)
+            .eq("artisan_id", user.id)
+            .eq("status", "accepted")
+            .single()
+
+        if (assignment) {
+            assignmentId = assignment.id
+            assignedAt = assignment.responded_at
+        } else if (intervention.intervention_type === "rdv" && intervention.rdv_selected_artisan_id === user.id) {
+            // Pour les RDV pré-sélectionnés par le client
+            assignmentId = intervention.id
+            assignedAt = intervention.submitted_at || intervention.created_at
+        } else {
+            console.log("Artisan non assigné:", user.id, "intervention:", intervention.id)
+            return null // L'artisan n'est pas assigné à cette intervention
+        }
+
+        const diagnostic = Array.isArray(intervention.intervention_diagnostics)
+            ? intervention.intervention_diagnostics[0]
+            : intervention.intervention_diagnostics
+
+        const serviceType = Array.isArray(intervention.rdv_service_types)
+            ? intervention.rdv_service_types[0]
+            : intervention.rdv_service_types
+
+        const photos = (intervention.intervention_photos || []).map((p: { id: string; storage_path: string; description?: string }) => ({
+            id: p.id,
+            url: p.storage_path,
+            description: p.description,
+        }))
+
+        return {
+            id: intervention.id,
+            trackingNumber: intervention.tracking_number,
+            interventionType: intervention.intervention_type,
+            status: intervention.status,
+            
+            // Client
+            clientFirstName: intervention.client_first_name || "Client",
+            clientLastName: intervention.client_last_name,
+            clientPhone: intervention.client_phone || "",
+            clientEmail: intervention.client_email || "",
+            
+            // Adresse
+            addressStreet: intervention.address_street || "",
+            addressComplement: intervention.address_complement,
+            addressCity: intervention.address_city || "",
+            addressPostalCode: intervention.address_postal_code || "",
+            addressInstructions: intervention.address_instructions,
+            latitude: intervention.latitude,
+            longitude: intervention.longitude,
+            
+            // Diagnostic
+            situationType: diagnostic?.situation_type || "other",
+            situationDetails: diagnostic?.situation_details,
+            doorType: diagnostic?.door_type,
+            lockType: diagnostic?.lock_type,
+            propertyType: diagnostic?.property_type,
+            accessDifficulty: diagnostic?.access_difficulty,
+            floorNumber: diagnostic?.floor_number,
+            hasElevator: diagnostic?.has_elevator,
+            additionalNotes: diagnostic?.additional_notes,
+            
+            // Service RDV
+            serviceType: serviceType ? {
+                code: serviceType.code,
+                name: serviceType.name,
+                icon: serviceType.icon,
+            } : undefined,
+            
+            // Planning
+            scheduledDate: intervention.scheduled_date,
+            scheduledTimeStart: intervention.scheduled_time_start,
+            scheduledTimeEnd: intervention.scheduled_time_end,
+            
+            // Prix
+            estimatedPriceMin: intervention.rdv_price_estimate_min_cents
+                ? intervention.rdv_price_estimate_min_cents / 100
+                : undefined,
+            estimatedPriceMax: intervention.rdv_price_estimate_max_cents
+                ? intervention.rdv_price_estimate_max_cents / 100
+                : undefined,
+            
+            // Photos
+            photos,
+            
+            // Timestamps
+            createdAt: intervention.created_at,
+            submittedAt: intervention.submitted_at,
+            acceptedAt: intervention.accepted_at,
+            
+            // Assignment
+            assignmentId: assignmentId || undefined,
+            assignedAt: assignedAt || intervention.created_at,
+        }
+    } catch (error) {
+        console.error("Erreur getMissionDetailsByTracking:", error)
+        return null
+    }
+}
+
+// ============================================
+// OPPORTUNITÉS RDV (NON URGENTES)
+// ============================================
+
+export interface RdvOpportunity {
+    id: string
+    trackingNumber: string
+    
+    // Localisation anonymisée
+    city: string
+    postalCode: string
+    latitude?: number
+    longitude?: number
+    
+    // Type de service
+    serviceType: {
+        code: string
+        name: string
+        icon: string
+    } | null
+    
+    // Diagnostic
+    diagnostic: {
+        propertyType?: string
+        doorType?: string
+        lockType?: string
+        accessDifficulty?: string
+        floorNumber?: number
+        hasElevator?: boolean
+        additionalNotes?: string
+    } | null
+    
+    // Photos
+    photos: {
+        id: string
+        url: string
+        description?: string
+    }[]
+    
+    // Planning
+    scheduledDate: string | null
+    scheduledTimeStart: string | null
+    scheduledTimeEnd: string | null
+    
+    // Prix estimé
+    estimatedPriceMin: number | null
+    estimatedPriceMax: number | null
+    
+    // Timestamps
+    createdAt: string
+    submittedAt: string | null
+}
+
+/**
+ * Récupère les opportunités RDV (non urgentes) en attente
+ * Données anonymisées pour RGPD
+ */
+export async function getRdvOpportunities(): Promise<RdvOpportunity[]> {
+    const supabase = await createClient()
+    const adminClient = createAdminClient()
+    
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+        return []
+    }
+    
+    const role = user.user_metadata?.role
+    if (role !== "artisan") {
+        return []
+    }
+    
+    try {
+        // Récupérer les IDs refusés par cet artisan
+        const { data: refusedAssignments } = await adminClient
+            .from("artisan_assignments")
+            .select("intervention_id")
+            .eq("artisan_id", user.id)
+            .eq("status", "refused")
+        
+        const refusedIds = refusedAssignments?.map(a => a.intervention_id) || []
+        
+        // Récupérer les interventions RDV en attente
+        const { data: interventions, error } = await adminClient
+            .from("intervention_requests")
+            .select(`
+                id,
+                tracking_number,
+                latitude,
+                longitude,
+                address_city,
+                address_postal_code,
+                scheduled_date,
+                scheduled_time_start,
+                scheduled_time_end,
+                rdv_price_estimate_min_cents,
+                rdv_price_estimate_max_cents,
+                created_at,
+                submitted_at,
+                rdv_service_types (
+                    code,
+                    name,
+                    icon
+                ),
+                intervention_diagnostics (
+                    property_type,
+                    door_type,
+                    lock_type,
+                    access_difficulty,
+                    floor_number,
+                    has_elevator,
+                    additional_notes
+                ),
+                intervention_photos (
+                    id,
+                    storage_path,
+                    description
+                )
+            `)
+            .in("status", ["pending", "searching"])
+            .eq("intervention_type", "rdv")
+            .order("scheduled_date", { ascending: true })
+            .limit(30)
+        
+        if (error || !interventions) {
+            console.error("Erreur récupération opportunités RDV:", error)
+            return []
+        }
+        
+        // Filtrer les refusées
+        const filtered = interventions.filter(i => !refusedIds.includes(i.id))
+        
+        // Mapper vers le format anonymisé
+        return filtered.map(intervention => {
+            const diagnostic = Array.isArray(intervention.intervention_diagnostics)
+                ? intervention.intervention_diagnostics[0]
+                : intervention.intervention_diagnostics
+            
+            // Le service type peut être un objet ou un tableau selon la relation
+            const rawServiceType = intervention.rdv_service_types
+            const serviceType = rawServiceType 
+                ? (Array.isArray(rawServiceType) 
+                    ? rawServiceType[0] as { code: string; name: string; icon: string }
+                    : rawServiceType as unknown as { code: string; name: string; icon: string })
+                : null
+            
+            const photos = (intervention.intervention_photos || []).map((p: { id: string; storage_path: string; description?: string }) => ({
+                id: p.id,
+                url: p.storage_path, // À transformer en URL signée si nécessaire
+                description: p.description
+            }))
+            
+            return {
+                id: intervention.id,
+                trackingNumber: intervention.tracking_number,
+                city: intervention.address_city,
+                postalCode: intervention.address_postal_code,
+                latitude: intervention.latitude,
+                longitude: intervention.longitude,
+                serviceType,
+                diagnostic: diagnostic ? {
+                    propertyType: diagnostic.property_type,
+                    doorType: diagnostic.door_type,
+                    lockType: diagnostic.lock_type,
+                    accessDifficulty: diagnostic.access_difficulty,
+                    floorNumber: diagnostic.floor_number,
+                    hasElevator: diagnostic.has_elevator,
+                    additionalNotes: diagnostic.additional_notes
+                } : null,
+                photos,
+                scheduledDate: intervention.scheduled_date,
+                scheduledTimeStart: intervention.scheduled_time_start,
+                scheduledTimeEnd: intervention.scheduled_time_end,
+                estimatedPriceMin: intervention.rdv_price_estimate_min_cents ? intervention.rdv_price_estimate_min_cents / 100 : null,
+                estimatedPriceMax: intervention.rdv_price_estimate_max_cents ? intervention.rdv_price_estimate_max_cents / 100 : null,
+                createdAt: intervention.created_at,
+                submittedAt: intervention.submitted_at
+            }
+        })
+    } catch (error) {
+        console.error("Erreur getRdvOpportunities:", error)
         return []
     }
 }

@@ -4,31 +4,49 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
-    Home,
-    AlertTriangle,
-    Navigation,
-    Calendar,
-    ClipboardList,
-    Wallet,
-    Star,
+    Siren,
+    Inbox,
+    ListChecks,
+    CalendarDays,
+    CreditCard,
     Settings,
     LogOut,
     Menu,
     X
 } from "lucide-react"
+import { LucideIcon } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 
-const NAV_ITEMS = [
-    { icon: Home, label: "Accueil", href: "/pro/dashboard" },
-    { icon: AlertTriangle, label: "Urgences", href: "/pro/urgences", badge: true },
-    { icon: Navigation, label: "Missions", href: "/pro/missions" },
-    { icon: Calendar, label: "Rendez-vous", href: "/pro/rendez-vous" },
-    { icon: ClipboardList, label: "Propositions", href: "/pro/propositions" },
-    { icon: Wallet, label: "Paiements", href: "/pro/paiements" },
-    { icon: Star, label: "Performance", href: "/pro/avis" },
+// Type pour les items de navigation
+interface NavItem {
+    icon: LucideIcon
+    label: string
+    href: string
+    badge?: boolean
+    isUrgent?: boolean
+}
+
+// Item Urgences séparé pour styling distinct
+const URGENCE_ITEM: NavItem = {
+    icon: Siren,
+    label: "Urgences",
+    href: "/pro/urgences",
+    badge: true,
+    isUrgent: true
+}
+
+// Navigation principale (sans urgences)
+const NAV_ITEMS: NavItem[] = [
+    { icon: Inbox, label: "Opportunités", href: "/pro/propositions" },
+    { icon: ListChecks, label: "En cours", href: "/pro/missions" },
+    { icon: CalendarDays, label: "Planning", href: "/pro/rendez-vous" },
+    { icon: CreditCard, label: "Paiements", href: "/pro/paiements" },
     { icon: Settings, label: "Paramètres", href: "/pro/compte" },
 ]
+
+// Items pour la nav mobile (urgences + 3 premiers items principaux)
+const MOBILE_NAV_ITEMS: NavItem[] = [URGENCE_ITEM, ...NAV_ITEMS.slice(0, 3)]
 
 interface ProSidebarProps {
     urgentCount?: number
@@ -106,6 +124,43 @@ export function ProSidebar({ urgentCount = 0, firstName = "Artisan" }: ProSideba
 
                 {/* Navigation - scrollable if content overflows */}
                 <nav className="flex-1 py-4 px-3 overflow-y-auto">
+                    {/* Urgences - Section prioritaire avec style distinct */}
+                    <div className="mb-4">
+                        {(() => {
+                            const isActive = pathname === URGENCE_ITEM.href || pathname.startsWith(URGENCE_ITEM.href + "/")
+                            const Icon = URGENCE_ITEM.icon
+                            return (
+                                <Link
+                                    href={URGENCE_ITEM.href}
+                                    onClick={() => setMobileOpen(false)}
+                                    className={cn(
+                                        "flex items-center gap-3 px-3 py-3 rounded-lg transition-all text-sm font-semibold",
+                                        isActive
+                                            ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
+                                            : "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
+                                    )}
+                                >
+                                    <Icon className={cn("w-5 h-5", isActive ? "text-white" : "text-red-500")} />
+                                    <span className="flex-1">{URGENCE_ITEM.label}</span>
+                                    {urgentCount > 0 && (
+                                        <span className={cn(
+                                            "px-2 py-0.5 text-xs font-bold rounded-full min-w-[20px] text-center animate-pulse",
+                                            isActive 
+                                                ? "bg-white text-red-600" 
+                                                : "bg-red-500 text-white"
+                                        )}>
+                                            {urgentCount}
+                                        </span>
+                                    )}
+                                </Link>
+                            )
+                        })()}
+                    </div>
+
+                    {/* Séparateur */}
+                    <div className="border-t border-gray-100 mb-4" />
+
+                    {/* Navigation principale */}
                     <ul className="space-y-1">
                         {NAV_ITEMS.map((item) => {
                             const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
@@ -125,11 +180,6 @@ export function ProSidebar({ urgentCount = 0, firstName = "Artisan" }: ProSideba
                                     >
                                         <Icon className={cn("w-5 h-5", isActive ? "text-emerald-600" : "text-gray-400")} />
                                         <span className="flex-1">{item.label}</span>
-                                        {item.badge && urgentCount > 0 && (
-                                            <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full min-w-[20px] text-center">
-                                                {urgentCount}
-                                            </span>
-                                        )}
                                     </Link>
                                 </li>
                             )
@@ -152,9 +202,10 @@ export function ProSidebar({ urgentCount = 0, firstName = "Artisan" }: ProSideba
             {/* Bottom Nav Mobile (Quick access) */}
             <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
                 <div className="flex justify-around items-center h-16 px-2">
-                    {NAV_ITEMS.slice(0, 4).map((item) => {
+                    {MOBILE_NAV_ITEMS.map((item) => {
                         const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
                         const Icon = item.icon
+                        const isUrgent = item.isUrgent === true
 
                         return (
                             <Link
@@ -162,14 +213,16 @@ export function ProSidebar({ urgentCount = 0, firstName = "Artisan" }: ProSideba
                                 href={item.href}
                                 className={cn(
                                     "flex flex-col items-center justify-center gap-1 px-3 py-2 relative",
-                                    isActive ? "text-emerald-600" : "text-gray-400"
+                                    isUrgent
+                                        ? isActive ? "text-red-600" : "text-red-500"
+                                        : isActive ? "text-emerald-600" : "text-gray-400"
                                 )}
                             >
                                 <Icon className="w-5 h-5" />
                                 <span className="text-[10px] font-medium">{item.label.split(" ")[0]}</span>
-                                {item.badge && urgentCount > 0 && (
-                                    <span className="absolute top-0 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                                        {urgentCount > 9 ? "9+" : urgentCount}
+                                {isUrgent && urgentCount > 0 && (
+                                    <span className="absolute top-0 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                                        {urgentCount > 9 ? "9+" : String(urgentCount)}
                                     </span>
                                 )}
                             </Link>
