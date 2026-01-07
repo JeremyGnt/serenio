@@ -38,7 +38,7 @@ export default function SignupPage() {
             </p>
             {/* Lien Artisan discret */}
             <Link
-              href="/login"
+              href="/pro/register"
               className="group inline-flex items-center gap-1.5 mt-3 text-sm text-blue-600 hover:text-blue-700 hover:underline"
             >
               <span>Vous êtes artisan serrurier ?</span>
