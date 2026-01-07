@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -22,8 +22,12 @@ import {
     Copy,
     Check,
     Loader2,
-    Wrench
+    Wrench,
+    Wifi,
+    WifiOff
 } from "lucide-react"
+import { supabase } from "@/lib/supabase/client"
+import type { RealtimePostgresChangesPayload, RealtimeChannel } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 import {
     AlertDialog,
@@ -142,6 +146,14 @@ const STATUS_CONFIG: Record<string, {
     }
 }
 
+// Type pour le payload Supabase Realtime
+interface InterventionPayload {
+    id: string
+    status: string
+    tracking_number: string
+    artisan_id: string | null
+}
+
 export function TrackingView({ data, currentUserId }: TrackingViewProps) {
     const router = useRouter()
     const { intervention, artisan, quote, statusHistory } = data
@@ -149,6 +161,53 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
     const [showCancelDialog, setShowCancelDialog] = useState(false)
     const [copied, setCopied] = useState(false)
     const [refreshing, setRefreshing] = useState(false)
+    const [isConnected, setIsConnected] = useState(false)
+    const channelRef = useRef<RealtimeChannel | null>(null)
+
+    // Fonction de rafraîchissement
+    const handleRefresh = useCallback(() => {
+        setRefreshing(true)
+        router.refresh()
+        // Simuler un délai pour le feedback visuel
+        setTimeout(() => setRefreshing(false), 1000)
+    }, [router])
+
+    // Supabase Realtime subscription pour les mises à jour de l'intervention
+    useEffect(() => {
+        const channel = supabase
+            .channel(`tracking:${intervention.id}`)
+            .on(
+                "postgres_changes",
+                {
+                    event: "UPDATE",
+                    schema: "public",
+                    table: "intervention_requests",
+                    filter: `id=eq.${intervention.id}`
+                },
+                (payload: RealtimePostgresChangesPayload<InterventionPayload>) => {
+                    const updated = payload.new as InterventionPayload
+
+                    // Si le statut ou l'artisan change, on rafraîchit
+                    if (
+                        updated.status !== intervention.status ||
+                        updated.artisan_id !== (artisan?.id || null)
+                    ) {
+                        handleRefresh()
+                    }
+                }
+            )
+            .subscribe((status) => {
+                setIsConnected(status === "SUBSCRIBED")
+            })
+
+        channelRef.current = channel
+
+        return () => {
+            if (channelRef.current) {
+                supabase.removeChannel(channelRef.current)
+            }
+        }
+    }, [intervention.id, intervention.status, artisan?.id, handleRefresh])
 
     // Nettoyer le tracking actif si l'intervention est terminée
     useEffect(() => {
@@ -181,11 +240,6 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
         setTimeout(() => setCopied(false), 2000)
     }
 
-    const handleRefresh = () => {
-        setRefreshing(true)
-        window.location.reload()
-    }
-
     const canCancel = ["draft", "pending", "searching", "assigned"].includes(intervention.status)
     const isCompleted = intervention.status === "completed"
     const isCancelled = intervention.status === "cancelled"
@@ -201,6 +255,21 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                     </div>
 
                     <div className="flex items-center gap-2">
+                        {/* Indicateur de connexion temps réel */}
+                        <div
+                            className="flex items-center gap-1 px-2 py-1 rounded-lg"
+                            title={isConnected ? "Mise à jour automatique activée" : "Connexion en cours..."}
+                        >
+                            {isConnected ? (
+                                <Wifi className="w-4 h-4 text-emerald-500" />
+                            ) : (
+                                <WifiOff className="w-4 h-4 text-gray-400 animate-pulse" />
+                            )}
+                            <span className="text-xs text-muted-foreground hidden sm:inline">
+                                {isConnected ? "Live" : "..."}
+                            </span>
+                        </div>
+
                         <button
                             onClick={copyTrackingNumber}
                             className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors text-sm"
@@ -217,6 +286,7 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                             onClick={handleRefresh}
                             disabled={refreshing}
                             className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+                            title="Rafraîchir manuellement"
                         >
                             <RefreshCw className={cn("w-5 h-5", refreshing && "animate-spin")} />
                         </button>
@@ -234,23 +304,25 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                     <span>Retour</span>
                 </button>
 
-                {/* Header de page avec statut */}
-                <div className="flex items-center gap-3 mb-6 sm:mb-8">
-                    <div className={cn(
-                        "w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center flex-shrink-0",
-                        statusConfig.bgColor
-                    )}>
-                        <StatusIcon className={cn("w-6 h-6 sm:w-7 sm:h-7", statusConfig.color)} />
+                {/* Header de page avec statut - caché pour pending/searching/cancelled car redondant */}
+                {!["pending", "searching", "cancelled"].includes(intervention.status) && (
+                    <div className="flex items-center gap-3 mb-6 sm:mb-8">
+                        <div className={cn(
+                            "w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center flex-shrink-0",
+                            statusConfig.bgColor
+                        )}>
+                            <StatusIcon className={cn("w-6 h-6 sm:w-7 sm:h-7", statusConfig.color)} />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                                {statusInfo.label}
+                            </h1>
+                            <p className="text-sm sm:text-base text-muted-foreground">
+                                {statusInfo.description}
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                            {statusInfo.label}
-                        </h1>
-                        <p className="text-sm sm:text-base text-muted-foreground">
-                            {statusInfo.description}
-                        </p>
-                    </div>
-                </div>
+                )}
 
                 {/* Contenu principal */}
                 <div className="space-y-6">
@@ -318,14 +390,16 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                             </div>
                         )}
 
-                        {/* Timeline */}
-                        <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                            <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                <Clock className="w-5 h-5 text-gray-400" />
-                                Historique
-                            </h2>
-                            <TrackingTimeline history={statusHistory} />
-                        </div>
+                        {/* Timeline - Caché pour annulé */}
+                        {!isCancelled && (
+                            <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                                <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                    <Clock className="w-5 h-5 text-gray-400" />
+                                    Historique
+                                </h2>
+                                <TrackingTimeline history={statusHistory} />
+                            </div>
+                        )}
                     </div>
 
                     {/* Devis (pleine largeur si présent) */}
@@ -339,48 +413,50 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                         />
                     )}
 
-                    {/* Deuxième ligne : Adresse + Coordonnées */}
-                    <div className="grid gap-6 lg:grid-cols-2">
-                        {/* Adresse */}
-                        <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                            <h2 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                <MapPin className="w-5 h-5 text-gray-400" />
-                                Adresse d'intervention
-                            </h2>
-                            <p className="text-gray-700">{intervention.addressStreet}</p>
-                            {intervention.addressComplement && (
-                                <p className="text-gray-600">{intervention.addressComplement}</p>
-                            )}
-                            <p className="text-gray-600">
-                                {intervention.addressPostalCode} {intervention.addressCity}
-                            </p>
-                            {intervention.addressInstructions && (
-                                <div className="flex items-start gap-2 mt-3 p-3 bg-gray-50 rounded-lg text-sm text-gray-600">
-                                    <StickyNote className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                                    <span>{intervention.addressInstructions}</span>
-                                </div>
-                            )}
-                        </div>
+                    {/* Deuxième ligne : Adresse + Coordonnées - Caché pour annulé */}
+                    {!isCancelled && (
+                        <div className="grid gap-6 lg:grid-cols-2">
+                            {/* Adresse */}
+                            <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                                <h2 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                    <MapPin className="w-5 h-5 text-gray-400" />
+                                    Adresse d'intervention
+                                </h2>
+                                <p className="text-gray-700">{intervention.addressStreet}</p>
+                                {intervention.addressComplement && (
+                                    <p className="text-gray-600">{intervention.addressComplement}</p>
+                                )}
+                                <p className="text-gray-600">
+                                    {intervention.addressPostalCode} {intervention.addressCity}
+                                </p>
+                                {intervention.addressInstructions && (
+                                    <div className="flex items-start gap-2 mt-3 p-3 bg-gray-50 rounded-lg text-sm text-gray-600">
+                                        <StickyNote className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                        <span>{intervention.addressInstructions}</span>
+                                    </div>
+                                )}
+                            </div>
 
-                        {/* Contact */}
-                        <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                            <h2 className="font-semibold text-gray-900 mb-4">Vos coordonnées</h2>
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
-                                        <Phone className="w-4 h-4 text-gray-600" />
+                            {/* Contact */}
+                            <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                                <h2 className="font-semibold text-gray-900 mb-4">Vos coordonnées</h2>
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
+                                            <Phone className="w-4 h-4 text-gray-600" />
+                                        </div>
+                                        <span className="text-gray-700">{intervention.clientPhone}</span>
                                     </div>
-                                    <span className="text-gray-700">{intervention.clientPhone}</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
-                                        <Mail className="w-4 h-4 text-gray-600" />
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
+                                            <Mail className="w-4 h-4 text-gray-600" />
+                                        </div>
+                                        <span className="text-gray-700">{intervention.clientEmail}</span>
                                     </div>
-                                    <span className="text-gray-700">{intervention.clientEmail}</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Actions - Centered below grid */}
                     {canCancel && !isCompleted && !isCancelled && (
@@ -410,6 +486,33 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                                 <Button className="mt-3 bg-emerald-600 hover:bg-emerald-700" size="sm">
                                     <Star className="w-4 h-4 mr-2" />
                                     Laisser un avis
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Cancelled Message */}
+                    {isCancelled && (
+                        <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center">
+                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <AlertCircle className="w-8 h-8 text-red-500" />
+                            </div>
+                            <h3 className="font-semibold text-gray-900 mb-2">Demande annulée</h3>
+                            <p className="text-gray-500 mb-6 max-w-sm mx-auto">
+                                Cette demande a été annulée. Vous pouvez créer une nouvelle demande si vous avez besoin d'aide.
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                                    <Link href="/urgence">
+                                        <AlertTriangle className="w-4 h-4 mr-2" />
+                                        Nouvelle urgence
+                                    </Link>
+                                </Button>
+                                <Button asChild variant="outline">
+                                    <Link href="/rdv">
+                                        <Clock className="w-4 h-4 mr-2" />
+                                        Planifier un RDV
+                                    </Link>
                                 </Button>
                             </div>
                         </div>

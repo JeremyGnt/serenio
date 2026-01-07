@@ -89,25 +89,28 @@ export interface ArtisanForSelection {
 export interface RdvDiagnosticAnswers {
   // Type de propriété
   propertyType?: "appartement" | "maison" | "bureau" | "commerce" | "other"
-  
+  propertyTypeOther?: string // Précision si "other" est sélectionné
+
   // Informations sur la porte/serrure
   doorType?: "standard" | "blindee" | "cave" | "garage" | "other"
+  doorTypeOther?: string // Précision si "other" est sélectionné
   lockType?: "standard" | "multipoint" | "electronique" | "other"
+  lockTypeOther?: string // Précision si "other" est sélectionné
   lockBrand?: string
-  
+
   // Accessibilité
   floorNumber?: number
   hasElevator?: boolean
   accessDifficulty?: "facile" | "moyen" | "difficile"
-  
+
   // Contexte
   isEmergency?: boolean
   hasBeenBrokenInto?: boolean
   lockAge?: "recent" | "moyen" | "ancien" | "unknown"
-  
+
   // Notes
   additionalNotes?: string
-  
+
   // Contact préféré
   preferredContactMethod?: "phone" | "email"
 }
@@ -120,28 +123,29 @@ export interface RdvFormState {
   // Étape 1: Type de service
   serviceType: RdvServiceCode | null
   serviceTypeId: string | null
-  
+  serviceOtherDetails: string // Détails si "other" est sélectionné
+
   // Étape 2: Diagnostic
   diagnostic: RdvDiagnosticAnswers
-  
+
   // Étape 3: Photos
   photos: File[]
   photoUrls: string[]
-  
+
   // Étape 4: Prix estimé (calculé)
   estimatedPriceMin: number | null
   estimatedPriceMax: number | null
-  
+
   // Étape 5: Planning
   selectedDate: string | null // YYYY-MM-DD
   selectedSlotId: string | null
   selectedTimeStart: string | null
   selectedTimeEnd: string | null
-  
+
   // Étape 6: Artisan
   autoAssign: boolean
   selectedArtisanId: string | null
-  
+
   // Étape 7: Coordonnées client
   clientFirstName: string
   clientLastName: string
@@ -155,7 +159,7 @@ export interface RdvFormState {
   addressInstructions: string
   latitude: number | null
   longitude: number | null
-  
+
   // Après création
   interventionId: string | null
   trackingNumber: string | null
@@ -164,6 +168,7 @@ export interface RdvFormState {
 export const initialRdvFormState: RdvFormState = {
   serviceType: null,
   serviceTypeId: null,
+  serviceOtherDetails: "",
   diagnostic: {},
   photos: [],
   photoUrls: [],
@@ -195,14 +200,14 @@ export const initialRdvFormState: RdvFormState = {
 // ÉTAPES DU PARCOURS RDV
 // ============================================
 
-export type RdvStepId = 
+export type RdvStepId =
   | "service"
-  | "diagnostic" 
+  | "diagnostic"
   | "photos"
-  | "prix" 
-  | "planning" 
-  | "artisan" 
-  | "coordonnees" 
+  | "prix"
+  | "planning"
+  | "artisan"
+  | "coordonnees"
   | "recapitulatif"
 
 export interface RdvStep {
@@ -227,7 +232,7 @@ export const RDV_STEPS: RdvStep[] = [
 // STATUT SUIVI RDV
 // ============================================
 
-export type RdvTrackingStatus = 
+export type RdvTrackingStatus =
   | "pending" // En attente de confirmation artisan
   | "confirmed" // Confirmé
   | "rescheduled" // Reprogrammé
@@ -238,38 +243,38 @@ export interface RdvTrackingInfo {
   id: string
   trackingNumber: string
   status: RdvTrackingStatus
-  
+
   // Service
   serviceType: RdvServiceTypeDisplay
-  
+
   // Planning
   scheduledDate: string
   scheduledTimeStart: string
   scheduledTimeEnd: string
-  
+
   // Artisan
   artisan: ArtisanForSelection | null
   autoAssigned: boolean
-  
+
   // Prix
   estimatedPriceMin: number
   estimatedPriceMax: number
-  
+
   // Client
   clientFirstName: string
   clientEmail: string
   clientPhone: string
-  
+
   // Adresse
   addressStreet: string
   addressCity: string
   addressPostalCode: string
-  
+
   // Dates
   createdAt: string
   confirmedAt: string | null
   reminderSentAt: string | null
-  
+
   // Actions possibles
   canModify: boolean
   canCancel: boolean

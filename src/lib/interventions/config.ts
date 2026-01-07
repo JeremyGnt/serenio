@@ -342,8 +342,8 @@ export const URGENCE_STEPS = [
 
 export const STATUS_LABELS: Record<string, { label: string; color: string; description: string }> = {
   draft: { label: "Brouillon", color: "gray", description: "Demande en cours de création" },
-  pending: { label: "En attente", color: "yellow", description: "Recherche d'un serrurier..." },
-  searching: { label: "Recherche", color: "yellow", description: "Recherche d'un serrurier disponible" },
+  pending: { label: "Demande reçue", color: "yellow", description: "Votre demande a bien été enregistrée" },
+  searching: { label: "Demande reçue", color: "yellow", description: "Votre demande a bien été enregistrée" },
   assigned: { label: "Assigné", color: "blue", description: "Un serrurier a été trouvé" },
   accepted: { label: "Accepté", color: "blue", description: "Le serrurier a accepté" },
   en_route: { label: "En route", color: "indigo", description: "Le serrurier est en chemin" },

@@ -214,7 +214,7 @@ export function MissionsTabs({ activeMissions, completedMissions, cancelledMissi
                             key={mission.id}
                             mission={mission}
                             tabType={activeTab}
-                            unreadCount={unreadCounts[mission.id] || 0}
+                            unreadCount={unreadCounts[mission.interventionId] || 0}
                         />
                     ))}
                 </div>
@@ -343,7 +343,7 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
 
                     {/* Badge nouveaux messages */}
                     {!isCancelled && !isCompleted && unreadCount > 0 && (
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-sm animate-pulse">
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-100 text-red-600 text-xs font-semibold rounded-full">
                             {unreadCount} message{unreadCount > 1 ? "s" : ""}
                         </div>
                     )}

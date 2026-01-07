@@ -243,6 +243,7 @@ export async function getInterventionDetailsForArtisan(
 
 export interface ArtisanStats {
     pendingCount: number
+    opportunitiesCount: number
     monthlyInterventions: number
     monthlyRevenue: number
 }
@@ -254,7 +255,7 @@ export async function getArtisanStats(): Promise<ArtisanStats> {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-        return { pendingCount: 0, monthlyInterventions: 0, monthlyRevenue: 0 }
+        return { pendingCount: 0, opportunitiesCount: 0, monthlyInterventions: 0, monthlyRevenue: 0 }
     }
 
     try {
@@ -267,7 +268,7 @@ export async function getArtisanStats(): Promise<ArtisanStats> {
 
         const refusedIds = refusedAssignments?.map(a => a.intervention_id) || []
 
-        // Récupérer toutes les interventions pending
+        // Récupérer toutes les interventions pending (urgences)
         const { data: pendingInterventions } = await adminClient
             .from("intervention_requests")
             .select("id")
@@ -276,6 +277,18 @@ export async function getArtisanStats(): Promise<ArtisanStats> {
 
         // Filtrer pour exclure celles refusées par cet artisan
         const filteredCount = pendingInterventions?.filter(
+            intervention => !refusedIds.includes(intervention.id)
+        ).length || 0
+
+        // Récupérer les opportunités RDV
+        const { data: rdvOpportunities } = await adminClient
+            .from("intervention_requests")
+            .select("id")
+            .in("status", ["pending", "searching"])
+            .eq("intervention_type", "rdv")
+
+        // Filtrer pour exclure celles refusées par cet artisan
+        const opportunitiesCount = rdvOpportunities?.filter(
             intervention => !refusedIds.includes(intervention.id)
         ).length || 0
 
@@ -293,12 +306,13 @@ export async function getArtisanStats(): Promise<ArtisanStats> {
 
         return {
             pendingCount: filteredCount,
+            opportunitiesCount,
             monthlyInterventions: monthlyCount || 0,
             monthlyRevenue: 0, // TODO: calculer à partir des devis acceptés
         }
     } catch (error) {
         console.error("Erreur getArtisanStats:", error)
-        return { pendingCount: 0, monthlyInterventions: 0, monthlyRevenue: 0 }
+        return { pendingCount: 0, opportunitiesCount: 0, monthlyInterventions: 0, monthlyRevenue: 0 }
     }
 }
 

@@ -169,11 +169,8 @@ export function UserMenu({ user, pendingRequestsCount = 0, unreadMessagesCount =
             >
               <ClipboardList className="w-4 h-4" />
               Mes demandes
-              {(pendingCount > 0 || unreadCount > 0) && (
-                <span className="ml-auto bg-emerald-100 text-emerald-700 text-xs font-medium px-2 py-0.5 rounded-full flex gap-1 items-center">
-                  {pendingCount > 0 ? pendingCount : ""}
-                  {unreadCount > 0 && <span className="bg-red-500 text-white rounded-full w-2 h-2" />}
-                </span>
+              {unreadCount > 0 && (
+                <span className="ml-auto bg-red-500 text-white rounded-full w-2 h-2" />
               )}
             </Link>
 

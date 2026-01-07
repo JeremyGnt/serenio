@@ -1,28 +1,28 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
-import Image from "next/image"
-import { ArrowLeft, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { RdvServiceTypeDisplay, RdvFormState, RdvStepId } from "@/types/rdv"
 import { RDV_STEPS, initialRdvFormState } from "@/types/rdv"
 import { calculatePriceEstimate } from "@/lib/rdv/queries"
 import { createRdvIntervention, createAccountAndSignIn } from "@/lib/rdv/actions"
 import { setActiveTracking } from "@/lib/active-tracking"
+import { FlowHeader, type FlowStep } from "@/components/flow"
 
-import { RdvProgress } from "./rdv-progress"
-import { 
-  StepService, 
-  StepDiagnostic, 
-  StepPhotos, 
-  StepPrix, 
-  StepPlanning, 
-  StepArtisan, 
-  StepCoordonnees, 
-  StepRecapitulatif 
+import {
+  StepService,
+  StepDiagnostic,
+  StepPhotos,
+  StepPrix,
+  StepPlanning,
+  StepArtisan,
+  StepCoordonnees,
+  StepRecapitulatif
 } from "./steps"
+
+const STORAGE_KEY = "serenio_rdv_form"
+const STEP_STORAGE_KEY = "serenio_rdv_step"
 
 interface RdvFlowProps {
   serviceTypes: RdvServiceTypeDisplay[]
@@ -33,17 +33,58 @@ interface RdvFlowProps {
 
 export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlowProps) {
   const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(0)
-  const [formState, setFormState] = useState<RdvFormState>(() => ({
-    ...initialRdvFormState,
-    clientEmail: userEmail || "",
-    clientFirstName: userName || "",
-    clientPhone: userPhone || "",
-  }))
+
+  // Initialiser l'état depuis sessionStorage si disponible
+  const [currentStep, setCurrentStep] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem(STEP_STORAGE_KEY)
+      return saved ? parseInt(saved, 10) : 0
+    }
+    return 0
+  })
+
+  const [formState, setFormState] = useState<RdvFormState>(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem(STORAGE_KEY)
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+          // On garde les données sauvées mais on met à jour avec les infos user si connecté
+          return {
+            ...parsed,
+            clientEmail: userEmail || parsed.clientEmail || "",
+            clientFirstName: userName || parsed.clientFirstName || "",
+            clientPhone: userPhone || parsed.clientPhone || "",
+            // Note: on ne peut pas sauvegarder les fichiers, donc on reset photos
+            photos: [],
+          }
+        } catch {
+          // Si erreur de parsing, on utilise l'état initial
+        }
+      }
+    }
+    return {
+      ...initialRdvFormState,
+      clientEmail: userEmail || "",
+      clientFirstName: userName || "",
+      clientPhone: userPhone || "",
+    }
+  })
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
   const currentStepId = RDV_STEPS[currentStep]?.id
+
+  // Sauvegarder dans sessionStorage à chaque changement
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // On ne sauvegarde pas les photos (File objects ne sont pas sérialisables)
+      const toSave = { ...formState, photos: [] }
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(toSave))
+      sessionStorage.setItem(STEP_STORAGE_KEY, currentStep.toString())
+    }
+  }, [formState, currentStep])
 
   const showError = (message: string) => {
     setError(message)
@@ -58,10 +99,10 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
   // Calculer le prix estimé quand on passe à l'étape prix
   const calculatePrice = useCallback(() => {
     if (!formState.serviceType) return
-    
+
     const serviceType = serviceTypes.find(s => s.code === formState.serviceType)
     if (!serviceType) return
-    
+
     const estimate = calculatePriceEstimate(serviceType, formState.diagnostic)
     updateForm({
       estimatedPriceMin: estimate.min,
@@ -74,18 +115,34 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
     switch (currentStepId) {
       case "service":
         if (!formState.serviceType) return "Veuillez sélectionner un type de service"
+        // Validation "Autre besoin" requiert une précision
+        if (formState.serviceType === "other" && !formState.serviceOtherDetails.trim()) {
+          return "Veuillez préciser votre besoin"
+        }
         break
-      
+
       case "diagnostic":
         if (!formState.diagnostic.propertyType) return "Veuillez indiquer le type de propriété"
+        // Validation "Autre" propriété requiert une précision
+        if (formState.diagnostic.propertyType === "other" && !formState.diagnostic.propertyTypeOther?.trim()) {
+          return "Veuillez préciser le type de logement"
+        }
         if (!formState.diagnostic.doorType) return "Veuillez indiquer le type de porte"
+        // Validation "Autre" porte requiert une précision
+        if (formState.diagnostic.doorType === "other" && !formState.diagnostic.doorTypeOther?.trim()) {
+          return "Veuillez préciser le type de porte"
+        }
+        // Validation "Autre" serrure requiert une précision (si sélectionné)
+        if (formState.diagnostic.lockType === "other" && !formState.diagnostic.lockTypeOther?.trim()) {
+          return "Veuillez préciser le type de serrure"
+        }
         break
-      
+
       case "planning":
         if (!formState.selectedDate) return "Veuillez sélectionner une date"
         if (!formState.selectedTimeStart) return "Veuillez sélectionner un créneau horaire"
         break
-      
+
       case "coordonnees":
         if (!formState.clientFirstName.trim()) return "Veuillez indiquer votre prénom"
         if (!formState.clientEmail.trim()) return "Veuillez indiquer votre email"
@@ -93,17 +150,17 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
         if (!formState.addressStreet.trim()) return "Veuillez indiquer votre adresse"
         if (!formState.addressPostalCode.trim()) return "Veuillez indiquer votre code postal"
         if (!formState.addressCity.trim()) return "Veuillez indiquer votre ville"
-        
+
         // Validation email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         if (!emailRegex.test(formState.clientEmail)) return "Veuillez entrer un email valide"
-        
+
         // Validation téléphone
         const phoneRegex = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/
         if (!phoneRegex.test(formState.clientPhone.replace(/\s/g, ""))) {
           return "Veuillez entrer un numéro de téléphone valide"
         }
-        
+
         // Validation mot de passe (seulement si non connecté)
         if (!userEmail) {
           if (!formState.clientPassword) return "Veuillez définir un mot de passe"
@@ -154,21 +211,25 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
           lastName: formState.clientLastName,
           phone: formState.clientPhone,
         })
-        
+
         if (!accountResult.success) {
           throw new Error(accountResult.error || "Erreur lors de la création du compte")
         }
       }
-      
+
       const result = await createRdvIntervention(formState)
-      
+
       if (!result.success || !result.trackingNumber) {
         throw new Error(result.error || "Erreur lors de la création du rendez-vous")
       }
 
       // Sauvegarder le tracking
       setActiveTracking(result.trackingNumber)
-      
+
+      // Nettoyer le sessionStorage après soumission réussie
+      sessionStorage.removeItem(STORAGE_KEY)
+      sessionStorage.removeItem(STEP_STORAGE_KEY)
+
       // Rediriger vers la page de suivi
       router.push(`/rdv/suivi/${result.trackingNumber}`)
     } catch (err) {
@@ -187,9 +248,11 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
             serviceTypes={serviceTypes}
             selectedService={formState.serviceType}
             onSelect={(code, id) => updateForm({ serviceType: code, serviceTypeId: id })}
+            serviceOtherDetails={formState.serviceOtherDetails}
+            onServiceOtherDetailsChange={(details) => updateForm({ serviceOtherDetails: details })}
           />
         )
-      
+
       case "diagnostic":
         return (
           <StepDiagnostic
@@ -198,7 +261,7 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
             onUpdate={(diagnostic: Partial<RdvFormState["diagnostic"]>) => updateForm({ diagnostic: { ...formState.diagnostic, ...diagnostic } })}
           />
         )
-      
+
       case "photos":
         return (
           <StepPhotos
@@ -206,7 +269,7 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
             onUpdate={(photos: File[]) => updateForm({ photos })}
           />
         )
-      
+
       case "prix":
         return (
           <StepPrix
@@ -216,7 +279,7 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
             estimatedMax={formState.estimatedPriceMax || 0}
           />
         )
-      
+
       case "planning":
         return (
           <StepPlanning
@@ -224,14 +287,14 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
             selectedTimeStart={formState.selectedTimeStart}
             selectedTimeEnd={formState.selectedTimeEnd}
             onSelectDate={(date: string) => updateForm({ selectedDate: date, selectedTimeStart: null, selectedTimeEnd: null })}
-            onSelectTime={(start: string, end: string, slotId?: string) => updateForm({ 
-              selectedTimeStart: start, 
+            onSelectTime={(start: string, end: string, slotId?: string) => updateForm({
+              selectedTimeStart: start,
               selectedTimeEnd: end,
               selectedSlotId: slotId || null
             })}
           />
         )
-      
+
       case "artisan":
         return (
           <StepArtisan
@@ -241,7 +304,7 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
             onSelectArtisan={(id: string) => updateForm({ selectedArtisanId: id, autoAssign: false })}
           />
         )
-      
+
       case "coordonnees":
         return (
           <StepCoordonnees
@@ -250,7 +313,7 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
             isLoggedIn={!!userEmail}
           />
         )
-      
+
       case "recapitulatif":
         return (
           <StepRecapitulatif
@@ -259,47 +322,31 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
             onEdit={(stepIndex: number) => setCurrentStep(stepIndex)}
           />
         )
-      
+
       default:
         return null
     }
   }
 
+  // Transform steps for FlowHeader
+  const flowSteps: FlowStep[] = RDV_STEPS.map((step) => ({
+    id: step.id,
+    label: step.title,
+    shortLabel: step.title.slice(0, 3),
+  }))
+
   return (
     <>
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {currentStep > 0 ? (
-              <button
-                onClick={prevStep}
-                className="p-2 -ml-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-            ) : (
-              <Link href="/" className="flex items-center gap-2">
-                <Image src="/logo.svg" alt="Serenio" width={28} height={28} />
-                <span className="font-bold text-gray-900">Serenio</span>
-              </Link>
-            )}
-          </div>
-
-          <Link
-            href="/"
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </Link>
-        </div>
-      </header>
-
-      {/* Progress */}
-      <RdvProgress 
-        currentStep={currentStep} 
-        totalSteps={RDV_STEPS.length}
-        stepTitle={RDV_STEPS[currentStep]?.title}
+      {/* Flow Header with integrated stepper */}
+      <FlowHeader
+        mode="rdv"
+        steps={flowSteps}
+        currentStepIndex={currentStep}
+        estimatedTime="~5 min"
+        onBack={currentStep > 0 ? prevStep : undefined}
+        showBack={true}
+        closeHref="/"
+        backHref="/"
       />
 
       {/* Content */}
@@ -328,7 +375,7 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
               Retour
             </Button>
           )}
-          
+
           {currentStepId === "recapitulatif" ? (
             <Button
               onClick={handleSubmit}

@@ -91,19 +91,18 @@ export function StepDiagnostic({
                 {/* Question type: single */}
                 {question.type === "single" && question.options && (
                   <div className="space-y-2">
-                    <div className="grid gap-2">
+                    <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
                       {question.options.map((option) => (
                         <button
                           key={option.value}
                           type="button"
                           onClick={() => handleAnswerChange(question.id, option.value)}
-                          className={`w-full text-left p-3 rounded-lg border transition-all ${
-                            currentValue === option.value
+                          className={`w-full text-left p-3 rounded-lg border transition-all h-full ${currentValue === option.value
                               ? "border-red-500 bg-red-50"
                               : "border-gray-200 hover:border-gray-300"
-                          }`}
+                            }`}
                         >
-                          {option.label}
+                          <span className="block font-medium">{option.label}</span>
                         </button>
                       ))}
                     </div>
@@ -131,22 +130,20 @@ export function StepDiagnostic({
                     <button
                       type="button"
                       onClick={() => handleAnswerChange(question.id, true)}
-                      className={`flex-1 p-3 rounded-lg border transition-all ${
-                        currentValue === true
+                      className={`flex-1 p-3 rounded-lg border transition-all ${currentValue === true
                           ? "border-red-500 bg-red-50"
                           : "border-gray-200 hover:border-gray-300"
-                      }`}
+                        }`}
                     >
                       Oui
                     </button>
                     <button
                       type="button"
                       onClick={() => handleAnswerChange(question.id, false)}
-                      className={`flex-1 p-3 rounded-lg border transition-all ${
-                        currentValue === false
+                      className={`flex-1 p-3 rounded-lg border transition-all ${currentValue === false
                           ? "border-red-500 bg-red-50"
                           : "border-gray-200 hover:border-gray-300"
-                      }`}
+                        }`}
                     >
                       Non
                     </button>
@@ -165,7 +162,7 @@ export function StepDiagnostic({
 
                 {/* Question type: multiple */}
                 {question.type === "multiple" && question.options && (
-                  <div className="grid gap-2">
+                  <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
                     {question.options.map((option) => {
                       const values = (currentValue as string[]) || []
                       const isSelected = values.includes(option.value)
@@ -180,16 +177,14 @@ export function StepDiagnostic({
                               : [...values, option.value]
                             handleAnswerChange(question.id, newValues)
                           }}
-                          className={`w-full text-left p-3 rounded-lg border transition-all flex items-center gap-3 ${
-                            isSelected
+                          className={`w-full text-left p-3 rounded-lg border transition-all flex items-center gap-3 h-full ${isSelected
                               ? "border-red-500 bg-red-50"
                               : "border-gray-200 hover:border-gray-300"
-                          }`}
+                            }`}
                         >
                           <div
-                            className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                              isSelected ? "border-red-500 bg-red-500" : "border-gray-300"
-                            }`}
+                            className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? "border-red-500 bg-red-500" : "border-gray-300"
+                              }`}
                           >
                             {isSelected && (
                               <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -201,7 +196,7 @@ export function StepDiagnostic({
                               </svg>
                             )}
                           </div>
-                          {option.label}
+                          <span className="font-medium">{option.label}</span>
                         </button>
                       )
                     })}

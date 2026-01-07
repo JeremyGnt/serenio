@@ -2,14 +2,14 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { ArrowLeft, X, AlertTriangle, Clock, WifiOff, Save, Trash2 } from "lucide-react"
+import { WifiOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { PriceScenarioDisplay, SituationType, DiagnosticAnswers } from "@/types/intervention"
 import { URGENCE_STEPS, DIAGNOSTIC_QUESTIONS } from "@/lib/interventions/config"
 import { createIntervention, updateDiagnostic, submitIntervention } from "@/lib/interventions"
 import { setActiveTracking } from "@/lib/active-tracking"
 import { useFormAutoSave } from "@/hooks/useFormAutoSave"
+import { FlowHeader, type FlowStep } from "@/components/flow"
 
 import { StepSituation } from "./steps/step-situation"
 import { StepDiagnostic } from "./steps/step-diagnostic"
@@ -17,7 +17,6 @@ import { StepPhotos } from "./steps/step-photos"
 import { StepLocalisation } from "./steps/step-localisation"
 import { StepContact } from "./steps/step-contact"
 import { StepRecap } from "./steps/step-recap"
-import { UrgenceProgress } from "./urgence-progress"
 
 
 interface UrgenceFlowProps {
@@ -310,47 +309,26 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
     ? priceScenarios.find((s) => s.code === formState.situationType) ?? null
     : null
 
+  // Transform steps for FlowHeader
+  const flowSteps: FlowStep[] = URGENCE_STEPS.map((step) => ({
+    id: step.id,
+    label: step.label,
+    shortLabel: step.label.slice(0, 3),
+  }))
+
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 h-14 flex items-center justify-between">
-          <button
-            onClick={currentStep > 0 ? prevStep : undefined}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-          >
-            {currentStep > 0 ? (
-              <>
-                <ArrowLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Retour</span>
-              </>
-            ) : (
-              <Link href="/" className="flex items-center gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Accueil</span>
-              </Link>
-            )}
-          </button>
-
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-2 font-bold text-red-600">
-              <AlertTriangle className="w-4 h-4" />
-              Urgence
-            </span>
-            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
-              <Clock className="w-3 h-3" />
-              ~3min
-            </span>
-          </div>
-
-          <Link href="/" className="text-muted-foreground hover:text-foreground">
-            <X className="w-5 h-5" />
-          </Link>
-        </div>
-      </header>
-
-      {/* Progress */}
-      <UrgenceProgress currentStep={currentStep} steps={URGENCE_STEPS} />
+      {/* Flow Header with integrated stepper */}
+      <FlowHeader
+        mode="urgence"
+        steps={flowSteps}
+        currentStepIndex={currentStep}
+        estimatedTime="~3 min"
+        onBack={currentStep > 0 ? prevStep : undefined}
+        showBack={true}
+        closeHref="/"
+        backHref="/"
+      />
 
       {/* Content */}
       <main className="flex-1 max-w-2xl lg:max-w-4xl mx-auto w-full px-4 py-6">

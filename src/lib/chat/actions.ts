@@ -391,20 +391,39 @@ export async function getTotalUnreadCount(userId: string): Promise<number> {
     const adminClient = createAdminClient()
 
     // 1. Trouver toutes les conversations où l'utilisateur est participant
-    const { data: participations, error: partError } = await adminClient
+    // et dont l'intervention n'est pas terminée ou annulée
+    const { data: conversations, error: convError } = await adminClient
         .from("conversation_participants")
-        .select("conversation_id")
+        .select(`
+            conversation_id,
+            conversations!inner (
+                id,
+                intervention_id,
+                intervention_requests!inner (
+                    status
+                )
+            )
+        `)
         .eq("user_id", userId)
 
-    if (partError || !participations?.length) return 0
+    if (convError || !conversations?.length) return 0
 
-    const conversationIds = participations.map(p => p.conversation_id)
+    // Filtrer les conversations dont l'intervention est active (pas terminée/annulée)
+    const activeConversationIds = conversations
+        .filter(c => {
+            const conv = c.conversations as any
+            const status = conv?.intervention_requests?.status
+            return status && !["completed", "cancelled"].includes(status)
+        })
+        .map(c => c.conversation_id)
+
+    if (activeConversationIds.length === 0) return 0
 
     // 2. Compter les messages non lus dans ces conversations (envoyés par d'autres)
     const { count, error } = await adminClient
         .from("messages")
         .select("*", { count: "exact", head: true })
-        .in("conversation_id", conversationIds)
+        .in("conversation_id", activeConversationIds)
         .neq("sender_id", userId) // Messages des autres
         .is("read_at", null)      // Non lus
 

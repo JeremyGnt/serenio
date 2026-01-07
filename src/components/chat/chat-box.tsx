@@ -66,8 +66,10 @@ export function ChatBox({
 
     // Marquer comme lu quand visible
     useEffect(() => {
-        markMessagesAsRead(conversationId)
-    }, [conversationId, messages])
+        if (isVisible) {
+            markMessagesAsRead(conversationId)
+        }
+    }, [conversationId, messages, isVisible])
 
     // Détecter si on est en bas
     const isNearBottom = useCallback(() => {

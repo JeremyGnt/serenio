@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { KeyRound, ShieldCheck, Wrench, HelpCircle, Clock, Check } from "lucide-react"
 import type { RdvServiceTypeDisplay, RdvServiceCode } from "@/types/rdv"
 import { cn } from "@/lib/utils"
@@ -15,9 +16,17 @@ interface StepServiceProps {
   serviceTypes: RdvServiceTypeDisplay[]
   selectedService: RdvServiceCode | null
   onSelect: (code: RdvServiceCode, id: string) => void
+  serviceOtherDetails?: string
+  onServiceOtherDetailsChange?: (details: string) => void
 }
 
-export function StepService({ serviceTypes, selectedService, onSelect }: StepServiceProps) {
+export function StepService({
+  serviceTypes,
+  selectedService,
+  onSelect,
+  serviceOtherDetails = "",
+  onServiceOtherDetailsChange,
+}: StepServiceProps) {
   return (
     <div className="space-y-6">
       {/* Titre */}
@@ -31,7 +40,7 @@ export function StepService({ serviceTypes, selectedService, onSelect }: StepSer
       </div>
 
       {/* Cartes de services */}
-      <div className="grid gap-4">
+      <div className="grid gap-4 md:grid-cols-2">
         {serviceTypes.map((service) => {
           const isSelected = selectedService === service.code
           const Icon = ICONS[service.icon || "HelpCircle"] || HelpCircle
@@ -41,13 +50,13 @@ export function StepService({ serviceTypes, selectedService, onSelect }: StepSer
               key={service.id}
               onClick={() => onSelect(service.code, service.id)}
               className={cn(
-                "w-full text-left p-5 rounded-xl border-2 transition-all",
+                "w-full h-full text-left p-5 rounded-xl border-2 transition-all flex flex-col",
                 isSelected
                   ? "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/20"
                   : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
               )}
             >
-              <div className="flex gap-4">
+              <div className="flex gap-4 flex-1">
                 {/* Icône */}
                 <div className={cn(
                   "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0",
@@ -60,7 +69,7 @@ export function StepService({ serviceTypes, selectedService, onSelect }: StepSer
                 </div>
 
                 {/* Contenu */}
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 flex flex-col">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className={cn(
                       "font-semibold",
@@ -74,8 +83,8 @@ export function StepService({ serviceTypes, selectedService, onSelect }: StepSer
                       </div>
                     )}
                   </div>
-                  
-                  <p className="text-sm text-gray-500 mt-1">
+
+                  <p className="text-sm text-gray-500 mt-1 line-clamp-2 flex-1">
                     {service.description}
                   </p>
 
@@ -98,6 +107,25 @@ export function StepService({ serviceTypes, selectedService, onSelect }: StepSer
           )
         })}
       </div>
+
+      {/* Champ "Préciser" si "Autre besoin" est sélectionné */}
+      {selectedService === "other" && onServiceOtherDetailsChange && (
+        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <label htmlFor="serviceOtherDetails" className="block text-sm font-medium text-gray-700 mb-2">
+            Précisez votre besoin <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            id="serviceOtherDetails"
+            value={serviceOtherDetails}
+            onChange={(e) => onServiceOtherDetailsChange(e.target.value.slice(0, 200))}
+            placeholder="Décrivez en quelques mots votre besoin..."
+            rows={3}
+            maxLength={200}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+          />
+          <p className="text-xs text-gray-400 mt-1 text-right">{serviceOtherDetails.length}/200</p>
+        </div>
+      )}
 
       {/* Note */}
       <p className="text-center text-sm text-gray-500">

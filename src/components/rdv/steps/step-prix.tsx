@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, Info, AlertCircle, TrendingUp } from "lucide-react"
+import { Check, Info, TrendingUp, Shield, FileCheck } from "lucide-react"
 import type { RdvServiceTypeDisplay, RdvDiagnosticAnswers } from "@/types/rdv"
 import { calculatePriceEstimate } from "@/lib/rdv/queries"
 
@@ -26,7 +26,7 @@ export function StepPrix({ serviceType, diagnostic, estimatedMin, estimatedMax }
         </p>
       </div>
 
-      {/* Prix estimé */}
+      {/* Prix estimé - pleine largeur */}
       <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200 rounded-2xl p-6 text-center">
         <p className="text-sm text-emerald-700 font-medium mb-2">Fourchette estimée</p>
         <div className="flex items-baseline justify-center gap-2">
@@ -39,73 +39,83 @@ export function StepPrix({ serviceType, diagnostic, estimatedMin, estimatedMax }
         </p>
       </div>
 
-      {/* Ce qui est inclus */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
-        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-          <Check className="w-5 h-5 text-emerald-500" />
-          Ce qui est inclus
-        </h3>
-        <ul className="space-y-2">
-          {estimate.includes.map((item: string, index: number) => (
-            <li key={index} className="flex items-center gap-3 text-gray-700">
-              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full flex-shrink-0" />
-              {item}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* Layout 2 colonnes sur desktop pour les listes */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Ce qui est inclus */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+            <Check className="w-5 h-5 text-emerald-500" />
+            Ce qui est inclus
+          </h3>
+          <ul className="space-y-2">
+            {estimate.includes.map((item: string, index: number) => (
+              <li key={index} className="flex items-center gap-3 text-gray-700 text-sm">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full flex-shrink-0" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      {/* Ce qui peut faire varier */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
-        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-amber-500" />
-          Ce qui peut faire varier le prix
-        </h3>
-        <ul className="space-y-2">
-          {estimate.variables.map((item: string, index: number) => (
-            <li key={index} className="flex items-center gap-3 text-gray-700">
+        {/* Ce qui peut faire varier */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-amber-500" />
+            Ce qui peut faire varier le prix
+          </h3>
+          <ul className="space-y-2">
+            {estimate.variables.map((item: string, index: number) => (
+              <li key={index} className="flex items-center gap-3 text-gray-700 text-sm">
+                <div className="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0" />
+                {item}
+              </li>
+            ))}
+            <li className="flex items-center gap-3 text-gray-700 text-sm">
               <div className="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0" />
-              {item}
+              Pièces et matériel nécessaires
             </li>
-          ))}
-          <li className="flex items-center gap-3 text-gray-700">
-            <div className="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0" />
-            Pièces et matériel nécessaires
-          </li>
-          <li className="flex items-center gap-3 text-gray-700">
-            <div className="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0" />
-            Complexité constatée sur place
-          </li>
-        </ul>
+            <li className="flex items-center gap-3 text-gray-700 text-sm">
+              <div className="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0" />
+              Complexité constatée sur place
+            </li>
+          </ul>
+        </div>
       </div>
 
-      {/* Note importante */}
+      {/* Garanties - pleine largeur */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-gray-50 rounded-xl p-3 sm:p-4 text-center">
+          <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
+            <FileCheck className="w-5 h-5 text-emerald-600" />
+          </div>
+          <p className="text-xs sm:text-sm font-medium text-gray-900">Devis gratuit</p>
+          <p className="text-xs text-gray-500 hidden sm:block">Sans engagement</p>
+        </div>
+        <div className="bg-gray-50 rounded-xl p-3 sm:p-4 text-center">
+          <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
+            <Shield className="w-5 h-5 text-emerald-600" />
+          </div>
+          <p className="text-xs sm:text-sm font-medium text-gray-900">Pas de surprise</p>
+          <p className="text-xs text-gray-500 hidden sm:block">Prix validé ensemble</p>
+        </div>
+        <div className="bg-gray-50 rounded-xl p-3 sm:p-4 text-center">
+          <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
+            <Check className="w-5 h-5 text-emerald-600" />
+          </div>
+          <p className="text-xs sm:text-sm font-medium text-gray-900">Qualité</p>
+          <p className="text-xs text-gray-500 hidden sm:block">Artisans qualifiés</p>
+        </div>
+      </div>
+
+      {/* Note importante - pleine largeur */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
         <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
         <div className="text-sm text-blue-700">
           <p className="font-medium mb-1">Prix final confirmé avant intervention</p>
           <p>
-            L'artisan vous communiquera le prix exact après diagnostic sur place. 
+            L'artisan vous communiquera le prix exact après diagnostic sur place.
             Vous pourrez accepter ou refuser sans engagement.
           </p>
-        </div>
-      </div>
-
-      {/* Garanties */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-gray-50 rounded-xl p-4 text-center">
-          <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
-            <Check className="w-5 h-5 text-emerald-600" />
-          </div>
-          <p className="text-sm font-medium text-gray-900">Devis gratuit</p>
-          <p className="text-xs text-gray-500">Sans engagement</p>
-        </div>
-        <div className="bg-gray-50 rounded-xl p-4 text-center">
-          <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2">
-            <AlertCircle className="w-5 h-5 text-emerald-600" />
-          </div>
-          <p className="text-sm font-medium text-gray-900">Pas de surprise</p>
-          <p className="text-xs text-gray-500">Prix validé ensemble</p>
         </div>
       </div>
     </div>

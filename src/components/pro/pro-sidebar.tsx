@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
     Siren,
     Inbox,
@@ -52,21 +52,33 @@ const MOBILE_NAV_ITEMS: NavItem[] = [URGENCE_ITEM, ...NAV_ITEMS.slice(0, 3)]
 
 interface ProSidebarProps {
     urgentCount?: number
+    opportunitiesCount?: number
     firstName?: string
     userId?: string
     totalUnreadMessages?: number
 }
 
-export function ProSidebar({ urgentCount = 0, firstName = "Artisan", userId, totalUnreadMessages = 0 }: ProSidebarProps) {
+export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName = "Artisan", userId, totalUnreadMessages = 0 }: ProSidebarProps) {
     const pathname = usePathname()
+    const router = useRouter()
     const [mobileOpen, setMobileOpen] = useState(false)
     const [unreadCount, setUnreadCount] = useState(totalUnreadMessages)
+    const [urgentCountState, setUrgentCountState] = useState(urgentCount)
+    const [opportunitiesCountState, setOpportunitiesCountState] = useState(opportunitiesCount)
 
     useEffect(() => {
         setUnreadCount(totalUnreadMessages)
     }, [totalUnreadMessages])
 
-    // Realtime subscription
+    useEffect(() => {
+        setUrgentCountState(urgentCount)
+    }, [urgentCount])
+
+    useEffect(() => {
+        setOpportunitiesCountState(opportunitiesCount)
+    }, [opportunitiesCount])
+
+    // Realtime subscription pour les messages
     useEffect(() => {
         if (!userId) return
 
@@ -102,6 +114,29 @@ export function ProSidebar({ urgentCount = 0, firstName = "Artisan", userId, tot
             clearTimeout(timeoutId)
         }
     }, [userId])
+
+    // Realtime subscription pour les nouvelles interventions (urgences et opportunités)
+    useEffect(() => {
+        const channel = supabase
+            .channel("pro_interventions_sidebar")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "intervention_requests"
+                },
+                () => {
+                    // Rafraîchir la page pour obtenir les nouveaux compteurs
+                    router.refresh()
+                }
+            )
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [router])
 
     return (
         <>
@@ -188,14 +223,14 @@ export function ProSidebar({ urgentCount = 0, firstName = "Artisan", userId, tot
                                 >
                                     <Icon className={cn("w-5 h-5", isActive ? "text-white" : "text-red-500")} />
                                     <span className="flex-1">{URGENCE_ITEM.label}</span>
-                                    {urgentCount > 0 && (
+                                    {urgentCountState > 0 && (
                                         <span className={cn(
                                             "px-2 py-0.5 text-xs font-bold rounded-full min-w-[20px] text-center animate-pulse",
                                             isActive
                                                 ? "bg-white text-red-600"
                                                 : "bg-red-500 text-white"
                                         )}>
-                                            {urgentCount}
+                                            {urgentCountState}
                                         </span>
                                     )}
                                 </Link>
@@ -212,6 +247,7 @@ export function ProSidebar({ urgentCount = 0, firstName = "Artisan", userId, tot
                             const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
                             const Icon = item.icon
                             const isMissions = item.href === "/pro/missions"
+                            const isOpportunities = item.href === "/pro/propositions"
 
                             return (
                                 <li key={item.href}>
@@ -230,6 +266,11 @@ export function ProSidebar({ urgentCount = 0, firstName = "Artisan", userId, tot
                                         {isMissions && unreadCount > 0 && (
                                             <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
                                                 {unreadCount > 9 ? "9+" : unreadCount}
+                                            </span>
+                                        )}
+                                        {isOpportunities && opportunitiesCountState > 0 && (
+                                            <span className="bg-purple-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
+                                                {opportunitiesCountState > 9 ? "9+" : opportunitiesCountState}
                                             </span>
                                         )}
                                     </Link>
@@ -272,9 +313,9 @@ export function ProSidebar({ urgentCount = 0, firstName = "Artisan", userId, tot
                             >
                                 <Icon className="w-5 h-5" />
                                 <span className="text-[10px] font-medium">{item.label.split(" ")[0]}</span>
-                                {isUrgent && urgentCount > 0 && (
+                                {isUrgent && urgentCountState > 0 && (
                                     <span className="absolute top-0 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse">
-                                        {urgentCount > 9 ? "9+" : String(urgentCount)}
+                                        {urgentCountState > 9 ? "9+" : String(urgentCountState)}
                                     </span>
                                 )}
                             </Link>

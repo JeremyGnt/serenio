@@ -22,7 +22,7 @@ export default async function ProLayout({
     }
 
     // Fetch stats only if artisan is validated
-    const stats = role === "artisan" ? await getArtisanStats() : { pendingCount: 0 }
+    const stats = role === "artisan" ? await getArtisanStats() : { pendingCount: 0, opportunitiesCount: 0 }
 
     // Fetch global unread messages count
     const totalUnreadMessages = role === "artisan" ? await getTotalUnreadCount(user.id) : 0
@@ -33,6 +33,7 @@ export default async function ProLayout({
         <div className="min-h-screen bg-gray-50">
             <ProSidebar
                 urgentCount={stats.pendingCount}
+                opportunitiesCount={stats.opportunitiesCount}
                 firstName={firstName}
                 userId={user.id}
                 totalUnreadMessages={totalUnreadMessages}

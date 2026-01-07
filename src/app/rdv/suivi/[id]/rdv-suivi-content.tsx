@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { 
   CheckCircle2, 
   Clock, 
@@ -29,8 +30,12 @@ import {
   Building2,
   AlertTriangle,
   Info,
-  Truck
+  Truck,
+  Wifi,
+  WifiOff
 } from "lucide-react"
+import { supabase } from "@/lib/supabase/client"
+import type { RealtimePostgresChangesPayload, RealtimeChannel } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 import {
   AlertDialog,
@@ -224,12 +229,68 @@ const SERVICE_ICONS: Record<string, typeof Wrench> = {
   other: HelpCircle
 }
 
+// Type pour le payload Supabase Realtime
+interface RdvPayload {
+  id: string
+  status: string
+  tracking_number: string
+  artisan_id: string | null
+}
+
 export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
+  const router = useRouter()
   const [copied, setCopied] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [showRescheduleDialog, setShowRescheduleDialog] = useState(false)
   const [cancelling, setCancelling] = useState(false)
+  const [isConnected, setIsConnected] = useState(false)
+  const channelRef = useRef<RealtimeChannel | null>(null)
+
+  // Fonction de rafraîchissement
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true)
+    router.refresh()
+    // Simuler un délai pour le feedback visuel
+    setTimeout(() => setRefreshing(false), 1000)
+  }, [router])
+
+  // Supabase Realtime subscription pour les mises à jour du RDV
+  useEffect(() => {
+    const channel = supabase
+      .channel(`rdv-tracking:${rdv.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "intervention_requests",
+          filter: `id=eq.${rdv.id}`
+        },
+        (payload: RealtimePostgresChangesPayload<RdvPayload>) => {
+          const updated = payload.new as RdvPayload
+          
+          // Si le statut ou l'artisan change, on rafraîchit
+          if (
+            updated.status !== rdv.status ||
+            updated.artisan_id !== (rdv.artisans ? rdv.id : null)
+          ) {
+            handleRefresh()
+          }
+        }
+      )
+      .subscribe((status) => {
+        setIsConnected(status === "SUBSCRIBED")
+      })
+
+    channelRef.current = channel
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+      }
+    }
+  }, [rdv.id, rdv.status, rdv.artisans, handleRefresh])
 
   const status = STATUS_CONFIG[rdv.status] || STATUS_CONFIG.pending
   const StatusIcon = status.icon
@@ -268,16 +329,11 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleRefresh = () => {
-    setRefreshing(true)
-    window.location.reload()
-  }
-
   const handleCancel = async () => {
     setCancelling(true)
     try {
       await cancelRdv(rdv.id, cancellationFee > 0 ? "Annulé avec frais (moins de 24h)" : "Annulé par le client")
-      window.location.reload()
+      handleRefresh()
     } catch (error) {
       console.error("Erreur annulation:", error)
     } finally {
@@ -307,6 +363,21 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
           </Link>
           
           <div className="flex items-center gap-3">
+            {/* Indicateur de connexion temps réel */}
+            <div 
+              className="flex items-center gap-1 px-2 py-1 rounded-lg" 
+              title={isConnected ? "Mise à jour automatique activée" : "Connexion en cours..."}
+            >
+              {isConnected ? (
+                <Wifi className="w-4 h-4 text-emerald-500" />
+              ) : (
+                <WifiOff className="w-4 h-4 text-gray-400 animate-pulse" />
+              )}
+              <span className="text-xs text-muted-foreground hidden sm:inline">
+                {isConnected ? "Live" : "..."}
+              </span>
+            </div>
+
             <button
               onClick={copyTrackingNumber}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors text-sm"
@@ -323,6 +394,7 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
               onClick={handleRefresh}
               disabled={refreshing}
               className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+              title="Rafraîchir manuellement"
             >
               <RefreshCw className={cn("w-5 h-5", refreshing && "animate-spin")} />
             </button>

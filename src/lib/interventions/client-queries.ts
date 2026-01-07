@@ -114,7 +114,8 @@ export async function getUserPendingRequestsCount(userEmail: string): Promise<nu
             .from("intervention_requests")
             .select("id", { count: "exact", head: true })
             .eq("client_email", userEmail)
-            .not("status", "in", '("completed","cancelled")')
+            .neq("status", "completed")
+            .neq("status", "cancelled")
         
         if (error) {
             console.error("Erreur getUserPendingRequestsCount:", error)

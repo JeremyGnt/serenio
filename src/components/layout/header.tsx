@@ -71,10 +71,15 @@ export async function Header() {
             {isArtisan && (
               <Link
                 href="/pro/dashboard"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
+                className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
               >
                 <LayoutDashboard className="w-4 h-4" />
                 <span className="hidden sm:inline">Pro</span>
+                {unreadMessagesCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold ring-2 ring-white">
+                    {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
+                  </span>
+                )}
               </Link>
             )}
 
@@ -90,7 +95,7 @@ export async function Header() {
             )}
 
             {user ? (
-              <UserMenu user={user} pendingRequestsCount={pendingRequestsCount} unreadMessagesCount={unreadMessagesCount} />
+              <UserMenu user={user} pendingRequestsCount={pendingRequestsCount} unreadMessagesCount={isArtisan ? 0 : unreadMessagesCount} />
             ) : (
               <>
                 {/* Connexion - icône sur mobile, texte sur desktop */}

@@ -61,7 +61,7 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
           {PROPERTY_TYPES.map((type) => {
             const isSelected = diagnostic.propertyType === type.value
             const Icon = type.icon
-            
+
             return (
               <button
                 key={type.value}
@@ -79,6 +79,24 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
             )
           })}
         </div>
+        {/* Champ "Préciser" si "Autre" est sélectionné */}
+        {diagnostic.propertyType === "other" && (
+          <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <label htmlFor="propertyTypeOther" className="block text-sm font-medium text-gray-700 mb-2">
+              Préciser <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="propertyTypeOther"
+              type="text"
+              value={diagnostic.propertyTypeOther || ""}
+              onChange={(e) => onUpdate({ propertyTypeOther: e.target.value.slice(0, 100) })}
+              placeholder="Ex: Local technique, entrepôt..."
+              maxLength={100}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            />
+            <p className="text-xs text-gray-400 mt-1 text-right">{(diagnostic.propertyTypeOther || "").length}/100</p>
+          </div>
+        )}
       </div>
 
       {/* Type de porte */}
@@ -86,11 +104,11 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
         <label className="block text-sm font-medium text-gray-900">
           Type de porte
         </label>
-        <div className="grid gap-2">
+        <div className="grid gap-2 md:grid-cols-2">
           {DOOR_TYPES.map((type) => {
             const isSelected = diagnostic.doorType === type.value
             const Icon = type.icon
-            
+
             return (
               <button
                 key={type.value}
@@ -120,6 +138,24 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
             )
           })}
         </div>
+        {/* Champ "Préciser" si "Autre" est sélectionné */}
+        {diagnostic.doorType === "other" && (
+          <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <label htmlFor="doorTypeOther" className="block text-sm font-medium text-gray-700 mb-2">
+              Préciser <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="doorTypeOther"
+              type="text"
+              value={diagnostic.doorTypeOther || ""}
+              onChange={(e) => onUpdate({ doorTypeOther: e.target.value.slice(0, 100) })}
+              placeholder="Ex: Porte coulissante, porte vitrée..."
+              maxLength={100}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            />
+            <p className="text-xs text-gray-400 mt-1 text-right">{(diagnostic.doorTypeOther || "").length}/100</p>
+          </div>
+        )}
       </div>
 
       {/* Type de serrure */}
@@ -127,11 +163,11 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
         <label className="block text-sm font-medium text-gray-900">
           Type de serrure
         </label>
-        <div className="grid sm:grid-cols-2 gap-2">
+        <div className="grid gap-2 md:grid-cols-2">
           {LOCK_TYPES.map((type) => {
             const isSelected = diagnostic.lockType === type.value
             const Icon = type.icon
-            
+
             return (
               <button
                 key={type.value}
@@ -143,19 +179,42 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
                     : "border-gray-200 bg-white hover:border-gray-300"
                 )}
               >
-                <Icon className={cn("w-5 h-5", isSelected ? "text-emerald-600" : "text-gray-500")} />
+                <div className={cn(
+                  "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
+                  isSelected ? "bg-emerald-100" : "bg-gray-100"
+                )}>
+                  <Icon className={cn("w-5 h-5", isSelected ? "text-emerald-600" : "text-gray-600")} />
+                </div>
                 <div>
-                  <span className={cn("font-medium text-sm", isSelected ? "text-emerald-900" : "text-gray-900")}>
+                  <span className={cn("font-medium", isSelected ? "text-emerald-900" : "text-gray-900")}>
                     {type.label}
                   </span>
                   {type.description && (
-                    <p className="text-xs text-gray-500">{type.description}</p>
+                    <p className="text-sm text-gray-500">{type.description}</p>
                   )}
                 </div>
               </button>
             )
           })}
         </div>
+        {/* Champ "Préciser" si "Autre" est sélectionné */}
+        {diagnostic.lockType === "other" && (
+          <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <label htmlFor="lockTypeOther" className="block text-sm font-medium text-gray-700 mb-2">
+              Préciser <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="lockTypeOther"
+              type="text"
+              value={diagnostic.lockTypeOther || ""}
+              onChange={(e) => onUpdate({ lockTypeOther: e.target.value.slice(0, 100) })}
+              placeholder="Décrivez votre serrure..."
+              maxLength={100}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            />
+            <p className="text-xs text-gray-400 mt-1 text-right">{(diagnostic.lockTypeOther || "").length}/100</p>
+          </div>
+        )}
       </div>
 
       {/* Accessibilité */}
@@ -167,7 +226,7 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
           {ACCESS_DIFFICULTY.map((level) => {
             const isSelected = diagnostic.accessDifficulty === level.value
             const Icon = level.icon
-            
+
             return (
               <button
                 key={level.value}

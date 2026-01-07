@@ -50,10 +50,15 @@ const SITUATION_CONFIG: Record<SituationType, { label: string; icon: typeof Door
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
     assigned: { label: "Assignée", color: "text-amber-700", bgColor: "bg-amber-100" },
+    accepted: { label: "Acceptée", color: "text-blue-700", bgColor: "bg-blue-100" },
     en_route: { label: "En route", color: "text-blue-700", bgColor: "bg-blue-100" },
     arrived: { label: "Sur place", color: "text-purple-700", bgColor: "bg-purple-100" },
+    diagnosing: { label: "Diagnostic", color: "text-indigo-700", bgColor: "bg-indigo-100" },
+    quote_sent: { label: "Devis envoyé", color: "text-orange-700", bgColor: "bg-orange-100" },
+    quote_accepted: { label: "Devis accepté", color: "text-teal-700", bgColor: "bg-teal-100" },
     in_progress: { label: "En intervention", color: "text-emerald-700", bgColor: "bg-emerald-100" },
     completed: { label: "Terminée", color: "text-green-700", bgColor: "bg-green-100" },
+    cancelled: { label: "Annulée", color: "text-red-700", bgColor: "bg-red-100" },
     pending: { label: "En attente", color: "text-gray-700", bgColor: "bg-gray-100" },
 }
 
