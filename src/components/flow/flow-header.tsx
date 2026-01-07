@@ -123,9 +123,9 @@ export function FlowHeader({
                         <span className="hidden xs:inline">{config.label}</span>
                     </span>
 
-                    {/* Estimated time badge */}
+                    {/* Estimated time badge - now visible on mobile */}
                     {estimatedTime && (
-                        <span className="hidden sm:inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
+                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 text-[10px] sm:text-xs font-medium rounded-full border border-emerald-200 whitespace-nowrap">
                             <Clock className="w-3 h-3" />
                             {estimatedTime}
                         </span>

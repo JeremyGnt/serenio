@@ -38,35 +38,30 @@ export function Faq({ faq }: FaqProps) {
             return (
               <div
                 key={item.id}
-                className={`bg-white rounded-2xl border transition-all duration-300 ${
-                  isOpen 
-                    ? "border-emerald-200 shadow-lg shadow-emerald-100/50" 
+                className={`bg-white rounded-2xl border transition-all duration-300 ${isOpen
+                    ? "border-emerald-200 shadow-lg shadow-emerald-100/50"
                     : "border-slate-200 hover:border-slate-300"
-                }`}
+                  }`}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <button
                   onClick={() => toggle(item.id)}
-                  className="w-full flex items-center justify-between p-5 text-left"
+                  className="w-full flex items-center justify-between p-5 text-left transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-slate-50 active:duration-75"
                 >
-                  <span className={`font-medium pr-4 transition-colors ${
-                    isOpen ? "text-emerald-700" : "text-slate-900"
-                  }`}>
+                  <span className={`font-medium pr-4 transition-colors ${isOpen ? "text-emerald-700" : "text-slate-900"
+                    }`}>
                     {item.question}
                   </span>
-                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                    isOpen 
-                      ? "bg-emerald-100 rotate-180" 
+                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${isOpen
+                      ? "bg-emerald-100 rotate-180"
                       : "bg-slate-100"
-                  }`}>
-                    <ChevronDown className={`w-5 h-5 transition-colors ${
-                      isOpen ? "text-emerald-600" : "text-slate-500"
-                    }`} />
+                    }`}>
+                    <ChevronDown className={`w-5 h-5 transition-colors ${isOpen ? "text-emerald-600" : "text-slate-500"
+                      }`} />
                   </div>
                 </button>
-                <div className={`overflow-hidden transition-all duration-300 ${
-                  isOpen ? "max-h-96" : "max-h-0"
-                }`}>
+                <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96" : "max-h-0"
+                  }`}>
                   <div className="px-5 pb-5">
                     <p className="text-slate-600 leading-relaxed">
                       {item.answer}

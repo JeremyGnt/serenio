@@ -52,7 +52,7 @@ export function StepSituation({
             <button
               key={situation.code}
               onClick={() => onSelect(situation.code)}
-              className={`w-full text-left p-3 lg:p-4 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98] ${isSelected
+              className={`w-full text-left p-3 lg:p-4 rounded-xl border-2 transition-all duration-200 ease-out touch-manipulation active:scale-[0.96] active:duration-75 ${isSelected
                 ? "border-red-500 bg-red-50 active:bg-red-100"
                 : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 active:bg-gray-100"
                 }`}

@@ -125,11 +125,11 @@ export function FlowStepper({
                                         !isCompleted && !isCurrent && "text-gray-400"
                                     )}
                                 >
-                                    {/* Desktop: full label, Mobile: short label or step number */}
                                     <span className="hidden sm:block">{step.label}</span>
-                                    <span className="sm:hidden">{step.shortLabel || index + 1}</span>
+                                    {/* Mobile: labels hidden as per user request to avoid truncation */}
                                 </span>
                             </div>
+
                         </li>
                     )
                 })}
@@ -137,3 +137,4 @@ export function FlowStepper({
         </nav>
     )
 }
+

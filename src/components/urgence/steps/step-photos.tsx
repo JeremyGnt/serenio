@@ -49,7 +49,7 @@ export function StepPhotos({ photos, onUpdate, onSkip }: StepPhotosProps) {
         </div>
         <p className="text-gray-600 mb-2 font-medium">Cliquez pour ajouter des photos</p>
         <p className="text-sm text-muted-foreground">JPG, PNG ou HEIC • Max 5 photos</p>
-        
+
         <input
           ref={inputRef}
           type="file"
@@ -72,17 +72,17 @@ export function StepPhotos({ photos, onUpdate, onSkip }: StepPhotosProps) {
               />
               <button
                 onClick={() => removePhoto(index)}
-                className="absolute top-1 right-1 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+                className="absolute top-1 right-1 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-all duration-200 ease-out touch-manipulation active:scale-90 active:duration-75"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
           ))}
-          
+
           {photos.length < 5 && (
             <button
               onClick={() => inputRef.current?.click()}
-              className="aspect-square rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:border-gray-400 hover:text-gray-500 transition-colors"
+              className="aspect-square rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:border-gray-400 hover:text-gray-500 transition-all duration-200 ease-out touch-manipulation active:scale-[0.96] active:duration-75"
             >
               <ImagePlus className="w-6 h-6 mb-1" />
               <span className="text-xs">Ajouter</span>
@@ -94,15 +94,15 @@ export function StepPhotos({ photos, onUpdate, onSkip }: StepPhotosProps) {
       {/* Info */}
       <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
         <p className="text-sm text-blue-800">
-          <strong>Conseils :</strong> Prenez des photos de la serrure, de la porte, 
+          <strong>Conseils :</strong> Prenez des photos de la serrure, de la porte,
           et de tout élément qui pourrait aider le serrurier à préparer son intervention.
         </p>
       </div>
 
       {/* Bouton skip */}
       <div className="text-center">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="text-muted-foreground hover:text-foreground"
           onClick={onSkip}
         >

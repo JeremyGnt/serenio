@@ -256,7 +256,7 @@ export function ChatBox({
                                 setNewMessage(text)
                                 textareaRef.current?.focus()
                             }}
-                            className="px-3 py-2 bg-gray-50 hover:bg-emerald-50 text-xs font-medium text-gray-700 rounded-lg border border-gray-100 hover:border-emerald-200 hover:text-emerald-700 transition-all text-left truncate"
+                            className="px-3 py-2 bg-gray-50 hover:bg-emerald-50 text-xs font-medium text-gray-700 rounded-lg border border-gray-100 hover:border-emerald-200 hover:text-emerald-700 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:duration-75 active:bg-emerald-100 text-left truncate"
                             title={text}
                         >
                             {text}

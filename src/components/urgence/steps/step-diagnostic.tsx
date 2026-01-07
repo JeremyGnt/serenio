@@ -97,7 +97,7 @@ export function StepDiagnostic({
                           key={option.value}
                           type="button"
                           onClick={() => handleAnswerChange(question.id, option.value)}
-                          className={`w-full text-left p-3 rounded-lg border transition-all h-full touch-manipulation active:scale-[0.98] ${currentValue === option.value
+                          className={`w-full text-left p-3 rounded-lg border transition-all duration-200 ease-out h-full touch-manipulation active:scale-[0.96] active:duration-75 ${currentValue === option.value
                             ? "border-red-500 bg-red-50 active:bg-red-100"
                             : "border-gray-200 hover:border-gray-300 active:bg-gray-50 bg-white"
                             }`}
@@ -130,7 +130,7 @@ export function StepDiagnostic({
                     <button
                       type="button"
                       onClick={() => handleAnswerChange(question.id, true)}
-                      className={`flex-1 p-3 rounded-lg border transition-all touch-manipulation active:scale-[0.98] ${currentValue === true
+                      className={`flex-1 p-3 rounded-lg border transition-all duration-200 ease-out touch-manipulation active:scale-[0.96] active:duration-75 ${currentValue === true
                         ? "border-red-500 bg-red-50 active:bg-red-100"
                         : "border-gray-200 hover:border-gray-300 active:bg-gray-50 bg-white"
                         }`}
@@ -140,7 +140,7 @@ export function StepDiagnostic({
                     <button
                       type="button"
                       onClick={() => handleAnswerChange(question.id, false)}
-                      className={`flex-1 p-3 rounded-lg border transition-all touch-manipulation active:scale-[0.98] ${currentValue === false
+                      className={`flex-1 p-3 rounded-lg border transition-all duration-200 ease-out touch-manipulation active:scale-[0.96] active:duration-75 ${currentValue === false
                         ? "border-red-500 bg-red-50 active:bg-red-100"
                         : "border-gray-200 hover:border-gray-300 active:bg-gray-50 bg-white"
                         }`}
@@ -177,7 +177,7 @@ export function StepDiagnostic({
                               : [...values, option.value]
                             handleAnswerChange(question.id, newValues)
                           }}
-                          className={`w-full text-left p-3 rounded-lg border transition-all flex items-center gap-3 h-full touch-manipulation active:scale-[0.98] ${isSelected
+                          className={`w-full text-left p-3 rounded-lg border transition-all duration-200 ease-out flex items-center gap-3 h-full touch-manipulation active:scale-[0.96] active:duration-75 ${isSelected
                             ? "border-red-500 bg-red-50 active:bg-red-100"
                             : "border-gray-200 hover:border-gray-300 active:bg-gray-50 bg-white"
                             }`}

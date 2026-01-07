@@ -43,7 +43,7 @@ export function StepLocalisation({
 }: StepLocalisationProps) {
   const [geoLoading, setGeoLoading] = useState(false)
   const [geoError, setGeoError] = useState("")
-  
+
   // Autocomplétion
   const [searchQuery, setSearchQuery] = useState("")
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
@@ -76,7 +76,7 @@ export function StepLocalisation({
           `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(searchQuery)}&limit=5`
         )
         const data = await response.json()
-        
+
         if (data.features) {
           const results: AddressSuggestion[] = data.features.map((f: {
             properties: {
@@ -111,10 +111,10 @@ export function StepLocalisation({
 
   // Sélectionner une suggestion
   const selectSuggestion = (suggestion: AddressSuggestion) => {
-    const fullStreet = suggestion.housenumber 
+    const fullStreet = suggestion.housenumber
       ? `${suggestion.housenumber} ${suggestion.street || ""}`
       : suggestion.street || suggestion.label
-    
+
     onUpdate({
       addressStreet: fullStreet.trim(),
       addressPostalCode: suggestion.postcode || "",
@@ -151,7 +151,7 @@ export function StepLocalisation({
             onUpdate({
               latitude,
               longitude,
-              addressStreet: props.housenumber 
+              addressStreet: props.housenumber
                 ? `${props.housenumber} ${props.street || ""}`
                 : props.street || props.name || "",
               addressPostalCode: props.postcode || "",
@@ -246,7 +246,7 @@ export function StepLocalisation({
                 key={index}
                 type="button"
                 onClick={() => selectSuggestion(suggestion)}
-                className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-gray-100 active:duration-75"
               >
                 <p className="font-medium text-gray-900 text-sm">{suggestion.label}</p>
                 {suggestion.context && (
@@ -262,7 +262,7 @@ export function StepLocalisation({
       {(street || postalCode || city) && (
         <div className="space-y-4 p-4 bg-white rounded-xl border border-gray-200">
           <h3 className="font-medium text-gray-900">Adresse sélectionnée</h3>
-          
+
           <div className="space-y-2">
             <Label htmlFor="street">Adresse</Label>
             <Input

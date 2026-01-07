@@ -62,23 +62,23 @@ export function ProHeader({ firstName }: ProHeaderProps) {
 
         {/* Navigation Desktop */}
         <nav className="hidden md:flex items-center gap-6 text-sm">
-          <Link 
-            href="/pro/dashboard" 
-            className={`flex items-center gap-2 ${isDashboard ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          <Link
+            href="/pro/dashboard"
+            className={`flex items-center gap-2 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:duration-75 ${isDashboard ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           >
             <LayoutDashboard className="w-4 h-4" />
             Dashboard
           </Link>
 
           {/* Menu Réglages avec dropdown */}
-          <div 
+          <div
             ref={settingsRef}
             className="relative"
             onMouseEnter={() => setShowSettings(true)}
             onMouseLeave={() => setShowSettings(false)}
           >
-            <button 
-              className={`flex items-center gap-2 ${isCompte ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            <button
+              className={`flex items-center gap-2 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:duration-75 ${isCompte ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
               <Settings className="w-4 h-4" />
               Réglages
@@ -89,24 +89,24 @@ export function ProHeader({ firstName }: ProHeaderProps) {
             {showSettings && (
               <div className="absolute right-0 top-full pt-2">
                 <div className="bg-white rounded-xl border border-gray-200 shadow-lg py-2 min-w-48">
-                  <Link 
-                    href="/pro/compte" 
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors"
+                  <Link
+                    href="/pro/compte"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-all duration-200 ease-out touch-manipulation active:bg-gray-100 active:scale-[0.98] active:duration-75"
                   >
                     <User className="w-4 h-4 text-gray-500" />
                     Mon profil
                   </Link>
-                  <Link 
-                    href="/pro/compte?tab=billing" 
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors"
+                  <Link
+                    href="/pro/compte?tab=billing"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-all duration-200 ease-out touch-manipulation active:bg-gray-100 active:scale-[0.98] active:duration-75"
                   >
                     <CreditCard className="w-4 h-4 text-gray-500" />
                     Facturation
                   </Link>
                   <hr className="my-2 border-gray-100" />
-                  <button 
+                  <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 ease-out touch-manipulation active:bg-red-100 active:scale-[0.98] active:duration-75"
                   >
                     <LogOut className="w-4 h-4" />
                     Déconnexion
@@ -118,8 +118,8 @@ export function ProHeader({ firstName }: ProHeaderProps) {
         </nav>
 
         {/* Menu Mobile */}
-        <button 
-          className="md:hidden p-2 text-gray-600"
+        <button
+          className="md:hidden p-2 text-gray-600 transition-all duration-200 ease-out touch-manipulation active:scale-[0.85] active:duration-75"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -130,34 +130,34 @@ export function ProHeader({ firstName }: ProHeaderProps) {
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100">
           <div className="px-4 py-3 space-y-1">
-            <Link 
+            <Link
               href="/pro/dashboard"
               onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-3 px-3 py-3 rounded-lg ${isDashboard ? "bg-gray-100 font-medium" : "hover:bg-gray-50"}`}
+              className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 ${isDashboard ? "bg-gray-100 font-medium" : "hover:bg-gray-50 active:bg-gray-100"}`}
             >
               <LayoutDashboard className="w-5 h-5" />
               Dashboard
             </Link>
-            <Link 
+            <Link
               href="/pro/compte"
               onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-3 px-3 py-3 rounded-lg ${isCompte ? "bg-gray-100 font-medium" : "hover:bg-gray-50"}`}
+              className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 ${isCompte ? "bg-gray-100 font-medium" : "hover:bg-gray-50 active:bg-gray-100"}`}
             >
               <User className="w-5 h-5" />
               Mon profil
             </Link>
-            <Link 
+            <Link
               href="/pro/compte?tab=billing"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-50"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200 ease-out touch-manipulation active:bg-gray-100 active:scale-[0.98] active:duration-75"
             >
               <CreditCard className="w-5 h-5" />
               Facturation
             </Link>
             <hr className="my-2 border-gray-100" />
-            <button 
+            <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-red-600 hover:bg-red-50"
+              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all duration-200 ease-out touch-manipulation active:bg-red-100 active:scale-[0.98] active:duration-75"
             >
               <LogOut className="w-5 h-5" />
               Déconnexion

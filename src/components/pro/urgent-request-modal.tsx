@@ -369,7 +369,7 @@ export function UrgentRequestModal({
                 <div className="relative border-b border-gray-100 p-4 lg:p-5">
                     <button
                         onClick={onClose}
-                        className="absolute top-3 right-3 p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
+                        className="absolute top-3 right-3 p-2 hover:bg-gray-100 rounded-full transition-all duration-200 ease-out touch-manipulation active:scale-90 active:duration-75 text-gray-400 hover:text-gray-600"
                         disabled={loading || successState !== null}
                     >
                         <X className="w-5 h-5" />
@@ -449,7 +449,7 @@ export function UrgentRequestModal({
                             <div className="lg:hidden">
                                 <button
                                     onClick={() => setShowMobileDetails(!showMobileDetails)}
-                                    className="w-full p-3 flex items-center justify-center gap-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                                    className="w-full p-3 flex items-center justify-center gap-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-gray-100 active:duration-75"
                                 >
                                     {showMobileDetails ? (
                                         <>
