@@ -97,9 +97,9 @@ export function StepDiagnostic({
                           key={option.value}
                           type="button"
                           onClick={() => handleAnswerChange(question.id, option.value)}
-                          className={`w-full text-left p-3 rounded-lg border transition-all h-full ${currentValue === option.value
-                              ? "border-red-500 bg-red-50"
-                              : "border-gray-200 hover:border-gray-300"
+                          className={`w-full text-left p-3 rounded-lg border transition-all h-full touch-manipulation active:scale-[0.98] ${currentValue === option.value
+                            ? "border-red-500 bg-red-50 active:bg-red-100"
+                            : "border-gray-200 hover:border-gray-300 active:bg-gray-50 bg-white"
                             }`}
                         >
                           <span className="block font-medium">{option.label}</span>
@@ -130,9 +130,9 @@ export function StepDiagnostic({
                     <button
                       type="button"
                       onClick={() => handleAnswerChange(question.id, true)}
-                      className={`flex-1 p-3 rounded-lg border transition-all ${currentValue === true
-                          ? "border-red-500 bg-red-50"
-                          : "border-gray-200 hover:border-gray-300"
+                      className={`flex-1 p-3 rounded-lg border transition-all touch-manipulation active:scale-[0.98] ${currentValue === true
+                        ? "border-red-500 bg-red-50 active:bg-red-100"
+                        : "border-gray-200 hover:border-gray-300 active:bg-gray-50 bg-white"
                         }`}
                     >
                       Oui
@@ -140,9 +140,9 @@ export function StepDiagnostic({
                     <button
                       type="button"
                       onClick={() => handleAnswerChange(question.id, false)}
-                      className={`flex-1 p-3 rounded-lg border transition-all ${currentValue === false
-                          ? "border-red-500 bg-red-50"
-                          : "border-gray-200 hover:border-gray-300"
+                      className={`flex-1 p-3 rounded-lg border transition-all touch-manipulation active:scale-[0.98] ${currentValue === false
+                        ? "border-red-500 bg-red-50 active:bg-red-100"
+                        : "border-gray-200 hover:border-gray-300 active:bg-gray-50 bg-white"
                         }`}
                     >
                       Non
@@ -177,9 +177,9 @@ export function StepDiagnostic({
                               : [...values, option.value]
                             handleAnswerChange(question.id, newValues)
                           }}
-                          className={`w-full text-left p-3 rounded-lg border transition-all flex items-center gap-3 h-full ${isSelected
-                              ? "border-red-500 bg-red-50"
-                              : "border-gray-200 hover:border-gray-300"
+                          className={`w-full text-left p-3 rounded-lg border transition-all flex items-center gap-3 h-full touch-manipulation active:scale-[0.98] ${isSelected
+                            ? "border-red-500 bg-red-50 active:bg-red-100"
+                            : "border-gray-200 hover:border-gray-300 active:bg-gray-50 bg-white"
                             }`}
                         >
                           <div

@@ -52,9 +52,9 @@ export function StepSituation({
             <button
               key={situation.code}
               onClick={() => onSelect(situation.code)}
-              className={`w-full text-left p-3 lg:p-4 rounded-xl border-2 transition-all ${isSelected
-                  ? "border-red-500 bg-red-50"
-                  : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+              className={`w-full text-left p-3 lg:p-4 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98] ${isSelected
+                ? "border-red-500 bg-red-50 active:bg-red-100"
+                : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 active:bg-gray-100"
                 }`}
             >
               <div className="flex items-start gap-3 lg:gap-4">
