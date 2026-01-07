@@ -318,6 +318,7 @@ export interface ActiveMission {
     situationType: SituationType
     status: string
     acceptedAt: string
+    completedAt?: string
 }
 
 /**
@@ -400,6 +401,113 @@ export async function getActiveArtisanMissions(): Promise<ActiveMission[]> {
             })
     } catch (error) {
         console.error("Erreur getActiveArtisanMissions:", error)
+        return []
+    }
+}
+
+// ============================================
+// TOUTES LES MISSIONS DE L'ARTISAN (filtrable)
+// ============================================
+
+export type MissionFilter = "all" | "active" | "completed" | "cancelled"
+
+/**
+ * Récupère toutes les missions de l'artisan connecté avec possibilité de filtrage
+ */
+export async function getAllArtisanMissions(filter: MissionFilter = "all"): Promise<ActiveMission[]> {
+    const supabase = await createClient()
+    const adminClient = createAdminClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return []
+    }
+
+    try {
+        // Récupérer tous les assignments acceptés de l'artisan avec les détails de l'intervention
+        const { data: assignments, error } = await adminClient
+            .from("artisan_assignments")
+            .select(`
+                id,
+                status,
+                responded_at,
+                intervention_requests (
+                    id,
+                    tracking_number,
+                    client_first_name,
+                    client_phone,
+                    address_street,
+                    address_city,
+                    address_postal_code,
+                    status,
+                    completed_at,
+                    intervention_diagnostics (
+                        situation_type
+                    )
+                )
+            `)
+            .eq("artisan_id", user.id)
+            .eq("status", "accepted")
+            .order("responded_at", { ascending: false })
+            .limit(100)
+
+        if (error || !assignments) {
+            console.error("Erreur récupération missions:", error)
+            return []
+        }
+
+        // Statuts actifs (en cours)
+        const activeStatuses = ["assigned", "en_route", "arrived", "diagnosing", "in_progress"]
+        // Statuts terminés
+        const completedStatuses = ["completed"]
+        // Statuts annulés
+        const cancelledStatuses = ["cancelled"]
+
+        return assignments
+            .filter((a) => a.intervention_requests)
+            .map((assignment) => {
+                const intervention = assignment.intervention_requests as unknown as {
+                    id: string
+                    tracking_number: string
+                    client_first_name: string
+                    client_phone: string
+                    address_street: string
+                    address_city: string
+                    address_postal_code: string
+                    status: string
+                    completed_at?: string
+                    intervention_diagnostics: { situation_type: SituationType }[] | { situation_type: SituationType }
+                }
+
+                const diagnostic = Array.isArray(intervention.intervention_diagnostics)
+                    ? intervention.intervention_diagnostics[0]
+                    : intervention.intervention_diagnostics
+
+                return {
+                    id: assignment.id,
+                    interventionId: intervention.id,
+                    trackingNumber: intervention.tracking_number,
+                    clientFirstName: intervention.client_first_name || "Client",
+                    clientPhone: intervention.client_phone || "",
+                    addressStreet: intervention.address_street || "",
+                    addressCity: intervention.address_city || "",
+                    addressPostalCode: intervention.address_postal_code || "",
+                    situationType: diagnostic?.situation_type || "other",
+                    status: intervention.status,
+                    acceptedAt: assignment.responded_at,
+                    completedAt: intervention.completed_at,
+                }
+            })
+            .filter((mission) => {
+                if (filter === "all") return true
+                if (filter === "active") return activeStatuses.includes(mission.status)
+                if (filter === "completed") return completedStatuses.includes(mission.status)
+                if (filter === "cancelled") return cancelledStatuses.includes(mission.status)
+                return true
+            })
+    } catch (error) {
+        console.error("Erreur getAllArtisanMissions:", error)
         return []
     }
 }

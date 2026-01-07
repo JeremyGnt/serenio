@@ -3,12 +3,13 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, X, AlertTriangle, Clock } from "lucide-react"
+import { ArrowLeft, X, AlertTriangle, Clock, WifiOff, Save, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { PriceScenarioDisplay, SituationType, DiagnosticAnswers } from "@/types/intervention"
 import { URGENCE_STEPS, DIAGNOSTIC_QUESTIONS } from "@/lib/interventions/config"
 import { createIntervention, updateDiagnostic, submitIntervention } from "@/lib/interventions"
 import { setActiveTracking } from "@/lib/active-tracking"
+import { useFormAutoSave } from "@/hooks/useFormAutoSave"
 
 import { StepSituation } from "./steps/step-situation"
 import { StepDiagnostic } from "./steps/step-diagnostic"
@@ -17,6 +18,7 @@ import { StepLocalisation } from "./steps/step-localisation"
 import { StepContact } from "./steps/step-contact"
 import { StepRecap } from "./steps/step-recap"
 import { UrgenceProgress } from "./urgence-progress"
+
 
 interface UrgenceFlowProps {
   priceScenarios: PriceScenarioDisplay[]
@@ -83,13 +85,25 @@ const initialFormState: FormState = {
 export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlowProps) {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
-  const [formState, setFormState] = useState<FormState>(() => ({
-    ...initialFormState,
-    clientEmail: userEmail || "",
-    clientFirstName: userName || "",
-  }))
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+
+  // Hook de sauvegarde automatique
+  const {
+    formState,
+    updateForm,
+    isRestored,
+    isOffline,
+    clearDraft,
+    setPendingSubmit,
+  } = useFormAutoSave<FormState>({
+    key: "urgence_form",
+    initialState: {
+      ...initialFormState,
+      clientEmail: userEmail || "",
+      clientFirstName: userName || "",
+    },
+  })
 
   const isLoggedIn = !!userEmail
 
@@ -101,11 +115,12 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  // Mettre à jour le formulaire
-  const updateForm = (updates: Partial<FormState>) => {
-    setFormState((prev) => ({ ...prev, ...updates }))
+  // Wrapper pour updateForm qui clear les erreurs
+  const handleUpdateForm = (updates: Partial<FormState>) => {
+    updateForm(updates)
     setError("")
   }
+
 
   // Vérifier si toutes les questions obligatoires du diagnostic sont remplies
   const validateDiagnostic = (): string | null => {
@@ -243,6 +258,7 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
     }
 
     if (currentStep < URGENCE_STEPS.length - 1) {
+      setError("") // Effacer les erreurs avant de passer à l'étape suivante
       setCurrentStep((prev) => prev + 1)
     }
   }
@@ -282,6 +298,9 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
       setActiveTracking(formState.trackingNumber)
     }
 
+    // Nettoyer le brouillon après soumission réussie
+    clearDraft()
+
     // Rediriger vers la page de suivi
     router.push(`/suivi/${formState.trackingNumber}`)
   }
@@ -313,10 +332,16 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
             )}
           </button>
 
-          <span className="flex items-center gap-2 font-bold text-red-600">
-            <AlertTriangle className="w-4 h-4" />
-            Urgence
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-2 font-bold text-red-600">
+              <AlertTriangle className="w-4 h-4" />
+              Urgence
+            </span>
+            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
+              <Clock className="w-3 h-3" />
+              ~3min
+            </span>
+          </div>
 
           <Link href="/" className="text-muted-foreground hover:text-foreground">
             <X className="w-5 h-5" />
@@ -327,22 +352,28 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
       {/* Progress */}
       <UrgenceProgress currentStep={currentStep} steps={URGENCE_STEPS} />
 
-      {/* Indication temps */}
-      <div className="flex justify-center py-2">
-        <div className="inline-flex items-center gap-2 px-4 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-          <Clock className="w-4 h-4 text-emerald-600" />
-          <span className="text-sm text-emerald-700">Formulaire rapide — <strong>3 min</strong></span>
-        </div>
-      </div>
-
       {/* Content */}
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-6">
+      <main className="flex-1 max-w-2xl lg:max-w-4xl mx-auto w-full px-4 py-6">
         {/* Erreur */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
             {error}
           </div>
         )}
+
+        {/* Bannière Mode hors-ligne */}
+        {isOffline && (
+          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3">
+            <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <WifiOff className="w-4 h-4 text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-amber-800">Mode hors-ligne</p>
+              <p className="text-xs text-amber-600">Vos données sont sauvegardées localement</p>
+            </div>
+          </div>
+        )}
+
 
         {/* Étapes */}
         {currentStepId === "situation" && (

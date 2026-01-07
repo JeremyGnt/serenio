@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { CheckCircle, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,7 +14,7 @@ interface PersonalInfoSectionProps {
 
 export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
   const metadata = user.user_metadata || {}
-  
+
   const [firstName, setFirstName] = useState(metadata.first_name || "")
   const [lastName, setLastName] = useState(metadata.last_name || "")
   const [phone, setPhone] = useState(metadata.phone || "")
@@ -43,81 +44,86 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
 
   return (
     <div>
-      <h2 className="text-lg font-bold mb-1">Informations personnelles</h2>
-      <p className="text-sm text-muted-foreground mb-6">
+      <h2 className="text-xl sm:text-2xl font-bold mb-2">Informations personnelles</h2>
+      <p className="text-sm sm:text-base text-muted-foreground mb-8">
         Modifiez vos informations de base
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Email (non modifiable) */}
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            value={user.email || ""}
-            disabled
-            className="h-12 bg-secondary/50"
-          />
-          <p className="text-xs text-muted-foreground">
+          <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              id="email"
+              type="email"
+              value={user.email || ""}
+              disabled
+              className="h-12 sm:h-14 pl-10 text-base bg-secondary/50"
+            />
+          </div>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             L'email ne peut pas être modifié
           </p>
         </div>
 
         {/* Nom & Prénom */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="lastName">Nom</Label>
+            <Label htmlFor="lastName" className="text-sm font-medium">Nom</Label>
             <Input
               id="lastName"
               type="text"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="h-12"
+              onChange={(e) => { setLastName(e.target.value); setSuccess(false) }}
+              placeholder="Dupont"
+              className="h-12 sm:h-14 text-base"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="firstName">Prénom</Label>
+            <Label htmlFor="firstName" className="text-sm font-medium">Prénom</Label>
             <Input
               id="firstName"
               type="text"
               value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="h-12"
+              onChange={(e) => { setFirstName(e.target.value); setSuccess(false) }}
+              placeholder="Jean"
+              className="h-12 sm:h-14 text-base"
             />
           </div>
         </div>
 
         {/* Téléphone */}
         <div className="space-y-2">
-          <Label htmlFor="phone">Téléphone</Label>
+          <Label htmlFor="phone" className="text-sm font-medium">Téléphone</Label>
           <Input
             id="phone"
             type="tel"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => { setPhone(e.target.value); setSuccess(false) }}
             placeholder="06 12 34 56 78"
-            className="h-12"
+            className="h-12 sm:h-14 text-base"
           />
         </div>
 
         {success && (
-          <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-sm text-emerald-700">
-            Informations mises à jour avec succès
+          <div className="flex items-center gap-2 p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700">
+            <CheckCircle className="w-5 h-5 flex-shrink-0" />
+            <span className="text-sm sm:text-base">Informations mises à jour avec succès</span>
           </div>
         )}
 
         {error && (
-          <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-sm text-red-700">
+          <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-sm sm:text-base text-red-700">
             {error}
           </div>
         )}
 
-        <Button type="submit" disabled={loading} className="h-12">
+        <Button type="submit" disabled={loading} className="w-full sm:w-auto h-12 sm:h-14 px-8 text-base">
           {loading ? "Enregistrement..." : "Enregistrer les modifications"}
         </Button>
       </form>
     </div>
   )
 }
-

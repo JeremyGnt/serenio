@@ -109,7 +109,7 @@ export interface RdvDiagnosticAnswers {
   additionalNotes?: string
   
   // Contact préféré
-  preferredContactMethod?: "phone" | "email" | "sms"
+  preferredContactMethod?: "phone" | "email"
 }
 
 // ============================================

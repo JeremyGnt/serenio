@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { getUser } from "@/lib/supabase/server"
 import { ProSidebar } from "@/components/pro/pro-sidebar"
 import { getArtisanStats } from "@/lib/interventions"
+import { getTotalUnreadCount } from "@/lib/chat/actions"
 
 export default async function ProLayout({
     children,
@@ -22,11 +23,20 @@ export default async function ProLayout({
 
     // Fetch stats only if artisan is validated
     const stats = role === "artisan" ? await getArtisanStats() : { pendingCount: 0 }
+
+    // Fetch global unread messages count
+    const totalUnreadMessages = role === "artisan" ? await getTotalUnreadCount(user.id) : 0
+
     const firstName = user.user_metadata?.first_name || "Artisan"
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <ProSidebar urgentCount={stats.pendingCount} firstName={firstName} />
+            <ProSidebar
+                urgentCount={stats.pendingCount}
+                firstName={firstName}
+                userId={user.id}
+                totalUnreadMessages={totalUnreadMessages}
+            />
 
             {/* Main content - offset for sidebar */}
             <main className="md:ml-64 pt-14 md:pt-0 pb-20 md:pb-0 min-h-screen">

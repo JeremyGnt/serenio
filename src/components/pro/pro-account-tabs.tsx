@@ -1,7 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Building2, User, MapPin, Lock, CreditCard, Trash2 } from "lucide-react"
+import { Building2, User, MapPin, Lock, CreditCard, Trash2, LogOut } from "lucide-react"
+import { logout } from "@/lib/auth/actions"
+import { cn } from "@/lib/utils"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { ProCompanySection } from "./pro-company-section"
 import { ProContactSection } from "./pro-contact-section"
@@ -40,20 +42,32 @@ export function ProAccountTabs({ user }: ProAccountTabsProps) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive
+                className={cn(
+                  "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                  isActive
                     ? isDanger
                       ? "bg-red-50 text-red-600"
                       : "bg-blue-50 text-blue-700"
                     : isDanger
                       ? "text-red-500 hover:bg-red-50"
                       : "text-gray-600 hover:bg-gray-50"
-                  }`}
+                )}
               >
                 <Icon className="w-4 h-4" />
                 {tab.label}
               </button>
             )
           })}
+
+          <div className="pt-2 mt-2 border-t border-gray-100">
+            <button
+              onClick={() => logout()}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Se déconnecter
+            </button>
+          </div>
         </div>
       </nav>
 

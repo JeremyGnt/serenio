@@ -1,15 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { User, MapPin, Lock, Bell, Shield, Trash2, Briefcase } from "lucide-react"
+import { User, MapPin, Lock, Shield, Trash2, Briefcase } from "lucide-react"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { PersonalInfoSection } from "./personal-info-section"
 import { AddressSection } from "./address-section"
 import { PasswordSection } from "./password-section"
-import { NotificationsSection } from "./notifications-section"
 import { SecuritySection } from "./security-section"
 import { DeleteAccountSection } from "./delete-account-section"
 import { BecomeProSection } from "./become-pro-section"
+
 
 interface AccountTabsProps {
   user: SupabaseUser
@@ -17,7 +17,7 @@ interface AccountTabsProps {
 
 export function AccountTabs({ user }: AccountTabsProps) {
   const [activeTab, setActiveTab] = useState("personal")
-  
+
   // Vérifier si l'utilisateur est déjà artisan ou en attente
   const userRole = user.user_metadata?.role
   const isArtisan = userRole === "artisan" || userRole === "artisan_pending" || userRole === "artisan_rejected"
@@ -26,7 +26,6 @@ export function AccountTabs({ user }: AccountTabsProps) {
     { id: "personal", label: "Informations", icon: User },
     { id: "address", label: "Adresse", icon: MapPin },
     { id: "password", label: "Mot de passe", icon: Lock },
-    { id: "notifications", label: "Notifications", icon: Bell },
     { id: "security", label: "Sécurité", icon: Shield },
     // Afficher "Devenir Pro" seulement si pas déjà artisan
     ...(!isArtisan ? [{ id: "become-pro", label: "Devenir Pro", icon: Briefcase, highlight: true }] : []),
@@ -43,24 +42,23 @@ export function AccountTabs({ user }: AccountTabsProps) {
             const isActive = activeTab === tab.id
             const isDanger = tab.id === "delete"
             const isHighlight = "highlight" in tab && tab.highlight
-            
+
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? isDanger
-                      ? "bg-red-50 text-red-600"
-                      : isHighlight
+                className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${isActive
+                  ? isDanger
+                    ? "bg-red-50 text-red-600"
+                    : isHighlight
                       ? "bg-purple-50 text-purple-700"
                       : "bg-emerald-50 text-emerald-700"
-                    : isDanger
+                  : isDanger
                     ? "text-red-500 hover:bg-red-50"
                     : isHighlight
-                    ? "text-purple-600 hover:bg-purple-50"
-                    : "text-muted-foreground hover:bg-secondary"
-                }`}
+                      ? "text-purple-600 hover:bg-purple-50"
+                      : "text-muted-foreground hover:bg-secondary"
+                  }`}
               >
                 <Icon className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">{tab.label}</span>
@@ -98,12 +96,11 @@ export function AccountTabs({ user }: AccountTabsProps) {
       </nav>
 
       {/* Content */}
-      <div className="flex-1">
-        <div className="bg-white rounded-xl border border-border p-6">
+      <div className="flex-1 min-w-0">
+        <div className="bg-white rounded-xl border border-border p-5 sm:p-6 md:p-8">
           {activeTab === "personal" && <PersonalInfoSection user={user} />}
           {activeTab === "address" && <AddressSection user={user} />}
           {activeTab === "password" && <PasswordSection />}
-          {activeTab === "notifications" && <NotificationsSection user={user} />}
           {activeTab === "security" && <SecuritySection user={user} />}
           {activeTab === "become-pro" && <BecomeProSection user={user} />}
           {activeTab === "delete" && <DeleteAccountSection />}

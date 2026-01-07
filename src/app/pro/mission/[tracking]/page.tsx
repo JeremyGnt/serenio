@@ -28,6 +28,7 @@ import { getUser } from "@/lib/supabase/server"
 import { getMissionDetailsByTracking } from "@/lib/interventions"
 import { Button } from "@/components/ui/button"
 import { MissionActions } from "@/components/pro/mission-actions"
+import { ChatDrawerWrapper } from "@/components/chat"
 import type { SituationType } from "@/types/intervention"
 
 export const metadata = {
@@ -83,7 +84,7 @@ export default async function MissionDetailPage({ params }: PageProps) {
     const situationLabel = SITUATION_CONFIG[mission.situationType]?.label || "Mission"
     const situationColor = SITUATION_CONFIG[mission.situationType]?.color || "bg-gray-100 text-gray-700"
     const statusInfo = STATUS_CONFIG[mission.status] || { label: mission.status, color: "text-gray-700", bgColor: "bg-gray-100" }
-    
+
     const isRdv = mission.interventionType === "rdv"
 
     const formatDate = (dateStr: string) => {
@@ -424,6 +425,14 @@ export default async function MissionDetailPage({ params }: PageProps) {
                     </div>
                 )}
             </div>
+
+            {/* Chat Drawer flottant - visible pour toutes les missions acceptées */}
+            {["assigned", "accepted", "en_route", "arrived", "diagnosing", "quote_sent", "quote_accepted", "in_progress"].includes(mission.status) && (
+                <ChatDrawerWrapper
+                    interventionId={mission.id}
+                    currentUserId={user.id}
+                />
+            )}
         </div>
     )
 }

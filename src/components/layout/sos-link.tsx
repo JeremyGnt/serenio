@@ -45,7 +45,7 @@ export function SosLink({ isLoggedIn }: SosLinkProps) {
     return (
         <Link
             href={targetUrl}
-            className="flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200"
         >
             <Zap className={`w-4 h-4 ${isChecking ? "animate-pulse" : ""}`} />
             <span>SOS</span>

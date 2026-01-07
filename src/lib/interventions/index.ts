@@ -5,6 +5,7 @@ export {
   submitIntervention,
   updateInterventionStatus,
   cancelIntervention,
+  deleteDraftIntervention,
   linkInterventionToUser,
   acceptMission,
   refuseMission,
@@ -30,6 +31,7 @@ export {
   getInterventionDetailsForArtisan,
   getArtisanStats,
   getActiveArtisanMissions,
+  getAllArtisanMissions,
   getMissionDetailsByTracking,
 } from "./pro-queries"
 
@@ -40,4 +42,5 @@ export type {
   ArtisanStats,
   ActiveMission,
   MissionDetails,
+  MissionFilter,
 } from "./pro-queries"

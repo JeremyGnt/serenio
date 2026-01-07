@@ -369,6 +369,79 @@ export async function cancelIntervention(
 }
 
 // ============================================
+// SUPPRESSION DE BROUILLON
+// ============================================
+
+/**
+ * Supprime un brouillon d'intervention
+ * Seuls les brouillons (draft) peuvent être supprimés
+ */
+export async function deleteDraftIntervention(
+  interventionId: string
+): Promise<InterventionResult> {
+  const supabase = await createClient()
+  const adminClient = createAdminClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  try {
+    // Récupérer l'intervention
+    const { data: intervention, error: fetchError } = await adminClient
+      .from("intervention_requests")
+      .select("id, status, client_email, client_id")
+      .eq("id", interventionId)
+      .single()
+
+    if (fetchError || !intervention) {
+      return { success: false, error: "Demande non trouvée" }
+    }
+
+    // Vérifier que c'est un brouillon
+    if (intervention.status !== "draft") {
+      return { success: false, error: "Seuls les brouillons peuvent être supprimés" }
+    }
+
+    // Vérifier que l'utilisateur a le droit de supprimer (propriétaire)
+    if (user) {
+      if (intervention.client_id && intervention.client_id !== user.id) {
+        return { success: false, error: "Vous n'êtes pas autorisé à supprimer cette demande" }
+      }
+      if (!intervention.client_id && intervention.client_email !== user.email) {
+        return { success: false, error: "Vous n'êtes pas autorisé à supprimer cette demande" }
+      }
+    }
+
+    // Supprimer d'abord les enregistrements liés
+    await adminClient
+      .from("intervention_diagnostics")
+      .delete()
+      .eq("intervention_id", interventionId)
+
+    await adminClient
+      .from("intervention_status_history")
+      .delete()
+      .eq("intervention_id", interventionId)
+
+    // Supprimer l'intervention
+    const { error: deleteError } = await adminClient
+      .from("intervention_requests")
+      .delete()
+      .eq("id", interventionId)
+
+    if (deleteError) {
+      console.error("Erreur suppression:", deleteError)
+      return { success: false, error: "Erreur lors de la suppression" }
+    }
+
+    revalidatePath("/compte/demandes")
+
+    return { success: true }
+  } catch (error) {
+    console.error("Erreur suppression brouillon:", error)
+    return { success: false, error: "Une erreur est survenue" }
+  }
+}
+
+// ============================================
 // ACTIONS ARTISAN - ACCEPTER/REFUSER MISSION
 // ============================================
 
@@ -464,6 +537,19 @@ export async function acceptMission(
       changed_by_role: "artisan",
       note: "Mission acceptée par l'artisan",
     })
+
+    // Récupérer le client_id pour créer la conversation
+    const { data: fullIntervention } = await adminClient
+      .from("intervention_requests")
+      .select("client_id")
+      .eq("id", interventionId)
+      .single()
+
+    // Créer la conversation de chat si client_id existe
+    if (fullIntervention?.client_id) {
+      const { createConversation } = await import("@/lib/chat/actions")
+      await createConversation(interventionId, fullIntervention.client_id, user.id)
+    }
 
     revalidatePath(`/suivi/${intervention.tracking_number}`)
     revalidatePath("/pro/dashboard")
@@ -637,7 +723,6 @@ export async function signalArrival(
       .from("intervention_requests")
       .update({
         status: "arrived",
-        arrived_at: new Date().toISOString(),
       })
       .eq("id", interventionId)
 

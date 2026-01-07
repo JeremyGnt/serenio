@@ -27,31 +27,37 @@ export function StepContact({
   onUpdate,
 }: StepContactProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-5">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1">
           Comment vous joindre ?
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Le serrurier vous contactera sur ce numéro
         </p>
       </div>
 
-      <div className="space-y-4">
-        {/* Téléphone (le plus important) */}
-        <div className="space-y-2">
-          <Label htmlFor="phone">
+      {/* Grille 2 colonnes sur desktop */}
+      <div className="grid gap-4 lg:grid-cols-2 lg:gap-5">
+        {/* Téléphone */}
+        <div className="space-y-1.5">
+          <Label htmlFor="phone" className="text-sm">
             Téléphone <span className="text-red-500">*</span>
           </Label>
           <div className="relative">
-            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
               id="phone"
               type="tel"
               value={phone}
-              onChange={(e) => onUpdate({ clientPhone: e.target.value })}
+              onChange={(e) => {
+                // Formatter le numéro avec espaces tous les 2 chiffres
+                const digits = e.target.value.replace(/\D/g, "").slice(0, 10)
+                const formatted = digits.replace(/(\d{2})(?=\d)/g, "$1 ")
+                onUpdate({ clientPhone: formatted })
+              }}
               placeholder="06 XX XX XX XX"
-              className="h-14 pl-10 text-lg"
+              className="h-11 lg:h-12 pl-10"
               required
             />
           </div>
@@ -61,79 +67,76 @@ export function StepContact({
         </div>
 
         {/* Email */}
-        <div className="space-y-2">
-          <Label htmlFor="email">
+        <div className="space-y-1.5">
+          <Label htmlFor="email" className="text-sm">
             Email <span className="text-red-500">*</span>
           </Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => onUpdate({ clientEmail: e.target.value })}
               placeholder="vous@exemple.com"
-              className="h-12 pl-10"
+              className="h-11 lg:h-12 pl-10"
               required
               readOnly={isLoggedIn && !!email}
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            {isLoggedIn ? "Email de votre compte" : "Pour recevoir le récapitulatif et la facture"}
+            {isLoggedIn ? "Email de votre compte" : "Pour le récapitulatif"}
           </p>
         </div>
 
-        {/* Nom / Prénom (optionnel) */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Nom</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <Input
-                id="lastName"
-                value={lastName}
-                onChange={(e) => onUpdate({ clientLastName: e.target.value })}
-                placeholder="Dupont"
-                className="h-12 pl-10"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="firstName">Prénom</Label>
+        {/* Nom */}
+        <div className="space-y-1.5">
+          <Label htmlFor="lastName" className="text-sm">Nom</Label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
-              id="firstName"
-              value={firstName}
-              onChange={(e) => onUpdate({ clientFirstName: e.target.value })}
-              placeholder="Jean"
-              className="h-12"
+              id="lastName"
+              value={lastName}
+              onChange={(e) => onUpdate({ clientLastName: e.target.value })}
+              placeholder="Dupont"
+              className="h-11 lg:h-12 pl-10"
             />
           </div>
         </div>
-      </div>
 
-      {/* Info confidentialité */}
-      <div className="p-4 bg-gray-100 rounded-xl flex items-start gap-3">
-        <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-          <Lock className="w-4 h-4 text-gray-600" />
+        {/* Prénom */}
+        <div className="space-y-1.5">
+          <Label htmlFor="firstName" className="text-sm">Prénom</Label>
+          <Input
+            id="firstName"
+            value={firstName}
+            onChange={(e) => onUpdate({ clientFirstName: e.target.value })}
+            placeholder="Jean"
+            className="h-11 lg:h-12"
+          />
         </div>
-        <p className="text-xs text-muted-foreground">
-          Vos informations sont sécurisées et ne seront utilisées que pour
-          cette intervention. Consultez notre politique de confidentialité.
-        </p>
       </div>
 
-      {/* Pas de compte requis - seulement si non connecté */}
-      {!isLoggedIn && (
-        <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-start gap-3">
-          <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-            <CheckCircle className="w-4 h-4 text-emerald-600" />
-          </div>
-          <p className="text-sm text-emerald-800">
-            <strong>Pas de compte requis</strong> — Vous pourrez créer un compte
-            après l'intervention pour retrouver vos factures.
+      {/* Messages d'info en grille sur desktop */}
+      <div className="grid gap-3 lg:grid-cols-2">
+        {/* Info confidentialité */}
+        <div className="p-3 bg-gray-100 rounded-xl flex items-center gap-3">
+          <Lock className="w-4 h-4 text-gray-500 flex-shrink-0" />
+          <p className="text-xs text-muted-foreground">
+            Vos informations sont sécurisées et confidentielles.
           </p>
         </div>
-      )}
+
+        {/* Pas de compte requis */}
+        {!isLoggedIn && (
+          <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center gap-3">
+            <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+            <p className="text-xs text-emerald-800">
+              <strong>Pas de compte requis</strong> — Créez-en un après si besoin.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -15,8 +15,10 @@ import {
     X
 } from "lucide-react"
 import { LucideIcon } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
+import { supabase } from "@/lib/supabase/client"
+import { getTotalUnreadCount } from "@/lib/chat/actions"
 
 // Type pour les items de navigation
 interface NavItem {
@@ -39,7 +41,7 @@ const URGENCE_ITEM: NavItem = {
 // Navigation principale (sans urgences)
 const NAV_ITEMS: NavItem[] = [
     { icon: Inbox, label: "Opportunités", href: "/pro/propositions" },
-    { icon: ListChecks, label: "En cours", href: "/pro/missions" },
+    { icon: ListChecks, label: "Missions", href: "/pro/missions" },
     { icon: CalendarDays, label: "Planning", href: "/pro/rendez-vous" },
     { icon: CreditCard, label: "Paiements", href: "/pro/paiements" },
     { icon: Settings, label: "Paramètres", href: "/pro/compte" },
@@ -51,11 +53,55 @@ const MOBILE_NAV_ITEMS: NavItem[] = [URGENCE_ITEM, ...NAV_ITEMS.slice(0, 3)]
 interface ProSidebarProps {
     urgentCount?: number
     firstName?: string
+    userId?: string
+    totalUnreadMessages?: number
 }
 
-export function ProSidebar({ urgentCount = 0, firstName = "Artisan" }: ProSidebarProps) {
+export function ProSidebar({ urgentCount = 0, firstName = "Artisan", userId, totalUnreadMessages = 0 }: ProSidebarProps) {
     const pathname = usePathname()
     const [mobileOpen, setMobileOpen] = useState(false)
+    const [unreadCount, setUnreadCount] = useState(totalUnreadMessages)
+
+    useEffect(() => {
+        setUnreadCount(totalUnreadMessages)
+    }, [totalUnreadMessages])
+
+    // Realtime subscription
+    useEffect(() => {
+        if (!userId) return
+
+        let timeoutId: NodeJS.Timeout
+
+        const fetchCount = async () => {
+            clearTimeout(timeoutId)
+            timeoutId = setTimeout(async () => {
+                const count = await getTotalUnreadCount(userId)
+                setUnreadCount(count)
+            }, 1000)
+        }
+
+        const channel = supabase
+            .channel(`pro_global_messages:${userId}`)
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "messages"
+                },
+                (payload: any) => {
+                    if (payload.new && payload.new.sender_id !== userId) {
+                        fetchCount()
+                    }
+                }
+            )
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+            clearTimeout(timeoutId)
+        }
+    }, [userId])
 
     return (
         <>
@@ -145,8 +191,8 @@ export function ProSidebar({ urgentCount = 0, firstName = "Artisan" }: ProSideba
                                     {urgentCount > 0 && (
                                         <span className={cn(
                                             "px-2 py-0.5 text-xs font-bold rounded-full min-w-[20px] text-center animate-pulse",
-                                            isActive 
-                                                ? "bg-white text-red-600" 
+                                            isActive
+                                                ? "bg-white text-red-600"
                                                 : "bg-red-500 text-white"
                                         )}>
                                             {urgentCount}
@@ -165,6 +211,7 @@ export function ProSidebar({ urgentCount = 0, firstName = "Artisan" }: ProSideba
                         {NAV_ITEMS.map((item) => {
                             const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
                             const Icon = item.icon
+                            const isMissions = item.href === "/pro/missions"
 
                             return (
                                 <li key={item.href}>
@@ -180,6 +227,11 @@ export function ProSidebar({ urgentCount = 0, firstName = "Artisan" }: ProSideba
                                     >
                                         <Icon className={cn("w-5 h-5", isActive ? "text-emerald-600" : "text-gray-400")} />
                                         <span className="flex-1">{item.label}</span>
+                                        {isMissions && unreadCount > 0 && (
+                                            <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
+                                                {unreadCount > 9 ? "9+" : unreadCount}
+                                            </span>
+                                        )}
                                     </Link>
                                 </li>
                             )

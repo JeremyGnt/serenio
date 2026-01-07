@@ -11,14 +11,23 @@ import { getUserPendingRequestsCount } from "@/lib/interventions/client-queries"
 // Liste des admins
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim()).filter(Boolean)
 
+import { getTotalUnreadCount } from "@/lib/chat/actions"
+
+// ...
+
 export async function Header() {
   const user = await getUser()
   const isAdmin = user && ADMIN_EMAILS.includes(user.email || "")
   const isArtisan = user?.user_metadata?.role === "artisan" || user?.user_metadata?.role === "artisan_pending"
-  
+
   // Récupérer le nombre de demandes en attente pour l'utilisateur
-  const pendingRequestsCount = user?.email 
+  const pendingRequestsCount = user?.email
     ? await getUserPendingRequestsCount(user.email)
+    : 0
+
+  // Récupérer le nombre de messages non lus global
+  const unreadMessagesCount = user?.id
+    ? await getTotalUnreadCount(user.id)
     : 0
 
   return (
@@ -62,7 +71,7 @@ export async function Header() {
             {isArtisan && (
               <Link
                 href="/pro/dashboard"
-                className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
               >
                 <LayoutDashboard className="w-4 h-4" />
                 <span className="hidden sm:inline">Pro</span>
@@ -81,7 +90,7 @@ export async function Header() {
             )}
 
             {user ? (
-              <UserMenu user={user} pendingRequestsCount={pendingRequestsCount} />
+              <UserMenu user={user} pendingRequestsCount={pendingRequestsCount} unreadMessagesCount={unreadMessagesCount} />
             ) : (
               <>
                 {/* Connexion - icône sur mobile, texte sur desktop */}

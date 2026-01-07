@@ -18,12 +18,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function TrackingPage({ params }: PageProps) {
   const { tracking } = await params
-  
+
   // Rediriger les RDV vers la nouvelle page de suivi RDV
   if (tracking.startsWith("RDV-")) {
     redirect(`/rdv/suivi/${tracking}`)
   }
-  
+
   const [data, user] = await Promise.all([
     getLiveTrackingData(tracking),
     getUser()
@@ -50,7 +50,7 @@ export default async function TrackingPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <TrackingView data={data} />
+      <TrackingView data={data} currentUserId={user?.id} />
     </div>
   )
 }

@@ -27,9 +27,9 @@ import {
   Loader2,
   Home,
   Building2,
-  MessageSquare,
   AlertTriangle,
-  Info
+  Info,
+  Truck
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -43,7 +43,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
-import { cancelRdv, proposeReschedule } from "@/lib/rdv/actions"
+import { cancelRdv } from "@/lib/rdv/actions"
 
 interface RdvSuiviContentProps {
   rdv: {
@@ -95,8 +95,8 @@ const STATUS_CONFIG: Record<string, {
   color: string
   bgColor: string
   borderColor: string
+  iconBg: string
   description: string
-  step: number
 }> = {
   pending: {
     label: "En attente",
@@ -104,17 +104,17 @@ const STATUS_CONFIG: Record<string, {
     color: "text-amber-600",
     bgColor: "bg-amber-50",
     borderColor: "border-amber-200",
-    description: "Votre demande est en cours de traitement",
-    step: 1
+    iconBg: "bg-amber-100",
+    description: "Votre demande est en cours de traitement"
   },
   searching: {
     label: "Recherche d'artisan",
     icon: Loader2,
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200",
-    description: "Nous recherchons un artisan disponible pour votre créneau",
-    step: 1
+    color: "text-amber-600",
+    bgColor: "bg-amber-50",
+    borderColor: "border-amber-200",
+    iconBg: "bg-amber-100",
+    description: "Nous recherchons un artisan disponible"
   },
   assigned: {
     label: "Artisan confirmé",
@@ -122,8 +122,8 @@ const STATUS_CONFIG: Record<string, {
     color: "text-purple-600",
     bgColor: "bg-purple-50",
     borderColor: "border-purple-200",
-    description: "Un artisan a accepté votre demande et sera présent au rendez-vous",
-    step: 2
+    iconBg: "bg-purple-100",
+    description: "Un artisan sera présent au rendez-vous"
   },
   accepted: {
     label: "Artisan confirmé",
@@ -131,26 +131,26 @@ const STATUS_CONFIG: Record<string, {
     color: "text-purple-600",
     bgColor: "bg-purple-50",
     borderColor: "border-purple-200",
-    description: "Un artisan a accepté votre demande et sera présent au rendez-vous",
-    step: 2
+    iconBg: "bg-purple-100",
+    description: "Un artisan a accepté votre demande"
   },
   en_route: {
     label: "Artisan en route",
-    icon: Clock,
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200",
-    description: "L'artisan est en route vers votre adresse",
-    step: 3
+    icon: Truck,
+    color: "text-indigo-600",
+    bgColor: "bg-indigo-50",
+    borderColor: "border-indigo-200",
+    iconBg: "bg-indigo-100",
+    description: "L'artisan est en route vers votre adresse"
   },
   arrived: {
     label: "Artisan sur place",
     icon: MapPin,
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-50",
-    borderColor: "border-emerald-200",
-    description: "L'artisan est arrivé et va commencer l'intervention",
-    step: 3
+    color: "text-purple-600",
+    bgColor: "bg-purple-50",
+    borderColor: "border-purple-200",
+    iconBg: "bg-purple-100",
+    description: "L'artisan est arrivé"
   },
   diagnosing: {
     label: "Diagnostic en cours",
@@ -158,8 +158,8 @@ const STATUS_CONFIG: Record<string, {
     color: "text-indigo-600",
     bgColor: "bg-indigo-50",
     borderColor: "border-indigo-200",
-    description: "L'artisan effectue un diagnostic de la situation",
-    step: 3
+    iconBg: "bg-indigo-100",
+    description: "L'artisan effectue un diagnostic"
   },
   quote_sent: {
     label: "Devis envoyé",
@@ -167,8 +167,8 @@ const STATUS_CONFIG: Record<string, {
     color: "text-orange-600",
     bgColor: "bg-orange-50",
     borderColor: "border-orange-200",
-    description: "L'artisan vous a envoyé un devis à valider",
-    step: 3
+    iconBg: "bg-orange-100",
+    description: "L'artisan vous a envoyé un devis"
   },
   quote_accepted: {
     label: "Devis accepté",
@@ -176,8 +176,8 @@ const STATUS_CONFIG: Record<string, {
     color: "text-teal-600",
     bgColor: "bg-teal-50",
     borderColor: "border-teal-200",
-    description: "Vous avez accepté le devis, l'intervention va commencer",
-    step: 3
+    iconBg: "bg-teal-100",
+    description: "L'intervention va commencer"
   },
   in_progress: {
     label: "Intervention en cours",
@@ -185,8 +185,8 @@ const STATUS_CONFIG: Record<string, {
     color: "text-blue-600",
     bgColor: "bg-blue-50",
     borderColor: "border-blue-200",
-    description: "L'artisan réalise l'intervention",
-    step: 4
+    iconBg: "bg-blue-100",
+    description: "L'artisan réalise l'intervention"
   },
   completed: {
     label: "Terminée",
@@ -194,8 +194,8 @@ const STATUS_CONFIG: Record<string, {
     color: "text-emerald-600",
     bgColor: "bg-emerald-50",
     borderColor: "border-emerald-200",
-    description: "L'intervention a été réalisée avec succès",
-    step: 5
+    iconBg: "bg-emerald-100",
+    description: "L'intervention a été réalisée avec succès"
   },
   cancelled: {
     label: "Annulé",
@@ -203,8 +203,8 @@ const STATUS_CONFIG: Record<string, {
     color: "text-red-600",
     bgColor: "bg-red-50",
     borderColor: "border-red-200",
-    description: "Ce rendez-vous a été annulé",
-    step: 0
+    iconBg: "bg-red-100",
+    description: "Ce rendez-vous a été annulé"
   },
   rescheduled: {
     label: "Reprogrammé",
@@ -212,8 +212,8 @@ const STATUS_CONFIG: Record<string, {
     color: "text-blue-600",
     bgColor: "bg-blue-50",
     borderColor: "border-blue-200",
-    description: "Votre rendez-vous a été reprogrammé à une nouvelle date",
-    step: 2
+    iconBg: "bg-blue-100",
+    description: "Votre rendez-vous a été reprogrammé"
   }
 }
 
@@ -224,14 +224,6 @@ const SERVICE_ICONS: Record<string, typeof Wrench> = {
   other: HelpCircle
 }
 
-const STEPS = [
-  { id: 1, label: "Demande" },
-  { id: 2, label: "Artisan" },
-  { id: 3, label: "Sur place" },
-  { id: 4, label: "Intervention" },
-  { id: 5, label: "Terminé" },
-]
-
 export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
   const [copied, setCopied] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -240,7 +232,11 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
   const [cancelling, setCancelling] = useState(false)
 
   const status = STATUS_CONFIG[rdv.status] || STATUS_CONFIG.pending
-  
+  const StatusIcon = status.icon
+  const ServiceIcon = rdv.rdv_service_types?.icon 
+    ? SERVICE_ICONS[rdv.rdv_service_types.icon] || Wrench
+    : Wrench
+
   // Calculer si on est à moins de 24h du RDV
   const scheduledDateTime = rdv.scheduled_date && rdv.scheduled_time_start
     ? new Date(`${rdv.scheduled_date}T${rdv.scheduled_time_start}`)
@@ -250,11 +246,7 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
     ? (scheduledDateTime.getTime() - now.getTime()) / (1000 * 60 * 60)
     : Infinity
   const isWithin24Hours = hoursUntilRdv <= 24 && hoursUntilRdv > 0
-  const cancellationFee = isWithin24Hours ? 30 : 0 // 30€ de frais si moins de 24h
-  const StatusIcon = status.icon
-  const ServiceIcon = rdv.rdv_service_types?.icon 
-    ? SERVICE_ICONS[rdv.rdv_service_types.icon] || Wrench
-    : Wrench
+  const cancellationFee = isWithin24Hours ? 30 : 0
 
   const diagnostic = rdv.intervention_diagnostics?.[0]
 
@@ -268,20 +260,6 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
   const formatTime = (start: string, end: string) => {
     const formatT = (t: string) => t?.substring(0, 5).replace(":", "h")
     return `${formatT(start)} - ${formatT(end)}`
-  }
-
-  const formatRelativeDate = (dateStr: string) => {
-    const date = new Date(dateStr)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / (1000 * 60))
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-    
-    if (diffMins < 60) return `Il y a ${diffMins} min`
-    if (diffHours < 24) return `Il y a ${diffHours}h`
-    if (diffDays < 7) return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`
-    return date.toLocaleDateString("fr-FR")
   }
 
   const copyTrackingNumber = async () => {
@@ -308,27 +286,17 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
     }
   }
 
-  const handleProposeReschedule = () => {
-    // TODO: Ouvrir un formulaire de proposition de nouveau créneau
-    setShowRescheduleDialog(true)
-  }
-
-  // Modification directe possible seulement avant l'assignation d'un artisan
-  const canModifyDirectly = ["pending", "searching"].includes(rdv.status)
-  // Proposition de changement quand un artisan est assigné
-  const canProposeChange = ["assigned", "accepted"].includes(rdv.status)
-  // Annulation possible jusqu'à ce que l'artisan soit sur place
+  // Permissions
   const canCancel = ["pending", "searching", "assigned", "accepted", "en_route"].includes(rdv.status)
   const isCancelled = rdv.status === "cancelled"
   const isCompleted = rdv.status === "completed"
-  const artisanOnSite = ["arrived", "diagnosing", "quote_sent", "quote_accepted", "in_progress"].includes(rdv.status)
   const hasArtisan = !!rdv.artisans
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <Link 
             href="/" 
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
@@ -362,308 +330,265 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Progress Steps */}
-        {!isCancelled && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
-            <div className="flex items-center justify-between relative">
-              {/* Progress line */}
-              <div className="absolute top-5 left-0 right-0 h-0.5 bg-gray-200" />
-              <div 
-                className="absolute top-5 left-0 h-0.5 bg-emerald-500 transition-all duration-500"
-                style={{ width: `${Math.max(0, (status.step - 1) / (STEPS.length - 1)) * 100}%` }}
-              />
-              
-              {STEPS.map((step) => (
-                <div key={step.id} className="flex flex-col items-center relative z-10">
-                  <div className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all",
-                    status.step >= step.id 
-                      ? "bg-emerald-500 text-white" 
-                      : "bg-gray-200 text-gray-500"
-                  )}>
-                    {status.step > step.id ? (
-                      <Check className="w-5 h-5" />
-                    ) : (
-                      step.id
-                    )}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Première ligne : Artisan + Date/Heure RDV */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Artisan Card */}
+          {hasArtisan ? (
+            <div className="bg-white rounded-2xl border border-gray-200 p-5">
+              <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <User className="w-5 h-5 text-gray-400" />
+                Votre artisan
+              </h2>
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center text-xl font-bold text-emerald-600">
+                  {rdv.artisans!.first_name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900">
+                    {rdv.artisans!.company_name || `${rdv.artisans!.first_name} ${rdv.artisans!.last_name}`}
+                  </p>
+                  <p className="text-sm text-gray-500">{rdv.artisans!.first_name}</p>
+                  {rdv.artisans!.rating && rdv.artisans!.rating > 0 && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      <span className="text-sm font-medium">{rdv.artisans!.rating.toFixed(1)}</span>
+                    </div>
+                  )}
+                </div>
+                {rdv.artisans!.phone && (
+                  <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                    <a href={`tel:${rdv.artisans!.phone}`}>
+                      <Phone className="w-4 h-4 mr-2" />
+                      Appeler
+                    </a>
+                  </Button>
+                )}
+              </div>
+              {rdv.status === "en_route" && (
+                <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                  <div className="flex items-center gap-3 text-blue-700">
+                    <Truck className="w-5 h-5" />
+                    <span className="font-medium">L'artisan est en route</span>
                   </div>
-                  <span className={cn(
-                    "text-xs mt-2 hidden sm:block",
-                    status.step >= step.id ? "text-emerald-600 font-medium" : "text-gray-400"
-                  )}>
-                    {step.label}
-                  </span>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Status Card */}
-        <div className={cn(
-          "rounded-2xl p-6 sm:p-8 border",
-          status.bgColor,
-          status.borderColor
-        )}>
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center bg-white shadow-sm">
-              <StatusIcon className={cn("w-8 h-8 sm:w-10 sm:h-10", status.color, status.icon === Loader2 && "animate-spin")} />
-            </div>
-            <div className="text-center sm:text-left flex-1">
-              <h1 className={cn("text-xl sm:text-2xl font-bold mb-1", status.color)}>
-                {status.label}
-              </h1>
-              <p className="text-gray-600">{status.description}</p>
-              
-              {rdv.submitted_at && (
-                <p className="text-sm text-gray-400 mt-2">
-                  Demande créée {formatRelativeDate(rdv.submitted_at)}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* RDV Details Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-          {/* Service Type Header */}
-          <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-5 text-white">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                <ServiceIcon className="w-6 h-6" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-lg">
-                  {rdv.rdv_service_types?.name || "Intervention serrurerie"}
-                </h2>
-                {rdv.rdv_service_types?.description && (
-                  <p className="text-emerald-100 text-sm">
-                    {rdv.rdv_service_types.description}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Details Grid */}
-          <div className="divide-y divide-gray-100">
-            {/* Date & Time */}
-            <div className="p-5 flex items-start gap-4">
-              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <CalendarDays className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Date et créneau</h3>
-                <p className="font-semibold text-gray-900">
-                  {rdv.scheduled_date ? formatDate(rdv.scheduled_date) : "Date non définie"}
-                </p>
-                <p className="text-gray-600 flex items-center gap-1.5 mt-1">
-                  <Clock className="w-4 h-4 text-gray-400" />
-                  {rdv.scheduled_time_start && rdv.scheduled_time_end 
-                    ? formatTime(rdv.scheduled_time_start, rdv.scheduled_time_end)
-                    : "Horaire non défini"
-                  }
-                </p>
-              </div>
-            </div>
-
-            {/* Address */}
-            <div className="p-5 flex items-start gap-4">
-              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <MapPin className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Adresse d'intervention</h3>
-                <p className="text-gray-900">{rdv.address_street}</p>
-                {rdv.address_complement && (
-                  <p className="text-gray-600">{rdv.address_complement}</p>
-                )}
-                <p className="text-gray-600">{rdv.address_postal_code} {rdv.address_city}</p>
-                {rdv.address_instructions && (
-                  <p className="text-sm text-gray-500 mt-2 flex items-start gap-1.5">
-                    <StickyNote className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                    {rdv.address_instructions}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Price Estimate */}
-            {rdv.rdv_price_estimate_min_cents && rdv.rdv_price_estimate_max_cents && (
-              <div className="p-5 flex items-start gap-4">
-                <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Euro className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">Estimation tarifaire</h3>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {rdv.rdv_price_estimate_min_cents / 100}€ - {rdv.rdv_price_estimate_max_cents / 100}€
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Tarif indicatif, le prix final sera confirmé sur place
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Artisan Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-5">
-          <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <User className="w-5 h-5 text-gray-400" />
-            Votre artisan
-          </h2>
-          
-          {rdv.artisans ? (
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center text-xl font-bold text-emerald-600 overflow-hidden">
-                {rdv.artisans.first_name.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-gray-900">
-                  {rdv.artisans.company_name || `${rdv.artisans.first_name} ${rdv.artisans.last_name}`}
-                </p>
-                <p className="text-sm text-gray-500">{rdv.artisans.first_name}</p>
-                {rdv.artisans.rating && rdv.artisans.rating > 0 && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                    <span className="text-sm font-medium">{rdv.artisans.rating.toFixed(1)}</span>
-                  </div>
-                )}
-              </div>
-              {rdv.artisans.phone && (
-                <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
-                  <a href={`tel:${rdv.artisans.phone}`}>
-                    <Phone className="w-4 h-4 mr-2" />
-                    Appeler
-                  </a>
-                </Button>
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-              </div>
-              <div>
-                <p className="font-medium text-gray-700">
-                  {rdv.rdv_auto_assign 
-                    ? "Recherche en cours..."
-                    : "En attente de confirmation"
-                  }
-                </p>
-                <p className="text-sm text-gray-500">
-                  {rdv.rdv_auto_assign 
-                    ? "Nous recherchons le meilleur artisan disponible"
-                    : "L'artisan va bientôt confirmer sa disponibilité"
-                  }
-                </p>
+            <div className="bg-amber-50 rounded-2xl border border-amber-200 p-5">
+              <h2 className="font-semibold text-amber-900 mb-4 flex items-center gap-2">
+                <User className="w-5 h-5 text-amber-600" />
+                Votre artisan
+              </h2>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Loader2 className="w-6 h-6 text-amber-600 animate-spin" />
+                </div>
+                <div>
+                  <p className="font-medium text-amber-800">
+                    {rdv.rdv_auto_assign ? "Recherche en cours..." : "En attente de confirmation"}
+                  </p>
+                  <p className="text-sm text-amber-700">
+                    {rdv.rdv_auto_assign 
+                      ? "Nous recherchons le meilleur artisan disponible"
+                      : "L'artisan va bientôt confirmer sa disponibilité"
+                    }
+                  </p>
+                </div>
               </div>
             </div>
           )}
-        </div>
 
-        {/* Diagnostic Summary */}
-        {diagnostic && (diagnostic.property_type || diagnostic.door_type) && (
+          {/* Date & Heure Card */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5">
             <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-gray-400" />
-              Résumé de votre demande
+              <CalendarDays className="w-5 h-5 text-gray-400" />
+              Rendez-vous prévu
             </h2>
-            <div className="grid grid-cols-2 gap-4">
-              {diagnostic.property_type && (
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    {diagnostic.property_type === "appartement" ? (
-                      <Building2 className="w-4 h-4 text-gray-600" />
-                    ) : (
-                      <Home className="w-4 h-4 text-gray-600" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Propriété</p>
-                    <p className="text-sm font-medium capitalize">{diagnostic.property_type}</p>
-                  </div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <CalendarDays className="w-5 h-5 text-purple-600" />
                 </div>
-              )}
-              {diagnostic.door_type && (
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <KeyRound className="w-4 h-4 text-gray-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Type de porte</p>
-                    <p className="text-sm font-medium capitalize">{diagnostic.door_type}</p>
-                  </div>
+                <div>
+                  <p className="font-semibold text-gray-900">
+                    {rdv.scheduled_date ? formatDate(rdv.scheduled_date) : "Date non définie"}
+                  </p>
+                  <p className="text-gray-600 flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-gray-400" />
+                    {rdv.scheduled_time_start && rdv.scheduled_time_end 
+                      ? formatTime(rdv.scheduled_time_start, rdv.scheduled_time_end)
+                      : "Horaire non défini"
+                    }
+                  </p>
                 </div>
-              )}
+              </div>
+              {/* Statut */}
+              <div className={cn(
+                "p-3 rounded-xl border flex items-center gap-3",
+                status.bgColor,
+                status.borderColor
+              )}>
+                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", status.iconBg)}>
+                  <StatusIcon className={cn("w-4 h-4", status.color, status.icon === Loader2 && "animate-spin")} />
+                </div>
+                <div>
+                  <p className={cn("font-medium text-sm", status.color)}>{status.label}</p>
+                  <p className="text-xs text-gray-600">{status.description}</p>
+                </div>
+              </div>
             </div>
-            {diagnostic.additional_notes && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-600">{diagnostic.additional_notes}</p>
+          </div>
+        </div>
+
+        {/* Deuxième ligne : Type de service + Estimation */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Service Type */}
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-4 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                  <ServiceIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="font-semibold">
+                    {rdv.rdv_service_types?.name || "Intervention serrurerie"}
+                  </h2>
+                  {rdv.rdv_service_types?.description && (
+                    <p className="text-emerald-100 text-sm">
+                      {rdv.rdv_service_types.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+            {/* Diagnostic Summary */}
+            {diagnostic && (diagnostic.property_type || diagnostic.door_type) && (
+              <div className="p-4">
+                <div className="grid grid-cols-2 gap-3">
+                  {diagnostic.property_type && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                        {diagnostic.property_type === "appartement" ? (
+                          <Building2 className="w-4 h-4 text-gray-600" />
+                        ) : (
+                          <Home className="w-4 h-4 text-gray-600" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Propriété</p>
+                        <p className="text-sm font-medium capitalize">{diagnostic.property_type}</p>
+                      </div>
+                    </div>
+                  )}
+                  {diagnostic.door_type && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <KeyRound className="w-4 h-4 text-gray-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Type de porte</p>
+                        <p className="text-sm font-medium capitalize">{diagnostic.door_type}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {diagnostic.additional_notes && (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600">{diagnostic.additional_notes}</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
 
-        {/* Your Info Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-5">
-          <h2 className="font-semibold text-gray-900 mb-4">Vos coordonnées</h2>
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
-                <User className="w-4 h-4 text-gray-600" />
+          {/* Estimation tarifaire */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-5">
+            <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Euro className="w-5 h-5 text-gray-400" />
+              Estimation tarifaire
+            </h2>
+            {rdv.rdv_price_estimate_min_cents && rdv.rdv_price_estimate_max_cents ? (
+              <div>
+                <p className="text-3xl font-bold text-gray-900">
+                  {rdv.rdv_price_estimate_min_cents / 100}€ - {rdv.rdv_price_estimate_max_cents / 100}€
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Tarif indicatif, le prix final sera confirmé sur place après diagnostic
+                </p>
               </div>
-              <span className="text-gray-700">
-                {rdv.client_first_name} {rdv.client_last_name}
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
-                <Mail className="w-4 h-4 text-gray-600" />
+            ) : (
+              <div className="text-gray-500">
+                <p>Prix à définir sur place</p>
+                <p className="text-sm mt-1">L'artisan vous fera un devis avant intervention</p>
               </div>
-              <span className="text-gray-700">{rdv.client_email}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
-                <Phone className="w-4 h-4 text-gray-600" />
+            )}
+          </div>
+        </div>
+
+        {/* Troisième ligne : Adresse + Coordonnées */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Adresse */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-5">
+            <h2 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-gray-400" />
+              Adresse d'intervention
+            </h2>
+            <p className="text-gray-700">{rdv.address_street}</p>
+            {rdv.address_complement && (
+              <p className="text-gray-600">{rdv.address_complement}</p>
+            )}
+            <p className="text-gray-600">
+              {rdv.address_postal_code} {rdv.address_city}
+            </p>
+            {rdv.address_instructions && (
+              <div className="flex items-start gap-2 mt-3 p-3 bg-gray-50 rounded-lg text-sm text-gray-600">
+                <StickyNote className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>{rdv.address_instructions}</span>
               </div>
-              <span className="text-gray-700">{rdv.client_phone}</span>
+            )}
+          </div>
+
+          {/* Contact */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-5">
+            <h2 className="font-semibold text-gray-900 mb-4">Vos coordonnées</h2>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <User className="w-4 h-4 text-gray-600" />
+                </div>
+                <span className="text-gray-700">
+                  {rdv.client_first_name} {rdv.client_last_name}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <Phone className="w-4 h-4 text-gray-600" />
+                </div>
+                <span className="text-gray-700">{rdv.client_phone}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <Mail className="w-4 h-4 text-gray-600" />
+                </div>
+                <span className="text-gray-700">{rdv.client_email}</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Actions */}
-        {(canModifyDirectly || canProposeChange || canCancel) && !isCompleted && !isCancelled && (
-          <div className="flex flex-col sm:flex-row gap-3">
-            {canModifyDirectly && (
-              <Button variant="outline" className="flex-1 h-12">
-                <CalendarDays className="w-4 h-4 mr-2" />
-                Modifier le rendez-vous
-              </Button>
-            )}
-            {canProposeChange && (
-              <Button 
-                variant="outline" 
-                className="flex-1 h-12 text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200"
-                onClick={handleProposeReschedule}
-              >
-                <CalendarDays className="w-4 h-4 mr-2" />
-                Proposer un autre créneau
-              </Button>
-            )}
-            {canCancel && (
-              <Button 
-                variant="outline" 
-                className="flex-1 h-12 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                onClick={() => setShowCancelDialog(true)}
-              >
-                <XCircle className="w-4 h-4 mr-2" />
-                Annuler{isWithin24Hours && " (frais)"}
-              </Button>
-            )}
+        {canCancel && !isCompleted && !isCancelled && (
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              className="h-12 px-8 text-red-600 border-red-200 hover:bg-red-50"
+              onClick={() => setShowCancelDialog(true)}
+              disabled={cancelling}
+            >
+              <XCircle className="w-4 h-4 mr-2" />
+              Annuler le rendez-vous{isWithin24Hours && " (frais 30€)"}
+            </Button>
           </div>
         )}
 
@@ -686,37 +611,7 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
           </div>
         )}
 
-        {/* Info when artisan is assigned */}
-        {hasArtisan && canProposeChange && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4">
-            <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <AlertCircle className="w-5 h-5 text-amber-600" />
-            </div>
-            <div>
-              <p className="font-medium text-amber-900 mb-1">Un artisan est déjà assigné</p>
-              <p className="text-sm text-amber-700">
-                Vous pouvez proposer un nouveau créneau. L'artisan devra valider la modification avant qu'elle ne prenne effet.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Reminder Note */}
-        {!isCompleted && !isCancelled && (
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex gap-4">
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <AlertCircle className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="font-medium text-blue-900 mb-1">Rappel automatique</p>
-              <p className="text-sm text-blue-700">
-                Vous recevrez un email et SMS de rappel 24h avant votre rendez-vous avec toutes les informations nécessaires.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Completed Success */}
+        {/* Success Message */}
         {isCompleted && (
           <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex gap-4">
             <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -725,7 +620,7 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
             <div>
               <p className="font-medium text-emerald-900 mb-1">Intervention terminée</p>
               <p className="text-sm text-emerald-700">
-                Merci d'avoir fait confiance à Serenio ! N'hésitez pas à laisser un avis sur votre expérience.
+                Merci d'avoir fait confiance à Serenio !
               </p>
               <Button className="mt-3 bg-emerald-600 hover:bg-emerald-700" size="sm">
                 <Star className="w-4 h-4 mr-2" />
@@ -735,12 +630,27 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
           </div>
         )}
 
+        {/* Cancelled Message */}
+        {isCancelled && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-5 flex gap-4">
+            <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <XCircle className="w-5 h-5 text-red-600" />
+            </div>
+            <div>
+              <p className="font-medium text-red-900 mb-1">Rendez-vous annulé</p>
+              <p className="text-sm text-red-700">
+                Ce rendez-vous a été annulé.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Support */}
-        <div className="text-center py-4">
+        <div className="text-center py-6">
           <p className="text-sm text-gray-500">
             Une question ?{" "}
-            <a 
-              href="mailto:contact@serenio.fr" 
+            <a
+              href="mailto:contact@serenio.fr"
               className="text-emerald-600 hover:text-emerald-700 font-medium hover:underline"
             >
               Contactez notre support
@@ -797,7 +707,7 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Reschedule Dialog - TODO: Add date picker */}
+      {/* Reschedule Dialog */}
       <AlertDialog open={showRescheduleDialog} onOpenChange={setShowRescheduleDialog}>
         <AlertDialogContent className="max-w-md mx-4">
           <AlertDialogHeader className="text-center sm:text-center">
@@ -809,7 +719,6 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
             </AlertDialogTitle>
             <AlertDialogDescription className="text-base mt-2">
               Votre proposition sera envoyée à l'artisan qui devra la valider.
-              Vous serez notifié de sa réponse par email et SMS.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="py-4 text-center text-gray-500">

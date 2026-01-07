@@ -49,13 +49,20 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
 
     const handleStartIntervention = async () => {
         setError(null)
+
+        // Si on n'est pas encore "sur place", on signale l'arrivée d'abord (automatiquement)
+        if (["assigned", "accepted", "en_route"].includes(status)) {
+            // On ne bloque pas si ça échoue (ex: déjà fait ailleurs), on tente le start ensuite
+            await signalArrival(interventionId)
+        }
+
         const result = await startIntervention(interventionId)
         if (result.success) {
             startTransition(() => {
                 router.refresh()
             })
         } else {
-            setError(result.error || "Erreur lors de la mise à jour")
+            setError(result.error || "Erreur lors du démarrage")
         }
     }
 
@@ -134,51 +141,41 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                     </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                    {/* Bouton Signaler arrivée */}
-                    <Button
-                        variant={canSignalArrival ? "default" : "outline"}
-                        className={`justify-start ${canSignalArrival ? "bg-blue-600 hover:bg-blue-700" : ""}`}
-                        onClick={handleSignalArrival}
-                        disabled={!canSignalArrival || isPending}
-                    >
-                        {isPending ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                            <MapPin className="w-4 h-4 mr-2" />
-                        )}
-                        {status === "arrived" ? "Arrivée signalée ✓" : "Signaler mon arrivée"}
-                    </Button>
+                <div className="flex flex-col gap-3">
+                    {/* Bouton Démarrer (Visible tant que pas terminé/annulé et pas en cours) */}
+                    {!["in_progress", "completed", "cancelled"].includes(status) && (
+                        <Button
+                            size="lg"
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-lg h-14"
+                            onClick={handleStartIntervention}
+                            disabled={isPending}
+                        >
+                            {isPending ? (
+                                <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                            ) : (
+                                <Play className="w-5 h-5 mr-3" />
+                            )}
+                            Démarrer l'intervention
+                        </Button>
+                    )}
 
-                    {/* Bouton Démarrer intervention */}
-                    <Button
-                        variant={canStartIntervention ? "default" : "outline"}
-                        className={`justify-start ${canStartIntervention ? "bg-amber-600 hover:bg-amber-700" : ""}`}
-                        onClick={handleStartIntervention}
-                        disabled={!canStartIntervention || isPending}
-                    >
-                        {isPending ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                            <Play className="w-4 h-4 mr-2" />
-                        )}
-                        {status === "in_progress" ? "Intervention en cours ✓" : "Démarrer l'intervention"}
-                    </Button>
-
-                    {/* Bouton Terminer */}
-                    <Button
-                        variant={canComplete ? "default" : "outline"}
-                        className={`justify-start sm:col-span-2 ${canComplete ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
-                        onClick={() => setShowCompleteDialog(true)}
-                        disabled={!canComplete || isPending}
-                    >
-                        {isPending ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                            <CheckCircle2 className="w-4 h-4 mr-2" />
-                        )}
-                        Terminer la mission
-                    </Button>
+                    {/* Bouton Terminer (Visible si en cours, ou plus avancé type valider devis etc, mais simplifié ici pour "en cours") */}
+                    {["in_progress", "diagnosing", "quote_sent", "quote_accepted"].includes(status) && (
+                        <Button
+                            size="lg"
+                            variant="outline"
+                            className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 text-lg h-14"
+                            onClick={() => setShowCompleteDialog(true)}
+                            disabled={isPending}
+                        >
+                            {isPending ? (
+                                <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                            ) : (
+                                <CheckCircle2 className="w-5 h-5 mr-3" />
+                            )}
+                            Terminer la mission
+                        </Button>
+                    )}
                 </div>
 
                 {/* Guide des étapes */}
@@ -195,7 +192,7 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                     <AlertDialogHeader>
                         <AlertDialogTitle>Terminer la mission ?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Confirmez-vous que l'intervention est terminée ? 
+                            Confirmez-vous que l'intervention est terminée ?
                             Le client sera notifié et pourra laisser un avis.
                         </AlertDialogDescription>
                     </AlertDialogHeader>

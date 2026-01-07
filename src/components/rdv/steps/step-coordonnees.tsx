@@ -1,9 +1,18 @@
 "use client"
 
-import { User, Mail, Phone, MapPin, Info, Lock, Eye, EyeOff } from "lucide-react"
-import { useState } from "react"
+import { User, Mail, Phone, MapPin, Info, Lock, Eye, EyeOff, Loader2 } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
 import type { RdvFormState } from "@/types/rdv"
 import { cn } from "@/lib/utils"
+
+interface AddressSuggestion {
+  label: string
+  housenumber?: string
+  street?: string
+  postcode?: string
+  city?: string
+  context?: string
+}
 
 interface StepCoordonneesProps {
   formState: RdvFormState
@@ -89,6 +98,86 @@ function PasswordField({ value, onChange }: { value: string; onChange: (value: s
 }
 
 export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordonneesProps) {
+  // Autocomplétion adresse
+  const [searchQuery, setSearchQuery] = useState("")
+  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [searchLoading, setSearchLoading] = useState(false)
+  const searchRef = useRef<HTMLDivElement>(null)
+
+  // Fermer les suggestions quand on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  // Recherche d'adresse avec l'API adresse.data.gouv.fr
+  useEffect(() => {
+    const searchAddress = async () => {
+      if (searchQuery.length < 3) {
+        setSuggestions([])
+        return
+      }
+
+      setSearchLoading(true)
+      try {
+        const response = await fetch(
+          `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(searchQuery)}&limit=5`
+        )
+        const data = await response.json()
+        
+        if (data.features) {
+          const results: AddressSuggestion[] = data.features.map((f: {
+            properties: {
+              label: string
+              housenumber?: string
+              street?: string
+              postcode?: string
+              city?: string
+              context?: string
+            }
+          }) => ({
+            label: f.properties.label,
+            housenumber: f.properties.housenumber,
+            street: f.properties.street,
+            postcode: f.properties.postcode,
+            city: f.properties.city,
+            context: f.properties.context,
+          }))
+          setSuggestions(results)
+          setShowSuggestions(true)
+        }
+      } catch {
+        console.error("Erreur recherche adresse")
+      } finally {
+        setSearchLoading(false)
+      }
+    }
+
+    const debounce = setTimeout(searchAddress, 300)
+    return () => clearTimeout(debounce)
+  }, [searchQuery])
+
+  // Sélectionner une suggestion
+  const selectSuggestion = (suggestion: AddressSuggestion) => {
+    const fullStreet = suggestion.housenumber 
+      ? `${suggestion.housenumber} ${suggestion.street || ""}`
+      : suggestion.street || suggestion.label
+    
+    onUpdate({
+      addressStreet: fullStreet.trim(),
+      addressPostalCode: suggestion.postcode || "",
+      addressCity: suggestion.city || "",
+    })
+    setSearchQuery("")
+    setShowSuggestions(false)
+  }
+
   return (
     <div className="space-y-6">
       {/* Titre */}
@@ -203,6 +292,49 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
         </h3>
 
         <div className="space-y-4">
+          {/* Recherche d'adresse avec autocomplétion */}
+          <div className="space-y-2" ref={searchRef}>
+            <label className="block text-sm text-gray-700">
+              Rechercher une adresse
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                placeholder="Tapez pour rechercher une adresse..."
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              />
+              {searchLoading && (
+                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />
+              )}
+              
+              {/* Suggestions */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => selectSuggestion(suggestion)}
+                      className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                    >
+                      <div className="font-medium text-gray-900 text-sm">
+                        {suggestion.label}
+                      </div>
+                      {suggestion.context && (
+                        <div className="text-xs text-gray-500 mt-0.5">
+                          {suggestion.context}
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="space-y-2">
             <label className="block text-sm text-gray-700">
               Adresse <span className="text-red-500">*</span>
@@ -278,10 +410,9 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
         <label className="block text-sm font-medium text-gray-900">
           Comment souhaitez-vous être contacté ?
         </label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {[
             { value: "phone", label: "Téléphone" },
-            { value: "sms", label: "SMS" },
             { value: "email", label: "Email" },
           ].map((method) => {
             const isSelected = formState.diagnostic.preferredContactMethod === method.value
@@ -292,7 +423,7 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
                 onClick={() => onUpdate({ 
                   diagnostic: { 
                     ...formState.diagnostic, 
-                    preferredContactMethod: method.value as "phone" | "sms" | "email"
+                    preferredContactMethod: method.value as "phone" | "email"
                   } 
                 })}
                 className={cn(

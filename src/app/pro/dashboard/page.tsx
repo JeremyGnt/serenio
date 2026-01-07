@@ -13,7 +13,7 @@ import {
 } from "lucide-react"
 import { getUser } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
-import { getPendingInterventions, getArtisanStats, getActiveArtisanMissions } from "@/lib/interventions"
+import { getPendingInterventions, getArtisanStats, getAllArtisanMissions } from "@/lib/interventions"
 import { ActiveMissionsList } from "@/components/pro/active-missions-list"
 
 export const metadata = {
@@ -53,7 +53,7 @@ export default async function ProDashboardPage() {
   const [pendingInterventions, stats, activeMissions] = await Promise.all([
     getPendingInterventions(),
     getArtisanStats(),
-    getActiveArtisanMissions(),
+    getAllArtisanMissions("active"),
   ])
 
   const firstName = user.user_metadata?.first_name || "Artisan"

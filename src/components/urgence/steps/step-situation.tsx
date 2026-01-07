@@ -1,12 +1,12 @@
 "use client"
 
-import { 
-  DoorClosed, 
-  KeyRound, 
-  Lock, 
-  ShieldAlert, 
-  KeySquare, 
-  type LucideIcon 
+import {
+  DoorClosed,
+  KeyRound,
+  Lock,
+  ShieldAlert,
+  KeySquare,
+  type LucideIcon
 } from "lucide-react"
 import type { SituationType, PriceScenarioDisplay } from "@/types/intervention"
 import { SITUATIONS } from "@/lib/interventions/config"
@@ -26,9 +26,9 @@ const ICONS: Record<string, LucideIcon> = {
   KeySquare,
 }
 
-export function StepSituation({ 
-  selected, 
-  onSelect, 
+export function StepSituation({
+  selected,
+  onSelect,
   priceScenarios,
 }: StepSituationProps) {
   return (
@@ -42,7 +42,7 @@ export function StepSituation({
         </p>
       </div>
 
-      <div className="grid gap-3">
+      <div className="grid gap-3 lg:grid-cols-2 lg:gap-4">
         {SITUATIONS.map((situation) => {
           const isSelected = selected === situation.code
           const scenario = priceScenarios.find((s) => s.code === situation.code)
@@ -52,35 +52,33 @@ export function StepSituation({
             <button
               key={situation.code}
               onClick={() => onSelect(situation.code)}
-              className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                isSelected
+              className={`w-full text-left p-3 lg:p-4 rounded-xl border-2 transition-all ${isSelected
                   ? "border-red-500 bg-red-50"
                   : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
-              }`}
+                }`}
             >
-              <div className="flex items-start gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                  isSelected ? "bg-red-100" : "bg-gray-100"
-                }`}>
-                  <Icon className={`w-6 h-6 ${isSelected ? "text-red-600" : "text-gray-600"}`} />
+              <div className="flex items-start gap-3 lg:gap-4">
+                <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${isSelected ? "bg-red-100" : "bg-gray-100"
+                  }`}>
+                  <Icon className={`w-5 h-5 lg:w-6 lg:h-6 ${isSelected ? "text-red-600" : "text-gray-600"}`} />
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-semibold text-gray-900 text-sm lg:text-base">
                       {situation.label}
                     </h3>
                     {situation.urgencyLevel === 3 && (
-                      <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-700 rounded-full">
-                        Très urgent
+                      <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-700 rounded-full flex-shrink-0">
+                        Urgent
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-xs lg:text-sm text-muted-foreground mt-0.5 lg:mt-1 line-clamp-2">
                     {situation.description}
                   </p>
                   {scenario && (
-                    <p className="text-sm font-medium text-gray-700 mt-2">
-                      Prix indicatif : {scenario.priceMin}€ – {scenario.priceMax}€
+                    <p className="text-xs lg:text-sm font-medium text-gray-700 mt-1 lg:mt-2">
+                      {scenario.priceMin}€ – {scenario.priceMax}€
                     </p>
                   )}
                 </div>
