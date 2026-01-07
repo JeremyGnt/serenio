@@ -12,13 +12,16 @@ import {
     Settings,
     LogOut,
     Menu,
-    X
+    X,
+    ChevronDown,
+    Check
 } from "lucide-react"
 import { LucideIcon } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase/client"
 import { getTotalUnreadCount } from "@/lib/chat/actions"
+import { updateArtisanAvailability } from "@/lib/pro/actions"
 
 // Type pour les items de navigation
 interface NavItem {
@@ -56,15 +59,50 @@ interface ProSidebarProps {
     firstName?: string
     userId?: string
     totalUnreadMessages?: number
+    isAvailable?: boolean
 }
 
-export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName = "Artisan", userId, totalUnreadMessages = 0 }: ProSidebarProps) {
+export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName = "Artisan", userId, totalUnreadMessages = 0, isAvailable = true }: ProSidebarProps) {
     const pathname = usePathname()
     const router = useRouter()
     const [mobileOpen, setMobileOpen] = useState(false)
     const [unreadCount, setUnreadCount] = useState(totalUnreadMessages)
     const [urgentCountState, setUrgentCountState] = useState(urgentCount)
     const [opportunitiesCountState, setOpportunitiesCountState] = useState(opportunitiesCount)
+    const [available, setAvailable] = useState(isAvailable)
+    const [statusDropdownOpen, setStatusDropdownOpen] = useState(false)
+    const [isUpdating, setIsUpdating] = useState(false)
+    const dropdownRef = useRef<HTMLDivElement>(null)
+
+    // Close dropdown on outside click
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setStatusDropdownOpen(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
+    }, [])
+
+    // Sync with prop changes
+    useEffect(() => {
+        setAvailable(isAvailable)
+    }, [isAvailable])
+
+    const handleStatusChange = async (newStatus: boolean) => {
+        if (newStatus === available) {
+            setStatusDropdownOpen(false)
+            return
+        }
+        setIsUpdating(true)
+        const result = await updateArtisanAvailability(newStatus)
+        if (result.success) {
+            setAvailable(newStatus)
+        }
+        setIsUpdating(false)
+        setStatusDropdownOpen(false)
+    }
 
     useEffect(() => {
         setUnreadCount(totalUnreadMessages)
@@ -142,7 +180,7 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
         <>
             {/* Header Mobile */}
             <header className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-50 flex items-center justify-between px-4">
-                <Link href="/pro/dashboard" className="flex items-center gap-2 font-bold">
+                <Link href="/pro/urgences" className="flex items-center gap-2 font-bold">
                     <Image src="/logo.svg" alt="Serenio" width={28} height={28} />
                     <span className="text-emerald-600">Pro</span>
                 </Link>
@@ -176,7 +214,7 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
             >
                 {/* Logo */}
                 <div className="h-16 flex items-center px-5 border-b border-gray-100 flex-shrink-0">
-                    <Link href="/pro/dashboard" className="flex items-center gap-2.5">
+                    <Link href="/pro/urgences" className="flex items-center gap-2.5">
                         <Image src="/logo.svg" alt="Serenio" width={32} height={32} />
                         <div>
                             <span className="font-bold text-gray-900">Serenio</span>
@@ -185,22 +223,72 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
                     </Link>
                 </div>
 
-                {/* User info */}
-                <div className="px-4 py-4 border-b border-gray-100 flex-shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                            <span className="text-emerald-700 font-bold text-sm">
+                {/* User info with status dropdown */}
+                <div className="px-4 py-4 border-b border-gray-100 flex-shrink-0" ref={dropdownRef}>
+                    <button
+                        onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
+                        disabled={isUpdating}
+                        className="w-full flex items-center gap-3 p-2 -m-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 group"
+                    >
+                        <div className={cn(
+                            "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+                            available ? "bg-emerald-100" : "bg-gray-100"
+                        )}>
+                            <span className={cn(
+                                "font-bold text-sm",
+                                available ? "text-emerald-700" : "text-gray-500"
+                            )}>
                                 {firstName.charAt(0).toUpperCase()}
                             </span>
                         </div>
-                        <div>
+                        <div className="flex-1 text-left">
                             <div className="font-medium text-gray-900 text-sm">{firstName}</div>
-                            <div className="text-xs text-emerald-600 flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                                Disponible
+                            <div className={cn(
+                                "text-xs flex items-center gap-1",
+                                available ? "text-emerald-600" : "text-gray-500"
+                            )}>
+                                <span className={cn(
+                                    "w-1.5 h-1.5 rounded-full",
+                                    available ? "bg-emerald-500" : "bg-gray-400"
+                                )} />
+                                {available ? "Disponible" : "Indisponible"}
                             </div>
                         </div>
-                    </div>
+                        <ChevronDown className={cn(
+                            "w-4 h-4 text-gray-400 transition-transform duration-200",
+                            statusDropdownOpen && "rotate-180"
+                        )} />
+                    </button>
+
+                    {/* Dropdown */}
+                    {statusDropdownOpen && (
+                        <div className="absolute left-4 right-4 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+                            <button
+                                onClick={() => handleStatusChange(true)}
+                                disabled={isUpdating}
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors",
+                                    available && "bg-emerald-50"
+                                )}
+                            >
+                                <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                                <span className="flex-1 text-sm font-medium text-gray-900">Disponible</span>
+                                {available && <Check className="w-4 h-4 text-emerald-600" />}
+                            </button>
+                            <button
+                                onClick={() => handleStatusChange(false)}
+                                disabled={isUpdating}
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors",
+                                    !available && "bg-gray-100"
+                                )}
+                            >
+                                <span className="w-2 h-2 bg-gray-400 rounded-full" />
+                                <span className="flex-1 text-sm font-medium text-gray-900">Indisponible</span>
+                                {!available && <Check className="w-4 h-4 text-gray-600" />}
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Navigation - scrollable if content overflows */}
@@ -217,17 +305,17 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
                                     className={cn(
                                         "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 text-sm font-semibold",
                                         isActive
-                                            ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
+                                            ? "bg-red-50 text-red-600 border border-red-200 ring-2 ring-red-100/50 shadow-sm"
                                             : "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
                                     )}
                                 >
-                                    <Icon className={cn("w-5 h-5", isActive ? "text-white" : "text-red-500")} />
+                                    <Icon className={cn("w-5 h-5", isActive ? "text-red-600" : "text-red-500")} />
                                     <span className="flex-1">{URGENCE_ITEM.label}</span>
                                     {urgentCountState > 0 && (
                                         <span className={cn(
                                             "px-2 py-0.5 text-xs font-bold rounded-full min-w-[20px] text-center animate-pulse",
                                             isActive
-                                                ? "bg-white text-red-600"
+                                                ? "bg-red-600 text-white"
                                                 : "bg-red-500 text-white"
                                         )}>
                                             {urgentCountState}
@@ -305,16 +393,20 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                    "flex flex-col items-center justify-center gap-1 px-3 py-2 relative transition-all duration-200 ease-out touch-manipulation active:scale-95 active:duration-75",
+                                    "flex flex-col items-center justify-center gap-1 px-3 py-2 relative transition-all duration-200 ease-out touch-manipulation active:scale-[0.92] active:duration-75 rounded-xl",
                                     isUrgent
-                                        ? isActive ? "text-red-600" : "text-red-500"
-                                        : isActive ? "text-emerald-600" : "text-gray-400"
+                                        ? isActive
+                                            ? "text-red-600 bg-red-50"
+                                            : "text-red-500 active:bg-red-50"
+                                        : isActive
+                                            ? "text-emerald-600 bg-emerald-50"
+                                            : "text-gray-400 active:bg-gray-100"
                                 )}
                             >
                                 <Icon className="w-5 h-5" />
                                 <span className="text-[10px] font-medium">{item.label.split(" ")[0]}</span>
                                 {isUrgent && urgentCountState > 0 && (
-                                    <span className="absolute top-0 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                                    <span className="absolute top-1 right-2 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse border-2 border-white">
                                         {urgentCountState > 9 ? "9+" : String(urgentCountState)}
                                     </span>
                                 )}
@@ -322,7 +414,7 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
                         )
                     })}
                 </div>
-            </nav>
+            </nav >
         </>
     )
 }

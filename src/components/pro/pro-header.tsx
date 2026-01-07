@@ -32,14 +32,14 @@ export function ProHeader({ firstName }: ProHeaderProps) {
     await logout()
   }
 
-  const isDashboard = pathname === "/pro/dashboard"
+  const isDashboard = pathname === "/pro/urgences"
   const isCompte = pathname === "/pro/compte"
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/pro/dashboard" className="flex items-center gap-2 font-bold text-lg">
+        <Link href="/pro/urgences" className="flex items-center gap-2 font-bold text-lg">
           {/* Logo seul sur mobile */}
           <Image
             src="/logo.svg"
@@ -63,11 +63,11 @@ export function ProHeader({ firstName }: ProHeaderProps) {
         {/* Navigation Desktop */}
         <nav className="hidden md:flex items-center gap-6 text-sm">
           <Link
-            href="/pro/dashboard"
+            href="/pro/urgences"
             className={`flex items-center gap-2 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:duration-75 ${isDashboard ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           >
             <LayoutDashboard className="w-4 h-4" />
-            Dashboard
+            Urgences
           </Link>
 
           {/* Menu Réglages avec dropdown */}
@@ -131,12 +131,12 @@ export function ProHeader({ firstName }: ProHeaderProps) {
         <div className="md:hidden bg-white border-t border-gray-100">
           <div className="px-4 py-3 space-y-1">
             <Link
-              href="/pro/dashboard"
+              href="/pro/urgences"
               onClick={() => setMobileMenuOpen(false)}
               className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 ${isDashboard ? "bg-gray-100 font-medium" : "hover:bg-gray-50 active:bg-gray-100"}`}
             >
               <LayoutDashboard className="w-5 h-5" />
-              Dashboard
+              Urgences
             </Link>
             <Link
               href="/pro/compte"

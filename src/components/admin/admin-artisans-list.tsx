@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { CheckCircle, XCircle, Clock, Eye } from "lucide-react"
+import { CheckCircle, XCircle, Clock, Eye, Circle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { supabase } from "@/lib/supabase/client"
 
 interface Artisan {
   id: string
@@ -15,6 +16,7 @@ interface Artisan {
   phone: string
   city: string
   status: "pending" | "approved" | "rejected" | "suspended"
+  is_available: boolean
   created_at: string
 }
 
@@ -22,14 +24,52 @@ interface AdminArtisansListProps {
   artisans: Artisan[]
 }
 
-export function AdminArtisansList({ artisans }: AdminArtisansListProps) {
+export function AdminArtisansList({ artisans: initialArtisans }: AdminArtisansListProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all")
+  const [availabilityFilter, setAvailabilityFilter] = useState<"all" | "available" | "unavailable">("all")
+  const [artisans, setArtisans] = useState<Artisan[]>(initialArtisans)
+
+  // Realtime subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin_artisans_realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "artisans"
+        },
+        (payload) => {
+          if (payload.eventType === "UPDATE" && payload.new) {
+            setArtisans(prev => prev.map(a =>
+              a.id === payload.new.id ? { ...a, ...payload.new } as Artisan : a
+            ))
+          } else if (payload.eventType === "INSERT" && payload.new) {
+            setArtisans(prev => [payload.new as Artisan, ...prev])
+          } else if (payload.eventType === "DELETE" && payload.old) {
+            setArtisans(prev => prev.filter(a => a.id !== payload.old.id))
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log("[AdminArtisans] Realtime subscription status:", status)
+      })
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   const filteredArtisans = artisans.filter((a) => {
-    if (filter === "all") return true
-    return a.status === filter
+    // Status filter
+    if (filter !== "all" && a.status !== filter) return false
+    // Availability filter
+    if (availabilityFilter === "available" && !a.is_available) return false
+    if (availabilityFilter === "unavailable" && a.is_available) return false
+    return true
   })
 
   const handleAction = async (artisanId: string, action: "approve" | "reject") => {
@@ -116,6 +156,35 @@ export function AdminArtisansList({ artisans }: AdminArtisansListProps) {
         >
           Refusés ({artisans.filter((a) => a.status === "rejected").length})
         </Button>
+
+        {/* Separator */}
+        <div className="w-px h-6 bg-gray-300 mx-2" />
+
+        {/* Availability filters */}
+        <Button
+          variant={availabilityFilter === "all" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setAvailabilityFilter("all")}
+        >
+          Toutes dispo.
+        </Button>
+        <Button
+          variant={availabilityFilter === "available" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setAvailabilityFilter("available")}
+          className={availabilityFilter !== "available" ? "border-emerald-300" : ""}
+        >
+          <Circle className="w-2 h-2 fill-emerald-500 text-emerald-500 mr-1" />
+          Disponibles ({artisans.filter((a) => a.is_available).length})
+        </Button>
+        <Button
+          variant={availabilityFilter === "unavailable" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setAvailabilityFilter("unavailable")}
+        >
+          <Circle className="w-2 h-2 fill-gray-400 text-gray-400 mr-1" />
+          Indisponibles ({artisans.filter((a) => !a.is_available).length})
+        </Button>
       </div>
 
       {/* Liste */}
@@ -143,6 +212,9 @@ export function AdminArtisansList({ artisans }: AdminArtisansListProps) {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Statut
                 </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Disponibilité
+                </th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Actions
                 </th>
@@ -164,6 +236,16 @@ export function AdminArtisansList({ artisans }: AdminArtisansListProps) {
                   <td className="px-4 py-4 font-mono text-sm">{artisan.siret}</td>
                   <td className="px-4 py-4">{artisan.city}</td>
                   <td className="px-4 py-4">{getStatusBadge(artisan.status)}</td>
+                  <td className="px-4 py-4">
+                    <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium transition-colors ${artisan.is_available
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-gray-100 text-gray-600"
+                      }`}>
+                      <span className={`w-2 h-2 rounded-full ${artisan.is_available ? "bg-emerald-500 animate-pulse" : "bg-gray-400"
+                        }`} />
+                      {artisan.is_available ? "Disponible" : "Indisponible"}
+                    </span>
+                  </td>
                   <td className="px-4 py-4">
                     <div className="flex items-center justify-end gap-2">
                       {artisan.status === "pending" && (

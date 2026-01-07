@@ -141,7 +141,7 @@ export function MissionsTabs({ activeMissions, completedMissions, cancelledMissi
     return (
         <>
             {/* Tabs */}
-            <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
+            <div className="grid grid-cols-3 sm:flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg w-full sm:w-fit">
                 {TABS.map((tab) => {
                     const count = getCount(tab.id)
                     const Icon = tab.icon
@@ -152,22 +152,22 @@ export function MissionsTabs({ activeMissions, completedMissions, cancelledMissi
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={cn(
-                                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all",
+                                "flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-1 sm:px-4 py-2 rounded-md text-[10px] sm:text-sm font-medium transition-all",
                                 isActive
                                     ? "bg-white text-gray-900 shadow-sm"
                                     : "text-gray-600 hover:text-gray-900"
                             )}
                         >
                             <Icon className={cn(
-                                "w-4 h-4",
+                                "w-4 h-4 sm:w-4 sm:h-4",
                                 isActive && tab.id === "active" && "text-amber-500",
                                 isActive && tab.id === "completed" && "text-emerald-500",
                                 isActive && tab.id === "cancelled" && "text-red-500",
                             )} />
-                            {tab.label}
+                            <span className="truncate max-w-full">{tab.label}</span>
                             {count > 0 && (
                                 <span className={cn(
-                                    "px-1.5 py-0.5 text-xs rounded-full",
+                                    "px-1.5 py-0.5 text-[10px] sm:text-xs rounded-full ml-0 sm:ml-auto",
                                     isActive && tab.id === "active" && "bg-amber-100 text-amber-700",
                                     isActive && tab.id === "completed" && "bg-emerald-100 text-emerald-700",
                                     isActive && tab.id === "cancelled" && "bg-red-100 text-red-700",
@@ -260,13 +260,14 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
 
     return (
         <div className={cn(
-            "rounded-xl border p-5 transition-shadow",
+            "rounded-xl border p-4 sm:p-5 transition-shadow",
             isCancelled && "bg-gray-50 border-red-200",
             isCompleted && "bg-gray-50 border-emerald-200",
             !isCancelled && !isCompleted && "bg-white border-gray-200 hover:shadow-md"
         )}>
-            <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4 flex-1">
+            <div className="flex flex-col sm:flex-row gap-4">
+                {/* Header (Icon + Title) - Mobile First: Top row */}
+                <div className="flex items-start gap-4 flex-1 min-w-0">
                     {/* Icône */}
                     <div className={cn(
                         "w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0",
@@ -284,30 +285,30 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
 
                     {/* Contenu principal */}
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <h3 className="font-semibold text-gray-900">{situationLabel}</h3>
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-gray-900 truncate">{situationLabel}</h3>
                             {!isCancelled && !isCompleted && (
-                                <span className={`px-2 py-0.5 text-xs font-medium rounded ${status.color}`}>
+                                <span className={`px-2 py-0.5 text-xs font-medium rounded whitespace-nowrap ${status.color}`}>
                                     {status.label}
                                 </span>
                             )}
                         </div>
 
                         {/* Adresse */}
-                        <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
-                            <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                            <span className="truncate">{mission.addressStreet}, {mission.addressPostalCode} {mission.addressCity}</span>
+                        <div className="flex items-start gap-1.5 text-sm text-gray-600 mb-2">
+                            <MapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                            <span className="line-clamp-2 leading-tight">{mission.addressStreet}, {mission.addressPostalCode} {mission.addressCity}</span>
                         </div>
 
                         {/* Infos client et temps */}
-                        <div className="flex items-center gap-4 text-sm text-gray-500 flex-wrap">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500">
                             {isCompleted && mission.completedAt ? (
-                                <span className="flex items-center gap-1">
+                                <span className="flex items-center gap-1.5 whitespace-nowrap">
                                     <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                                     Terminée le {formatDate(mission.completedAt)}
                                 </span>
                             ) : (
-                                <span className="flex items-center gap-1">
+                                <span className="flex items-center gap-1.5 whitespace-nowrap">
                                     <Clock className="w-4 h-4" />
                                     Acceptée {getTimeAgo(mission.acceptedAt)}
                                 </span>
@@ -315,9 +316,9 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
                             {!isCompleted && !isCancelled && mission.clientPhone && (
                                 <a
                                     href={`tel:${mission.clientPhone}`}
-                                    className="flex items-center gap-1 text-gray-900 font-medium hover:underline"
+                                    className="flex items-center gap-1 text-gray-900 font-medium hover:underline whitespace-nowrap"
                                 >
-                                    <Phone className="w-4 h-4" />
+                                    <Phone className="w-3.5 h-3.5" />
                                     Appeler {mission.clientFirstName}
                                 </a>
                             )}
@@ -325,37 +326,41 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
                     </div>
                 </div>
 
-                {/* Actions et badges à droite */}
-                <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                {/* Actions et badges - Mobile: Bottom row width full width buttons */}
+                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-100 sm:border-transparent w-full sm:w-auto">
                     {/* Badge pour missions terminées/annulées */}
-                    {isCancelled && (
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-sm">
-                            <XCircle className="w-3.5 h-3.5" />
-                            ANNULÉE
-                        </div>
-                    )}
-                    {isCompleted && (
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-500 text-white text-xs font-bold rounded-full shadow-sm">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            TERMINÉE
-                        </div>
-                    )}
+                    <div className="flex-shrink-0">
+                        {isCancelled && (
+                            <div className="flex items-center gap-1.5 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-sm">
+                                <XCircle className="w-3.5 h-3.5" />
+                                <span className="sm:hidden lg:inline">ANNULÉE</span>
+                            </div>
+                        )}
+                        {isCompleted && (
+                            <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-500 text-white text-xs font-bold rounded-full shadow-sm">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span className="sm:hidden lg:inline">TERMINÉE</span>
+                            </div>
+                        )}
 
-                    {/* Badge nouveaux messages */}
-                    {!isCancelled && !isCompleted && unreadCount > 0 && (
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-100 text-red-600 text-xs font-semibold rounded-full">
-                            {unreadCount} message{unreadCount > 1 ? "s" : ""}
-                        </div>
-                    )}
+                        {/* Badge nouveaux messages */}
+                        {!isCancelled && !isCompleted && unreadCount > 0 && (
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-100 text-red-600 text-xs font-semibold rounded-full">
+                                {unreadCount} message{unreadCount > 1 ? "s" : ""}
+                            </div>
+                        )}
+                    </div>
 
                     {/* Bouton Détails */}
                     {!isCancelled && (
-                        <Link href={`/pro/mission/${mission.trackingNumber}`}>
-                            <Button variant="outline" size="sm" className="gap-1">
-                                Détails
-                                <ChevronRight className="w-4 h-4" />
-                            </Button>
-                        </Link>
+                        <div className="flex-1 sm:flex-initial flex justify-end w-full sm:w-auto">
+                            <Link href={`/pro/mission/${mission.trackingNumber}`} className="w-full sm:w-auto">
+                                <Button variant="outline" size="sm" className="gap-1 w-full sm:w-auto justify-center active:scale-[0.98] transition-all">
+                                    Détails
+                                    <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                            </Link>
+                        </div>
                     )}
                 </div>
             </div>

@@ -40,7 +40,7 @@ export default async function MissionsPage() {
                         Missions
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        {totalMissions} mission{totalMissions !== 1 ? "s" : ""} au total
+                        Gérez vos interventions et suivez leur statut
                     </p>
                 </div>
             </div>

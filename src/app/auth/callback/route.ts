@@ -13,11 +13,11 @@ export async function GET(request: Request) {
   if (code) {
     const supabase = await createClient()
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-    
+
     if (!error && data.user) {
       // Vérifier si c'est un nouvel utilisateur OAuth (Google) sans rôle
       const userRole = data.user.user_metadata?.role
-      
+
       if (!userRole) {
         // Nouvel utilisateur via Google → attribuer le rôle "client"
         await supabase.auth.updateUser({
@@ -44,12 +44,12 @@ export async function GET(request: Request) {
 
       // Vérifier si c'est un artisan (rediriger vers dashboard pro)
       if (userRole === "artisan") {
-        return NextResponse.redirect(`${origin}/pro/dashboard`)
+        return NextResponse.redirect(`${origin}/pro/urgences`)
       }
 
       // Vérifier si artisan en attente
       if (userRole === "artisan_pending") {
-        return NextResponse.redirect(`${origin}/pro/dashboard`)
+        return NextResponse.redirect(`${origin}/pro/urgences`)
       }
 
       return NextResponse.redirect(`${origin}${next}`)

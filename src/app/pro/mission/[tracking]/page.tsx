@@ -122,21 +122,21 @@ export default async function MissionDetailPage({ params }: PageProps) {
 
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${situationColor}`}>
+                        <div className="flex items-start sm:items-center gap-3 mb-2">
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${situationColor}`}>
                                 <SituationIcon className="w-5 h-5" />
                             </div>
-                            <div>
-                                <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+                            <div className="min-w-0">
+                                <h1 className="text-xl md:text-2xl font-bold text-gray-900 break-words">
                                     {mission.serviceType?.name || situationLabel}
                                 </h1>
-                                <p className="text-sm text-muted-foreground font-mono">
+                                <p className="text-sm text-muted-foreground font-mono truncate">
                                     {mission.trackingNumber}
                                 </p>
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 mt-2 sm:mt-0">
                         <span className={`px-3 py-1 text-sm font-medium rounded-full ${statusInfo.bgColor} ${statusInfo.color}`}>
                             {statusInfo.label}
                         </span>

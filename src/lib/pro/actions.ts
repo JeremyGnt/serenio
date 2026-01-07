@@ -132,3 +132,43 @@ export async function updateArtisanAddress(data: {
   return { success: true }
 }
 
+/**
+ * Met à jour le statut de disponibilité de l'artisan
+ */
+export async function updateArtisanAvailability(isAvailable: boolean): Promise<ActionResult> {
+  const supabase = await createClient()
+  const { data: userData } = await supabase.auth.getUser()
+
+  if (!userData.user) {
+    return { success: false, error: "Non connecté" }
+  }
+
+  // Vérifier que l'utilisateur est un artisan
+  const role = userData.user.user_metadata?.role
+  if (role !== "artisan" && role !== "artisan_pending") {
+    return { success: false, error: "Accès réservé aux artisans" }
+  }
+
+  // Utiliser le client admin pour bypasser RLS
+  const { createAdminClient } = await import("@/lib/supabase/admin")
+  const adminClient = createAdminClient()
+
+  const { data, error } = await adminClient
+    .from("artisans")
+    .update({ is_available: isAvailable })
+    .eq("id", userData.user.id)
+    .select()
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  if (!data || data.length === 0) {
+    return { success: false, error: "Artisan non trouvé" }
+  }
+
+  revalidatePath("/pro")
+  return { success: true }
+}
+
+

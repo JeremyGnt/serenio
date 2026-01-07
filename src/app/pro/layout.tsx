@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { getUser } from "@/lib/supabase/server"
+import { createClient, getUser } from "@/lib/supabase/server"
 import { ProSidebar } from "@/components/pro/pro-sidebar"
 import { getArtisanStats } from "@/lib/interventions"
 import { getTotalUnreadCount } from "@/lib/chat/actions"
@@ -12,7 +12,7 @@ export default async function ProLayout({
     const user = await getUser()
 
     if (!user) {
-        redirect("/login?redirect=/pro/dashboard")
+        redirect("/login?redirect=/pro/urgences")
     }
 
     const role = user.user_metadata?.role
@@ -27,6 +27,18 @@ export default async function ProLayout({
     // Fetch global unread messages count
     const totalUnreadMessages = role === "artisan" ? await getTotalUnreadCount(user.id) : 0
 
+    // Fetch artisan availability status
+    let isAvailable = true
+    if (role === "artisan") {
+        const supabase = await createClient()
+        const { data: artisan } = await supabase
+            .from("artisans")
+            .select("is_available")
+            .eq("id", user.id)
+            .single()
+        isAvailable = artisan?.is_available ?? true
+    }
+
     const firstName = user.user_metadata?.first_name || "Artisan"
 
     return (
@@ -37,6 +49,7 @@ export default async function ProLayout({
                 firstName={firstName}
                 userId={user.id}
                 totalUnreadMessages={totalUnreadMessages}
+                isAvailable={isAvailable}
             />
 
             {/* Main content - offset for sidebar */}
@@ -46,3 +59,4 @@ export default async function ProLayout({
         </div>
     )
 }
+

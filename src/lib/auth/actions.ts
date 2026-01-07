@@ -195,7 +195,7 @@ export async function login(payload: LoginPayload): Promise<AuthResult> {
 
     // Artisan validé → rediriger vers dashboard pro
     revalidatePath("/", "layout")
-    return { success: true, redirectTo: "/pro/dashboard" }
+    return { success: true, redirectTo: "/pro/urgences" }
   }
 
   // Client normal

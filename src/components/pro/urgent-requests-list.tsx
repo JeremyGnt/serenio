@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Siren, RefreshCw, Loader2, Wifi, WifiOff } from "lucide-react"
+import { Siren, RefreshCw, Loader2, Wifi, WifiOff, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { UrgentRequestCard } from "./urgent-request-card"
 import { getPendingInterventions } from "@/lib/interventions/pro-queries"
@@ -68,7 +68,7 @@ export function UrgentRequestsList({ initialInterventions }: UrgentRequestsListP
                 },
                 async (payload: RealtimePostgresChangesPayload<InterventionPayload>) => {
                     const newIntervention = payload.new as InterventionPayload
-                    
+
                     // Vérifier que c'est bien une urgence en attente
                     if (
                         newIntervention.intervention_type === "urgence" &&
@@ -90,7 +90,7 @@ export function UrgentRequestsList({ initialInterventions }: UrgentRequestsListP
                 },
                 async (payload: RealtimePostgresChangesPayload<InterventionPayload>) => {
                     const updatedIntervention = payload.new as InterventionPayload
-                    
+
                     // Si une intervention passe en pending/searching, on actualise
                     if (["pending", "searching"].includes(updatedIntervention.status)) {
                         if (updatedIntervention.intervention_type === "urgence") {
@@ -99,7 +99,7 @@ export function UrgentRequestsList({ initialInterventions }: UrgentRequestsListP
                         }
                     } else {
                         // Si une intervention n'est plus pending/searching, on la retire de la liste
-                        setInterventions(prev => 
+                        setInterventions(prev =>
                             prev.filter(i => i.id !== updatedIntervention.id)
                         )
                     }
@@ -115,7 +115,7 @@ export function UrgentRequestsList({ initialInterventions }: UrgentRequestsListP
                 (payload: RealtimePostgresChangesPayload<InterventionPayload>) => {
                     const deletedIntervention = payload.old as InterventionPayload
                     // Retirer l'intervention supprimée de la liste
-                    setInterventions(prev => 
+                    setInterventions(prev =>
                         prev.filter(i => i.id !== deletedIntervention.id)
                     )
                 }
@@ -148,7 +148,7 @@ export function UrgentRequestsList({ initialInterventions }: UrgentRequestsListP
             <div className="bg-white rounded-xl border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="font-bold text-base md:text-lg flex items-center gap-2">
-                        <Siren className="w-5 h-5 text-red-500" />
+                        <Bell className="w-5 h-5 text-red-500" />
                         Demandes urgentes
                     </h2>
                     <div className="flex items-center gap-2">
@@ -177,7 +177,7 @@ export function UrgentRequestsList({ initialInterventions }: UrgentRequestsListP
                 <div className="text-center py-8 md:py-12 text-muted-foreground">
                     <p className="text-sm md:text-base">Aucune demande urgente pour le moment</p>
                     <p className="text-xs md:text-sm mt-2">
-                        {isConnected 
+                        {isConnected
                             ? "Les nouvelles urgences apparaîtront automatiquement"
                             : "Cliquez sur le bouton de rafraîchissement pour vérifier les nouvelles demandes"
                         }
@@ -197,7 +197,7 @@ export function UrgentRequestsList({ initialInterventions }: UrgentRequestsListP
             {/* Alerte nouvelle urgence */}
             {newUrgenceAlert && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 animate-pulse">
-                    <Siren className="w-5 h-5 text-red-500" />
+                    <Bell className="w-5 h-5 text-red-500" />
                     <span className="text-sm font-medium text-red-700">
                         Nouvelle urgence reçue !
                     </span>
@@ -211,10 +211,10 @@ export function UrgentRequestsList({ initialInterventions }: UrgentRequestsListP
                     </Button>
                 </div>
             )}
-            
+
             <div className="flex items-center justify-between mb-4">
                 <h2 className="font-bold text-base md:text-lg flex items-center gap-2">
-                    <Siren className="w-5 h-5 text-red-500" />
+                    <Bell className="w-5 h-5 text-red-500" />
                     Demandes urgentes
                     <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
                         {interventions.length}
