@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import type { ApiResponse, Lead, CreateLeadPayload } from "@/types/landing"
+
+// Liste des admins depuis variable d'environnement
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim()).filter(Boolean)
 
 /**
  * POST /api/leads
@@ -60,7 +64,9 @@ export async function POST(
       created_at: new Date().toISOString(),
     }
 
-    const { data, error } = await supabase
+    // Utiliser admin client pour insertion (pas de RLS sur leads pour anon)
+    const adminClient = createAdminClient()
+    const { data, error } = await adminClient
       .from("leads")
       .insert(leadData)
       .select("id")
@@ -68,9 +74,8 @@ export async function POST(
 
     if (error) {
       // En mode MVP, si la table n'existe pas, on simule le succès
-      // pour ne pas bloquer l'UX (les leads seront perdus mais l'UX fonctionne)
       if (error.code === "42P01") {
-        console.warn("Table leads inexistante - lead non enregistré:", leadData)
+        console.warn("Table leads inexistante - lead non enregistré")
         return NextResponse.json({
           success: true,
           data: { id: `temp-${Date.now()}` },
@@ -84,8 +89,8 @@ export async function POST(
       data: { id: data.id },
     })
   } catch (error) {
-    console.error("Erreur création lead:", error)
-    
+    console.error("Erreur création lead:", error instanceof Error ? error.message : "Unknown")
+
     return NextResponse.json(
       {
         success: false,
@@ -98,12 +103,32 @@ export async function POST(
 
 /**
  * GET /api/leads
- * Liste les leads (pour admin/backoffice futur)
- * TODO: Ajouter authentification admin
+ * Liste les leads (ADMIN ONLY - protégé par authentification)
  */
 export async function GET(): Promise<NextResponse<ApiResponse<Lead[]>>> {
   try {
-    const { data, error } = await supabase
+    // Vérifier que l'utilisateur est connecté
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "Non autorisé" },
+        { status: 401 }
+      )
+    }
+
+    // Vérifier si admin
+    if (!ADMIN_EMAILS.includes(user.email || "")) {
+      return NextResponse.json(
+        { success: false, error: "Accès refusé" },
+        { status: 403 }
+      )
+    }
+
+    // Admin client pour bypass RLS
+    const adminClient = createAdminClient()
+    const { data, error } = await adminClient
       .from("leads")
       .select("*")
       .order("created_at", { ascending: false })
@@ -124,8 +149,8 @@ export async function GET(): Promise<NextResponse<ApiResponse<Lead[]>>> {
       data: data as Lead[],
     })
   } catch (error) {
-    console.error("Erreur récupération leads:", error)
-    
+    console.error("Erreur récupération leads:", error instanceof Error ? error.message : "Unknown")
+
     return NextResponse.json(
       {
         success: false,

@@ -36,8 +36,8 @@ export async function updateSession(request: NextRequest) {
   // Rafraîchit la session si nécessaire
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Routes protégées (à personnaliser selon tes besoins)
-  const protectedRoutes = ["/dashboard", "/compte", "/mes-demandes"]
+  // Routes protégées (authentification requise)
+  const protectedRoutes = ["/dashboard", "/compte", "/mes-demandes", "/pro", "/admin"]
   const isProtectedRoute = protectedRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   )
@@ -53,7 +53,7 @@ export async function updateSession(request: NextRequest) {
   // Redirige vers / si déjà connecté sur /login ou /signup
   const authRoutes = ["/login", "/signup"]
   const isAuthRoute = authRoutes.includes(request.nextUrl.pathname)
-  
+
   if (isAuthRoute && user) {
     const redirect = request.nextUrl.searchParams.get("redirect") || "/"
     const url = request.nextUrl.clone()
