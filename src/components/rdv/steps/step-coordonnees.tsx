@@ -25,17 +25,17 @@ function PasswordField({ value, onChange }: { value: string; onChange: (value: s
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [confirmPassword, setConfirmPassword] = useState("")
-  
+
   const passwordsMatch = value === confirmPassword
   const isValidLength = value.length >= 6
-  
+
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
         <Lock className="w-4 h-4 text-gray-500" />
         Créer votre mot de passe
       </h3>
-      
+
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="block text-sm text-gray-700">
@@ -52,7 +52,7 @@ function PasswordField({ value, onChange }: { value: string; onChange: (value: s
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 p-1 rounded-full hover:bg-gray-100 active:bg-gray-200"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -61,7 +61,7 @@ function PasswordField({ value, onChange }: { value: string; onChange: (value: s
             <p className="text-xs text-red-500">Minimum 6 caractères</p>
           )}
         </div>
-        
+
         <div className="space-y-2">
           <label className="block text-sm text-gray-700">
             Confirmer <span className="text-red-500">*</span>
@@ -80,7 +80,7 @@ function PasswordField({ value, onChange }: { value: string; onChange: (value: s
             <button
               type="button"
               onClick={() => setShowConfirm(!showConfirm)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 p-1 rounded-full hover:bg-gray-100 active:bg-gray-200"
             >
               {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -130,7 +130,7 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
           `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(searchQuery)}&limit=5`
         )
         const data = await response.json()
-        
+
         if (data.features) {
           const results: AddressSuggestion[] = data.features.map((f: {
             properties: {
@@ -165,10 +165,10 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
 
   // Sélectionner une suggestion
   const selectSuggestion = (suggestion: AddressSuggestion) => {
-    const fullStreet = suggestion.housenumber 
+    const fullStreet = suggestion.housenumber
       ? `${suggestion.housenumber} ${suggestion.street || ""}`
       : suggestion.street || suggestion.label
-    
+
     onUpdate({
       addressStreet: fullStreet.trim(),
       addressPostalCode: suggestion.postcode || "",
@@ -309,7 +309,7 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
               {searchLoading && (
                 <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />
               )}
-              
+
               {/* Suggestions */}
               {showSuggestions && suggestions.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
@@ -318,7 +318,7 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
                       key={index}
                       type="button"
                       onClick={() => selectSuggestion(suggestion)}
-                      className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                      className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors touch-manipulation active:bg-gray-100 active:duration-75"
                     >
                       <div className="font-medium text-gray-900 text-sm">
                         {suggestion.label}
@@ -416,21 +416,21 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
             { value: "email", label: "Email" },
           ].map((method) => {
             const isSelected = formState.diagnostic.preferredContactMethod === method.value
-            
+
             return (
               <button
                 key={method.value}
-                onClick={() => onUpdate({ 
-                  diagnostic: { 
-                    ...formState.diagnostic, 
+                onClick={() => onUpdate({
+                  diagnostic: {
+                    ...formState.diagnostic,
                     preferredContactMethod: method.value as "phone" | "email"
-                  } 
+                  }
                 })}
                 className={cn(
-                  "py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all",
+                  "py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all touch-manipulation active:scale-[0.98] active:duration-75",
                   isSelected
                     ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700"
+                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700 active:bg-gray-50"
                 )}
               >
                 {method.label}

@@ -1,12 +1,12 @@
 "use client"
 
-import { 
-  CalendarDays, 
-  Clock, 
-  MapPin, 
-  User, 
-  Wrench, 
-  CreditCard, 
+import {
+  CalendarDays,
+  Clock,
+  MapPin,
+  User,
+  Wrench,
+  CreditCard,
   Edit2,
   CheckCircle2,
   Shield
@@ -60,7 +60,7 @@ export function StepRecapitulatif({ formState, serviceType, onEdit }: StepRecapi
           </div>
           <button
             onClick={() => onEdit(0)}
-            className="text-emerald-600 hover:text-emerald-700 p-1"
+            className="text-emerald-600 hover:text-emerald-700 p-2 rounded-full hover:bg-emerald-50 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 active:bg-emerald-100"
           >
             <Edit2 className="w-4 h-4" />
           </button>
@@ -81,7 +81,7 @@ export function StepRecapitulatif({ formState, serviceType, onEdit }: StepRecapi
               </p>
               <p className="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
                 <Clock className="w-3.5 h-3.5" />
-                {formState.selectedTimeStart && formState.selectedTimeEnd 
+                {formState.selectedTimeStart && formState.selectedTimeEnd
                   ? formatTime(formState.selectedTimeStart, formState.selectedTimeEnd)
                   : "Non défini"
                 }
@@ -90,7 +90,7 @@ export function StepRecapitulatif({ formState, serviceType, onEdit }: StepRecapi
           </div>
           <button
             onClick={() => onEdit(4)}
-            className="text-emerald-600 hover:text-emerald-700 p-1"
+            className="text-emerald-600 hover:text-emerald-700 p-2 rounded-full hover:bg-emerald-50 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 active:bg-emerald-100"
           >
             <Edit2 className="w-4 h-4" />
           </button>
@@ -107,8 +107,8 @@ export function StepRecapitulatif({ formState, serviceType, onEdit }: StepRecapi
             <div>
               <h3 className="font-semibold text-gray-900">Artisan</h3>
               <p className="text-gray-700 mt-1">
-                {formState.autoAssign 
-                  ? "Attribution automatique" 
+                {formState.autoAssign
+                  ? "Attribution automatique"
                   : "En attente de confirmation"
                 }
               </p>
@@ -119,7 +119,7 @@ export function StepRecapitulatif({ formState, serviceType, onEdit }: StepRecapi
           </div>
           <button
             onClick={() => onEdit(5)}
-            className="text-emerald-600 hover:text-emerald-700 p-1"
+            className="text-emerald-600 hover:text-emerald-700 p-2 rounded-full hover:bg-emerald-50 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 active:bg-emerald-100"
           >
             <Edit2 className="w-4 h-4" />
           </button>
@@ -146,7 +146,7 @@ export function StepRecapitulatif({ formState, serviceType, onEdit }: StepRecapi
           </div>
           <button
             onClick={() => onEdit(6)}
-            className="text-emerald-600 hover:text-emerald-700 p-1"
+            className="text-emerald-600 hover:text-emerald-700 p-2 rounded-full hover:bg-emerald-50 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 active:bg-emerald-100"
           >
             <Edit2 className="w-4 h-4" />
           </button>

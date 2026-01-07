@@ -50,10 +50,10 @@ export function StepService({
               key={service.id}
               onClick={() => onSelect(service.code, service.id)}
               className={cn(
-                "w-full h-full text-left p-5 rounded-xl border-2 transition-all flex flex-col",
+                "w-full h-full text-left p-5 rounded-xl border-2 transition-all flex flex-col touch-manipulation active:scale-[0.98] active:duration-75",
                 isSelected
                   ? "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/20"
-                  : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+                  : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm active:bg-gray-50"
               )}
             >
               <div className="flex gap-4 flex-1">

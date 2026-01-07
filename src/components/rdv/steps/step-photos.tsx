@@ -15,7 +15,7 @@ export function StepPhotos({ photos, onUpdate }: StepPhotosProps) {
 
   const handleFileSelect = (files: FileList | null) => {
     if (!files) return
-    
+
     const newPhotos = Array.from(files).filter(file => {
       // Vérifier le type
       if (!file.type.startsWith("image/")) return false
@@ -76,10 +76,10 @@ export function StepPhotos({ photos, onUpdate }: StepPhotosProps) {
         onDragLeave={handleDragLeave}
         onClick={() => fileInputRef.current?.click()}
         className={cn(
-          "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all",
+          "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all touch-manipulation active:scale-[0.98] active:duration-75",
           dragOver
             ? "border-emerald-500 bg-emerald-50"
-            : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100"
+            : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100 active:bg-gray-200"
         )}
       >
         <input
@@ -90,7 +90,7 @@ export function StepPhotos({ photos, onUpdate }: StepPhotosProps) {
           onChange={(e) => handleFileSelect(e.target.files)}
           className="hidden"
         />
-        
+
         <div className="flex flex-col items-center gap-3">
           <div className={cn(
             "w-14 h-14 rounded-full flex items-center justify-center",
@@ -118,12 +118,12 @@ export function StepPhotos({ photos, onUpdate }: StepPhotosProps) {
             </span>
             <button
               onClick={() => onUpdate([])}
-              className="text-sm text-red-600 hover:text-red-700"
+              className="text-sm text-red-600 hover:text-red-700 transition-all duration-200 touch-manipulation active:scale-[0.98]"
             >
               Tout supprimer
             </button>
           </div>
-          
+
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {photos.map((photo, index) => (
               <div key={index} className="relative group aspect-square rounded-xl overflow-hidden bg-gray-100">
@@ -137,18 +137,18 @@ export function StepPhotos({ photos, onUpdate }: StepPhotosProps) {
                     e.stopPropagation()
                     removePhoto(index)
                   }}
-                  className="absolute top-2 right-2 w-7 h-7 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors"
+                  className="absolute top-2 right-2 w-7 h-7 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-out touch-manipulation active:scale-90 active:duration-75"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             ))}
-            
+
             {/* Ajouter plus */}
             {photos.length < 5 && (
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors"
+                className="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 active:bg-gray-50"
               >
                 <Camera className="w-6 h-6" />
                 <span className="text-xs font-medium">Ajouter</span>

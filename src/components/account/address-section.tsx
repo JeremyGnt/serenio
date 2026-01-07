@@ -159,7 +159,7 @@ export function AddressSection({ user }: AddressSectionProps) {
                   key={index}
                   type="button"
                   onClick={() => selectSuggestion(suggestion)}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-all duration-200 border-b border-gray-100 last:border-0 touch-manipulation active:bg-gray-100 active:duration-75"
                 >
                   <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                   <span className="text-sm truncate">{suggestion.label}</span>

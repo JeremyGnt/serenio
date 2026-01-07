@@ -47,7 +47,7 @@ export function AccountTabs({ user }: AccountTabsProps) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${isActive
+                className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 touch-manipulation active:scale-[0.98] active:duration-75 ${isActive
                   ? isDanger
                     ? "bg-red-50 text-red-600"
                     : isHighlight

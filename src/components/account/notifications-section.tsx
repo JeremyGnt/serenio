@@ -26,14 +26,12 @@ function Toggle({ label, description, checked, onChange }: ToggleProps) {
       <button
         type="button"
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-          checked ? "bg-emerald-500" : "bg-gray-200"
-        }`}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-200 ease-out touch-manipulation active:scale-[0.95] active:duration-75 ${checked ? "bg-emerald-500" : "bg-gray-200"
+          }`}
       >
         <span
-          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-            checked ? "translate-x-6" : "translate-x-1"
-          }`}
+          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? "translate-x-6" : "translate-x-1"
+            }`}
         />
       </button>
     </div>
@@ -42,7 +40,7 @@ function Toggle({ label, description, checked, onChange }: ToggleProps) {
 
 export function NotificationsSection({ user }: NotificationsSectionProps) {
   const prefs = user.user_metadata?.notification_preferences || {}
-  
+
   const [emailMarketing, setEmailMarketing] = useState(prefs.email_marketing ?? true)
   const [emailUpdates, setEmailUpdates] = useState(prefs.email_updates ?? true)
   const [smsAlerts, setSmsAlerts] = useState(prefs.sms_alerts ?? true)

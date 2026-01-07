@@ -50,7 +50,7 @@ export function Hero({ isLoggedIn }: HeroProps) {
             {/* Bouton RDV */}
             <Link
               href="/rdv"
-              className="group flex items-center justify-center gap-2 h-14 sm:h-16 sm:flex-1 px-6 bg-white hover:bg-slate-50 text-slate-900 font-semibold rounded-xl sm:rounded-2xl border-2 border-slate-200 hover:border-emerald-300 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
+              className="group flex items-center justify-center gap-2 h-14 sm:h-16 sm:flex-1 px-6 bg-white hover:bg-slate-50 text-slate-900 font-semibold rounded-xl sm:rounded-2xl border-2 border-slate-200 hover:border-emerald-300 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] active:duration-75 touch-manipulation"
             >
               <Calendar className="w-5 h-5 text-emerald-600" />
               <span>Planifier un RDV</span>

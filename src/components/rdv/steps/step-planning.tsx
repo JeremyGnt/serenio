@@ -23,12 +23,12 @@ const TIME_SLOTS = [
   { start: "18:00", end: "20:00", label: "18h - 20h" },
 ]
 
-export function StepPlanning({ 
-  selectedDate, 
-  selectedTimeStart, 
+export function StepPlanning({
+  selectedDate,
+  selectedTimeStart,
   selectedTimeEnd,
-  onSelectDate, 
-  onSelectTime 
+  onSelectDate,
+  onSelectTime
 }: StepPlanningProps) {
   const [availableDays, setAvailableDays] = useState<DayAvailability[]>([])
   const [weekOffset, setWeekOffset] = useState(0)
@@ -75,8 +75,8 @@ export function StepPlanning({
               onClick={() => setWeekOffset(w => w - 1)}
               disabled={!canGoPrev}
               className={cn(
-                "p-1.5 rounded-lg transition-colors",
-                canGoPrev ? "hover:bg-gray-100 text-gray-700" : "text-gray-300 cursor-not-allowed"
+                "p-1.5 rounded-lg transition-colors touch-manipulation active:scale-[0.90] active:duration-75",
+                canGoPrev ? "hover:bg-gray-100 text-gray-700 active:bg-gray-200" : "text-gray-300 cursor-not-allowed"
               )}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -85,8 +85,8 @@ export function StepPlanning({
               onClick={() => setWeekOffset(w => w + 1)}
               disabled={!canGoNext}
               className={cn(
-                "p-1.5 rounded-lg transition-colors",
-                canGoNext ? "hover:bg-gray-100 text-gray-700" : "text-gray-300 cursor-not-allowed"
+                "p-1.5 rounded-lg transition-colors touch-manipulation active:scale-[0.90] active:duration-75",
+                canGoNext ? "hover:bg-gray-100 text-gray-700 active:bg-gray-200" : "text-gray-300 cursor-not-allowed"
               )}
             >
               <ChevronRight className="w-4 h-4" />
@@ -98,16 +98,16 @@ export function StepPlanning({
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {visibleDays.map((day) => {
             const isSelected = selectedDate === day.date
-            
+
             return (
               <button
                 key={day.date}
                 onClick={() => onSelectDate(day.date)}
                 className={cn(
-                  "flex flex-col items-center p-3 rounded-xl border-2 transition-all",
+                  "flex flex-col items-center p-3 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98] active:duration-75",
                   isSelected
                     ? "border-emerald-500 bg-emerald-50"
-                    : "border-gray-200 bg-white hover:border-gray-300"
+                    : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
                 )}
               >
                 <span className={cn(
@@ -146,16 +146,16 @@ export function StepPlanning({
             {TIME_SLOTS.map((slot) => {
               const isSelected = selectedTimeStart === slot.start
               const highDemand = isHighDemand(slot)
-              
+
               return (
                 <button
                   key={slot.start}
                   onClick={() => onSelectTime(slot.start, slot.end)}
                   className={cn(
-                    "relative flex flex-col items-center p-3 rounded-xl border-2 transition-all",
+                    "relative flex flex-col items-center p-3 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98] active:duration-75",
                     isSelected
                       ? "border-emerald-500 bg-emerald-50"
-                      : "border-gray-200 bg-white hover:border-gray-300"
+                      : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
                   )}
                 >
                   <span className={cn(
@@ -164,7 +164,7 @@ export function StepPlanning({
                   )}>
                     {slot.label}
                   </span>
-                  
+
                   {highDemand && !isSelected && (
                     <span className="flex items-center gap-1 text-xs text-amber-600 mt-1">
                       <AlertTriangle className="w-3 h-3" />
@@ -183,10 +183,10 @@ export function StepPlanning({
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
           <p className="text-sm text-emerald-800">
             <span className="font-medium">Votre rendez-vous :</span>{" "}
-            {new Date(selectedDate).toLocaleDateString("fr-FR", { 
-              weekday: "long", 
-              day: "numeric", 
-              month: "long" 
+            {new Date(selectedDate).toLocaleDateString("fr-FR", {
+              weekday: "long",
+              day: "numeric",
+              month: "long"
             })}{" "}
             entre {selectedTimeStart?.replace(":", "h")} et {selectedTimeEnd?.replace(":", "h")}
           </p>

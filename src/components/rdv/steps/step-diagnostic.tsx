@@ -67,10 +67,10 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
                 key={type.value}
                 onClick={() => onUpdate({ propertyType: type.value as RdvDiagnosticAnswers["propertyType"] })}
                 className={cn(
-                  "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all",
+                  "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98] active:duration-75",
                   isSelected
                     ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700"
+                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700 active:bg-gray-50"
                 )}
               >
                 <Icon className="w-5 h-5" />
@@ -114,10 +114,10 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
                 key={type.value}
                 onClick={() => onUpdate({ doorType: type.value as RdvDiagnosticAnswers["doorType"] })}
                 className={cn(
-                  "flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left",
+                  "flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left touch-manipulation active:scale-[0.98] active:duration-75",
                   isSelected
                     ? "border-emerald-500 bg-emerald-50"
-                    : "border-gray-200 bg-white hover:border-gray-300"
+                    : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
                 )}
               >
                 <div className={cn(
@@ -173,10 +173,10 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
                 key={type.value}
                 onClick={() => onUpdate({ lockType: type.value as RdvDiagnosticAnswers["lockType"] })}
                 className={cn(
-                  "flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left",
+                  "flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left touch-manipulation active:scale-[0.98] active:duration-75",
                   isSelected
                     ? "border-emerald-500 bg-emerald-50"
-                    : "border-gray-200 bg-white hover:border-gray-300"
+                    : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
                 )}
               >
                 <div className={cn(
@@ -232,10 +232,10 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
                 key={level.value}
                 onClick={() => onUpdate({ accessDifficulty: level.value as RdvDiagnosticAnswers["accessDifficulty"] })}
                 className={cn(
-                  "flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all",
+                  "flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98] active:duration-75",
                   isSelected
                     ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700"
+                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700 active:bg-gray-50"
                 )}
               >
                 <Icon className="w-5 h-5" />
@@ -271,10 +271,10 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
               <button
                 onClick={() => onUpdate({ hasElevator: true })}
                 className={cn(
-                  "flex-1 py-3 px-4 rounded-xl border-2 font-medium transition-all",
+                  "flex-1 py-3 px-4 rounded-xl border-2 font-medium transition-all touch-manipulation active:scale-[0.98] active:duration-75",
                   diagnostic.hasElevator === true
                     ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700"
+                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700 active:bg-gray-50"
                 )}
               >
                 Oui
@@ -282,10 +282,10 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
               <button
                 onClick={() => onUpdate({ hasElevator: false })}
                 className={cn(
-                  "flex-1 py-3 px-4 rounded-xl border-2 font-medium transition-all",
+                  "flex-1 py-3 px-4 rounded-xl border-2 font-medium transition-all touch-manipulation active:scale-[0.98] active:duration-75",
                   diagnostic.hasElevator === false
                     ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700"
+                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700 active:bg-gray-50"
                 )}
               >
                 Non

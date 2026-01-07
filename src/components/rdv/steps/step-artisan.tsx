@@ -13,11 +13,11 @@ interface StepArtisanProps {
   onSelectArtisan: (id: string) => void
 }
 
-export function StepArtisan({ 
-  autoAssign, 
-  selectedArtisanId, 
-  onToggleAutoAssign, 
-  onSelectArtisan 
+export function StepArtisan({
+  autoAssign,
+  selectedArtisanId,
+  onToggleAutoAssign,
+  onSelectArtisan
 }: StepArtisanProps) {
   const [artisans, setArtisans] = useState<ArtisanForSelection[]>([])
   const [loading, setLoading] = useState(true)
@@ -53,10 +53,10 @@ export function StepArtisan({
       <button
         onClick={() => onToggleAutoAssign(true)}
         className={cn(
-          "w-full p-5 rounded-xl border-2 transition-all text-left",
+          "w-full p-5 rounded-xl border-2 transition-all text-left touch-manipulation active:scale-[0.98] active:duration-75",
           autoAssign
             ? "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/20"
-            : "border-gray-200 bg-white hover:border-gray-300"
+            : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
         )}
       >
         <div className="flex gap-4">
@@ -102,10 +102,10 @@ export function StepArtisan({
         <button
           onClick={() => onToggleAutoAssign(false)}
           className={cn(
-            "w-full p-4 rounded-xl border-2 transition-all text-left",
+            "w-full p-4 rounded-xl border-2 transition-all text-left touch-manipulation active:scale-[0.98] active:duration-75",
             !autoAssign
               ? "border-emerald-500 bg-emerald-50"
-              : "border-gray-200 bg-white hover:border-gray-300"
+              : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
           )}
         >
           <div className="flex items-center gap-3">
@@ -146,24 +146,24 @@ export function StepArtisan({
             ) : (
               artisans.map((artisan) => {
                 const isSelected = selectedArtisanId === artisan.id
-                
+
                 return (
                   <button
                     key={artisan.id}
                     onClick={() => onSelectArtisan(artisan.id)}
                     className={cn(
-                      "w-full p-4 rounded-xl border-2 transition-all text-left",
+                      "w-full p-4 rounded-xl border-2 transition-all text-left touch-manipulation active:scale-[0.98] active:duration-75",
                       isSelected
                         ? "border-emerald-500 bg-emerald-50"
-                        : "border-gray-200 bg-white hover:border-gray-300"
+                        : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
                     )}
                   >
                     <div className="flex gap-3">
                       {/* Avatar */}
                       <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
                         {artisan.profilePhotoUrl ? (
-                          <img 
-                            src={artisan.profilePhotoUrl} 
+                          <img
+                            src={artisan.profilePhotoUrl}
                             alt={artisan.firstName}
                             className="w-full h-full object-cover"
                           />
@@ -191,7 +191,7 @@ export function StepArtisan({
                               </span>
                             </div>
                           </div>
-                          
+
                           {isSelected && (
                             <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
                           )}

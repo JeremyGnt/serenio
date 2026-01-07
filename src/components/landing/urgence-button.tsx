@@ -45,7 +45,7 @@ export function UrgenceButton({ isLoggedIn }: UrgenceButtonProps) {
     return (
         <Link
             href={targetUrl}
-            className="group relative flex items-center justify-center gap-2 h-14 sm:h-16 sm:flex-1 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl sm:rounded-2xl shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 transition-all duration-300 hover:-translate-y-1 active:translate-y-0 animate-pulse-subtle"
+            className="group relative flex items-center justify-center gap-2 h-14 sm:h-16 sm:flex-1 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl sm:rounded-2xl shadow-lg shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30 transition-all duration-200 ease-out hover:-translate-y-1 active:translate-y-0 active:scale-[0.96] active:duration-75 touch-manipulation animate-pulse-subtle"
         >
             {/* Effet de brillance */}
             <span className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity" />

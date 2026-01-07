@@ -9,6 +9,7 @@ import {
   Footer,
 } from "@/components/landing"
 import { ActiveSearchBanner } from "@/components/landing/active-search-banner"
+import { ScrollToTop } from "@/components/ui/scroll-to-top"
 import { getLandingPageData } from "@/lib/api/landing"
 import { getUser } from "@/lib/supabase/server"
 
@@ -32,6 +33,7 @@ export default async function Home() {
         <Testimonials testimonials={testimonials} />
         <Faq faq={faq} />
         <Footer />
+        <ScrollToTop />
       </main>
     </>
   )

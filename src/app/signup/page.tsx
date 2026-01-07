@@ -14,7 +14,7 @@ export default function SignupPage() {
       {/* Retour à l'accueil */}
       <Link
         href="/"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-all duration-200 ease-out touch-manipulation active:scale-95 active:duration-75 w-fit p-2 -ml-2 rounded-lg hover:bg-gray-100"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-all duration-200 ease-out touch-manipulation active:scale-95 active:duration-75 active:bg-gray-200 w-fit p-2 -ml-2 rounded-lg hover:bg-gray-100"
       >
         <ArrowLeft className="w-5 h-5" />
         <span className="hidden sm:inline">Retour à l'accueil</span>
