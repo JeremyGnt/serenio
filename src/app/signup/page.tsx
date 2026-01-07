@@ -12,8 +12,8 @@ export default function SignupPage() {
   return (
     <main className="min-h-screen flex flex-col px-4 py-6">
       {/* Retour à l'accueil */}
-      <Link 
-        href="/" 
+      <Link
+        href="/"
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit p-2 -ml-2 rounded-lg hover:bg-gray-100"
       >
         <ArrowLeft className="w-5 h-5" />
@@ -37,8 +37,8 @@ export default function SignupPage() {
               Créez votre compte
             </p>
             {/* Lien Artisan discret */}
-            <Link 
-              href="/pro/register" 
+            <Link
+              href="/login"
               className="group inline-flex items-center gap-1.5 mt-3 text-sm text-blue-600 hover:text-blue-700 hover:underline"
             >
               <span>Vous êtes artisan serrurier ?</span>
@@ -56,17 +56,6 @@ export default function SignupPage() {
               Se connecter
             </Link>
           </p>
-
-          {/* Lien Artisan - visible sur mobile uniquement */}
-          <Link
-            href="/pro/register"
-            className="md:hidden group flex items-center justify-center gap-3 p-4 bg-gray-50 border-2 border-blue-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all"
-          >
-            <Wrench className="w-5 h-5 text-blue-600" />
-            <span className="font-semibold text-blue-700 group-hover:text-blue-800">
-              Je suis artisan serrurier
-            </span>
-          </Link>
         </div>
       </div>
     </main>
