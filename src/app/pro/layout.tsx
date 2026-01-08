@@ -17,8 +17,14 @@ export default async function ProLayout({
 
     const role = user.user_metadata?.role
 
+    // Redirect non-artisans to account page
     if (role !== "artisan" && role !== "artisan_pending") {
         redirect("/compte")
+    }
+
+    // Redirect pending artisans to waiting page
+    if (role === "artisan_pending") {
+        redirect("/artisan-en-attente")
     }
 
     // Fetch stats only if artisan is validated

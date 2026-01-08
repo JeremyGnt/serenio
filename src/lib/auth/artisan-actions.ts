@@ -65,6 +65,7 @@ export async function registerArtisan(payload: ArtisanRegisterPayload): Promise<
     country: "France",
     experience: payload.experience || null,
     status: "pending", // En attente de validation
+    is_available: false, // Indisponible par défaut
     created_at: new Date().toISOString(),
   })
 

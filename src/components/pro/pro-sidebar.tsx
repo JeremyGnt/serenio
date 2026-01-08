@@ -311,9 +311,9 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
                                 >
                                     <Icon className={cn("w-5 h-5", isActive ? "text-red-600" : "text-red-500")} />
                                     <span className="flex-1">{URGENCE_ITEM.label}</span>
-                                    {urgentCountState > 0 && (
+                                    {available && urgentCountState > 0 && (
                                         <span className={cn(
-                                            "px-2 py-0.5 text-xs font-bold rounded-full min-w-[20px] text-center animate-pulse",
+                                            "px-2 py-0.5 text-xs font-bold rounded-full min-w-[20px] text-center",
                                             isActive
                                                 ? "bg-red-600 text-white"
                                                 : "bg-red-500 text-white"
@@ -405,8 +405,8 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
                             >
                                 <Icon className="w-5 h-5" />
                                 <span className="text-[10px] font-medium">{item.label.split(" ")[0]}</span>
-                                {isUrgent && urgentCountState > 0 && (
-                                    <span className="absolute top-1 right-2 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse border-2 border-white">
+                                {isUrgent && available && urgentCountState > 0 && (
+                                    <span className="absolute top-1 right-2 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
                                         {urgentCountState > 9 ? "9+" : String(urgentCountState)}
                                     </span>
                                 )}

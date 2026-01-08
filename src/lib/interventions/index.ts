@@ -33,6 +33,7 @@ export {
   getActiveArtisanMissions,
   getAllArtisanMissions,
   getMissionDetailsByTracking,
+  getArtisanAvailability,
 } from "./pro-queries"
 
 // Types Pro

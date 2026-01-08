@@ -210,19 +210,20 @@ export async function upgradeToArtisan(data: {
 
   // Créer l'entrée dans la table artisans
   const { error: insertError } = await supabase.from("artisans").insert({
-    user_id: userData.user.id,
+    id: userData.user.id,
     company_name: data.companyName,
     siret: data.siret,
     first_name: userData.user.user_metadata?.first_name || "",
     last_name: userData.user.user_metadata?.last_name || "",
     email: userData.user.email,
     phone: data.phone,
-    address_street: data.street,
-    address_postal_code: data.postalCode,
-    address_city: data.city,
-    experience: data.experience || "",
+    street: data.street,
+    postal_code: data.postalCode,
+    city: data.city,
+    country: "France",
+    experience: data.experience || null,
     status: "pending",
-    specialty: "serrurerie",
+    is_available: false, // Indisponible par défaut
   })
 
   if (insertError) {

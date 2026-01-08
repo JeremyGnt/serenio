@@ -1,7 +1,9 @@
-import { Siren, RefreshCw } from "lucide-react"
-import { getPendingInterventions } from "@/lib/interventions"
+import { Siren } from "lucide-react"
+import { getPendingInterventions, getArtisanAvailability } from "@/lib/interventions"
 import { UrgentRequestsList } from "@/components/pro/urgent-requests-list"
 import { UrgenceInfoBanner } from "@/components/pro/urgence-info-banner"
+import { getUser } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
 
 export const metadata = {
     title: "Urgences | Serenio Pro",
@@ -9,7 +11,16 @@ export const metadata = {
 }
 
 export default async function UrgencesPage() {
-    const pendingInterventions = await getPendingInterventions()
+    const user = await getUser()
+
+    if (!user) {
+        redirect("/login?redirect=/pro/urgences")
+    }
+
+    const [pendingInterventions, isAvailable] = await Promise.all([
+        getPendingInterventions(),
+        getArtisanAvailability()
+    ])
 
     return (
         <div className="p-4 md:p-6 lg:p-8">
@@ -30,7 +41,12 @@ export default async function UrgencesPage() {
             <UrgenceInfoBanner />
 
             {/* Liste des urgences */}
-            <UrgentRequestsList initialInterventions={pendingInterventions} />
+            <UrgentRequestsList
+                initialInterventions={pendingInterventions}
+                isAvailable={isAvailable}
+                userId={user.id}
+            />
         </div>
     )
 }
+

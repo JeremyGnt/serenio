@@ -2,9 +2,10 @@
 
 import { useState, useCallback, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Siren, RefreshCw, Loader2, Wifi, WifiOff, Bell } from "lucide-react"
+import { RefreshCw, Loader2, Wifi, WifiOff, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { UrgentRequestCard } from "./urgent-request-card"
+import { AvailabilityLock } from "./availability-lock"
 import { getPendingInterventions } from "@/lib/interventions/pro-queries"
 import { supabase } from "@/lib/supabase/client"
 import type { AnonymizedIntervention } from "@/lib/interventions"
@@ -12,6 +13,8 @@ import type { RealtimePostgresChangesPayload, RealtimeChannel } from "@supabase/
 
 interface UrgentRequestsListProps {
     initialInterventions: AnonymizedIntervention[]
+    isAvailable: boolean
+    userId: string
 }
 
 // Types pour les payloads Supabase Realtime
@@ -30,13 +33,15 @@ interface InterventionPayload {
     submitted_at: string | null
 }
 
-export function UrgentRequestsList({ initialInterventions }: UrgentRequestsListProps) {
+export function UrgentRequestsList({ initialInterventions, isAvailable, userId }: UrgentRequestsListProps) {
     const router = useRouter()
     const [interventions, setInterventions] = useState(initialInterventions)
     const [refreshing, setRefreshing] = useState(false)
     const [isConnected, setIsConnected] = useState(false)
     const [newUrgenceAlert, setNewUrgenceAlert] = useState(false)
+    const [localIsAvailable, setLocalIsAvailable] = useState(isAvailable)
     const channelRef = useRef<RealtimeChannel | null>(null)
+    const availabilityChannelRef = useRef<RealtimeChannel | null>(null)
 
     // Fonction de rafraîchissement manuel
     const handleRefresh = useCallback(async () => {
@@ -53,8 +58,53 @@ export function UrgentRequestsList({ initialInterventions }: UrgentRequestsListP
         }
     }, [router])
 
-    // Supabase Realtime subscription pour les nouvelles urgences
+    // Realtime subscription pour les changements de disponibilité
+    // Permet de synchroniser l'état quand l'artisan toggle depuis la sidebar
     useEffect(() => {
+        const channel = supabase
+            .channel(`artisan-availability-${userId}`)
+            .on(
+                "postgres_changes",
+                {
+                    event: "UPDATE",
+                    schema: "public",
+                    table: "artisans",
+                    filter: `id=eq.${userId}`
+                },
+                (payload) => {
+                    const newAvailability = (payload.new as { is_available: boolean }).is_available
+                    setLocalIsAvailable(newAvailability)
+
+                    // Si on repasse disponible, rafraîchir les urgences
+                    if (newAvailability) {
+                        handleRefresh()
+                    }
+                }
+            )
+            .subscribe()
+
+        availabilityChannelRef.current = channel
+
+        return () => {
+            if (availabilityChannelRef.current) {
+                supabase.removeChannel(availabilityChannelRef.current)
+            }
+        }
+    }, [userId, handleRefresh])
+
+    // Supabase Realtime subscription pour les nouvelles urgences
+    // Ne pas s'abonner si l'artisan est indisponible
+    useEffect(() => {
+        if (!localIsAvailable) {
+            // Nettoyer le channel existant si on passe en indisponible
+            if (channelRef.current) {
+                supabase.removeChannel(channelRef.current)
+                channelRef.current = null
+            }
+            setIsConnected(false)
+            return
+        }
+
         // S'abonner aux changements sur intervention_requests
         const channel = supabase
             .channel("urgences-realtime")
@@ -131,7 +181,14 @@ export function UrgentRequestsList({ initialInterventions }: UrgentRequestsListP
                 supabase.removeChannel(channelRef.current)
             }
         }
-    }, [handleRefresh])
+    }, [handleRefresh, localIsAvailable])
+
+    // Callback quand l'artisan repasse disponible
+    const handleAvailabilityChange = useCallback(() => {
+        setLocalIsAvailable(true)
+        handleRefresh()
+        router.refresh()
+    }, [handleRefresh, router])
 
     const handleAccept = (interventionId: string) => {
         setInterventions(prev => prev.filter(i => i.id !== interventionId))
@@ -145,7 +202,9 @@ export function UrgentRequestsList({ initialInterventions }: UrgentRequestsListP
 
     if (interventions.length === 0) {
         return (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="relative bg-white rounded-xl border border-gray-200 p-6">
+                {/* Overlay indisponible */}
+                {!localIsAvailable && <AvailabilityLock onAvailabilityChange={handleAvailabilityChange} />}
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="font-bold text-base md:text-lg flex items-center gap-2">
                         <Bell className="w-5 h-5 text-red-500" />
@@ -193,7 +252,9 @@ export function UrgentRequestsList({ initialInterventions }: UrgentRequestsListP
     }
 
     return (
-        <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
+        <div className="relative bg-white rounded-xl border border-gray-200 p-4 md:p-6">
+            {/* Overlay indisponible */}
+            {!localIsAvailable && <AvailabilityLock onAvailabilityChange={handleAvailabilityChange} />}
             {/* Alerte nouvelle urgence */}
             {newUrgenceAlert && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 animate-pulse">

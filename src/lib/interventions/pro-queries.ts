@@ -535,13 +535,13 @@ export interface MissionDetails {
     trackingNumber: string
     interventionType: "urgence" | "rdv"
     status: string
-    
+
     // Client
     clientFirstName: string
     clientLastName?: string
     clientPhone: string
     clientEmail: string
-    
+
     // Adresse complète
     addressStreet: string
     addressComplement?: string
@@ -550,7 +550,7 @@ export interface MissionDetails {
     addressInstructions?: string
     latitude?: number
     longitude?: number
-    
+
     // Diagnostic
     situationType: SituationType
     situationDetails?: string
@@ -561,35 +561,35 @@ export interface MissionDetails {
     floorNumber?: number
     hasElevator?: boolean
     additionalNotes?: string
-    
+
     // Service RDV
     serviceType?: {
         code: string
         name: string
         icon: string
     }
-    
+
     // Planning (pour RDV)
     scheduledDate?: string
     scheduledTimeStart?: string
     scheduledTimeEnd?: string
-    
+
     // Prix estimé
     estimatedPriceMin?: number
     estimatedPriceMax?: number
-    
+
     // Photos
     photos: {
         id: string
         url: string
         description?: string
     }[]
-    
+
     // Timestamps
     createdAt: string
     submittedAt?: string
     acceptedAt?: string
-    
+
     // Assignment info
     assignmentId?: string
     assignedAt?: string
@@ -634,7 +634,7 @@ export async function getMissionDetailsByTracking(
         // Puis rdv_selected_artisan_id (pour les RDV pré-sélectionnés par le client)
         let assignmentId: string | null = null
         let assignedAt: string | null = null
-        
+
         // Chercher dans artisan_assignments d'abord
         const { data: assignment } = await adminClient
             .from("artisan_assignments")
@@ -675,13 +675,13 @@ export async function getMissionDetailsByTracking(
             trackingNumber: intervention.tracking_number,
             interventionType: intervention.intervention_type,
             status: intervention.status,
-            
+
             // Client
             clientFirstName: intervention.client_first_name || "Client",
             clientLastName: intervention.client_last_name,
             clientPhone: intervention.client_phone || "",
             clientEmail: intervention.client_email || "",
-            
+
             // Adresse
             addressStreet: intervention.address_street || "",
             addressComplement: intervention.address_complement,
@@ -690,7 +690,7 @@ export async function getMissionDetailsByTracking(
             addressInstructions: intervention.address_instructions,
             latitude: intervention.latitude,
             longitude: intervention.longitude,
-            
+
             // Diagnostic
             situationType: diagnostic?.situation_type || "other",
             situationDetails: diagnostic?.situation_details,
@@ -701,19 +701,19 @@ export async function getMissionDetailsByTracking(
             floorNumber: diagnostic?.floor_number,
             hasElevator: diagnostic?.has_elevator,
             additionalNotes: diagnostic?.additional_notes,
-            
+
             // Service RDV
             serviceType: serviceType ? {
                 code: serviceType.code,
                 name: serviceType.name,
                 icon: serviceType.icon,
             } : undefined,
-            
+
             // Planning
             scheduledDate: intervention.scheduled_date,
             scheduledTimeStart: intervention.scheduled_time_start,
             scheduledTimeEnd: intervention.scheduled_time_end,
-            
+
             // Prix
             estimatedPriceMin: intervention.rdv_price_estimate_min_cents
                 ? intervention.rdv_price_estimate_min_cents / 100
@@ -721,15 +721,15 @@ export async function getMissionDetailsByTracking(
             estimatedPriceMax: intervention.rdv_price_estimate_max_cents
                 ? intervention.rdv_price_estimate_max_cents / 100
                 : undefined,
-            
+
             // Photos
             photos,
-            
+
             // Timestamps
             createdAt: intervention.created_at,
             submittedAt: intervention.submitted_at,
             acceptedAt: intervention.accepted_at,
-            
+
             // Assignment
             assignmentId: assignmentId || undefined,
             assignedAt: assignedAt || intervention.created_at,
@@ -747,20 +747,20 @@ export async function getMissionDetailsByTracking(
 export interface RdvOpportunity {
     id: string
     trackingNumber: string
-    
+
     // Localisation anonymisée
     city: string
     postalCode: string
     latitude?: number
     longitude?: number
-    
+
     // Type de service
     serviceType: {
         code: string
         name: string
         icon: string
     } | null
-    
+
     // Diagnostic
     diagnostic: {
         propertyType?: string
@@ -771,23 +771,23 @@ export interface RdvOpportunity {
         hasElevator?: boolean
         additionalNotes?: string
     } | null
-    
+
     // Photos
     photos: {
         id: string
         url: string
         description?: string
     }[]
-    
+
     // Planning
     scheduledDate: string | null
     scheduledTimeStart: string | null
     scheduledTimeEnd: string | null
-    
+
     // Prix estimé
     estimatedPriceMin: number | null
     estimatedPriceMax: number | null
-    
+
     // Timestamps
     createdAt: string
     submittedAt: string | null
@@ -800,18 +800,18 @@ export interface RdvOpportunity {
 export async function getRdvOpportunities(): Promise<RdvOpportunity[]> {
     const supabase = await createClient()
     const adminClient = createAdminClient()
-    
+
     const { data: { user } } = await supabase.auth.getUser()
-    
+
     if (!user) {
         return []
     }
-    
+
     const role = user.user_metadata?.role
     if (role !== "artisan") {
         return []
     }
-    
+
     try {
         // Récupérer les IDs refusés par cet artisan
         const { data: refusedAssignments } = await adminClient
@@ -819,9 +819,9 @@ export async function getRdvOpportunities(): Promise<RdvOpportunity[]> {
             .select("intervention_id")
             .eq("artisan_id", user.id)
             .eq("status", "refused")
-        
+
         const refusedIds = refusedAssignments?.map(a => a.intervention_id) || []
-        
+
         // Récupérer les interventions RDV en attente
         const { data: interventions, error } = await adminClient
             .from("intervention_requests")
@@ -863,35 +863,35 @@ export async function getRdvOpportunities(): Promise<RdvOpportunity[]> {
             .eq("intervention_type", "rdv")
             .order("scheduled_date", { ascending: true })
             .limit(30)
-        
+
         if (error || !interventions) {
             console.error("Erreur récupération opportunités RDV:", error)
             return []
         }
-        
+
         // Filtrer les refusées
         const filtered = interventions.filter(i => !refusedIds.includes(i.id))
-        
+
         // Mapper vers le format anonymisé
         return filtered.map(intervention => {
             const diagnostic = Array.isArray(intervention.intervention_diagnostics)
                 ? intervention.intervention_diagnostics[0]
                 : intervention.intervention_diagnostics
-            
+
             // Le service type peut être un objet ou un tableau selon la relation
             const rawServiceType = intervention.rdv_service_types
-            const serviceType = rawServiceType 
-                ? (Array.isArray(rawServiceType) 
+            const serviceType = rawServiceType
+                ? (Array.isArray(rawServiceType)
                     ? rawServiceType[0] as { code: string; name: string; icon: string }
                     : rawServiceType as unknown as { code: string; name: string; icon: string })
                 : null
-            
+
             const photos = (intervention.intervention_photos || []).map((p: { id: string; storage_path: string; description?: string }) => ({
                 id: p.id,
                 url: p.storage_path, // À transformer en URL signée si nécessaire
                 description: p.description
             }))
-            
+
             return {
                 id: intervention.id,
                 trackingNumber: intervention.tracking_number,
@@ -922,5 +922,37 @@ export async function getRdvOpportunities(): Promise<RdvOpportunity[]> {
     } catch (error) {
         console.error("Erreur getRdvOpportunities:", error)
         return []
+    }
+}
+
+// ============================================
+// STATUT DISPONIBILITÉ ARTISAN
+// ============================================
+
+/**
+ * Récupère le statut de disponibilité de l'artisan connecté
+ * Retourne true si disponible, false sinon
+ */
+export async function getArtisanAvailability(): Promise<boolean> {
+    const supabase = await createClient()
+    const adminClient = createAdminClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return false
+    }
+
+    try {
+        const { data: artisan } = await adminClient
+            .from("artisans")
+            .select("is_available")
+            .eq("id", user.id)
+            .single()
+
+        return artisan?.is_available ?? false
+    } catch (error) {
+        console.error("Erreur getArtisanAvailability:", error)
+        return false
     }
 }

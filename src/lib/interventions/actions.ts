@@ -468,6 +468,17 @@ export async function acceptMission(
   }
 
   try {
+    // Vérifier que l'artisan est disponible (sécurité backend)
+    const { data: artisan } = await adminClient
+      .from("artisans")
+      .select("is_available")
+      .eq("id", user.id)
+      .single()
+
+    if (!artisan?.is_available) {
+      return { success: false, error: "Vous devez être disponible pour accepter une mission" }
+    }
+
     // Récupérer l'intervention
     const { data: intervention, error: fetchError } = await adminClient
       .from("intervention_requests")
