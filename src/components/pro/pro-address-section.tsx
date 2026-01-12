@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PostalCodeInput } from "@/components/ui/postal-code-input"
 import { updateArtisanAddress } from "@/lib/pro/actions"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 
@@ -64,11 +65,11 @@ export function ProAddressSection({ user }: ProAddressSectionProps) {
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="postalCode">Code postal</Label>
-            <Input
+            <PostalCodeInput
               id="postalCode"
               value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value)}
-              maxLength={5}
+              onChange={(value) => setPostalCode(value)}
+              placeholder="69001"
               className="h-12"
             />
           </div>

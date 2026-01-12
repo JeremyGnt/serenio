@@ -23,9 +23,11 @@ import {
     Wrench,
     CircleDot,
     HelpCircle,
-    FileText
+    FileText,
+    Camera
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { InterventionPhotos } from "@/components/ui/intervention-photos"
 import type { AnonymizedIntervention } from "@/lib/interventions"
 import { acceptMission, refuseMission } from "@/lib/interventions"
 import type { SituationType, DoorType, LockType } from "@/types/intervention"
@@ -301,6 +303,21 @@ export function UrgentRequestModal({
         )
     }
 
+    // Section photos
+    const PhotosSection = () => (
+        <div className="mb-4">
+            <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-1">
+                <Camera className="w-3 h-3" />
+                Photos du client
+            </h4>
+            <InterventionPhotos
+                interventionId={intervention.id}
+                thumbnailMode={false}
+                className="bg-gray-50 rounded-lg p-3"
+            />
+        </div>
+    )
+
     // Section carte
     const MapSection = () => (
         <div className="mt-4">
@@ -436,6 +453,9 @@ export function UrgentRequestModal({
                                     </p>
                                 </div>
                             )}
+
+                            {/* Photos du client */}
+                            <PhotosSection />
 
                             {/* Desktop: Détails techniques toujours visibles */}
                             <div className="hidden lg:block">

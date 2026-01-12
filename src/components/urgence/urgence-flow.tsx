@@ -9,7 +9,9 @@ import { URGENCE_STEPS, DIAGNOSTIC_QUESTIONS } from "@/lib/interventions/config"
 import { createIntervention, updateDiagnostic, submitIntervention } from "@/lib/interventions"
 import { setActiveTracking } from "@/lib/active-tracking"
 import { useFormAutoSave } from "@/hooks/useFormAutoSave"
+import { usePhotoUpload } from "@/hooks/usePhotoUpload"
 import { FlowHeader, type FlowStep } from "@/components/flow"
+import type { PhotoPreview } from "@/components/ui/upload-photos"
 
 import { StepSituation } from "./steps/step-situation"
 import { StepDiagnostic } from "./steps/step-diagnostic"
@@ -37,7 +39,8 @@ interface FormState {
   situationDetails: string
 
   // Photos
-  photos: File[]
+  photos: PhotoPreview[]
+  rgpdConsent: boolean
 
   // Localisation
   addressStreet: string
@@ -66,6 +69,7 @@ const initialFormState: FormState = {
   lockType: null,
   situationDetails: "",
   photos: [],
+  rgpdConsent: false,
   addressStreet: "",
   addressPostalCode: "",
   addressCity: "",
@@ -276,6 +280,68 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
     }
   }
 
+  // Upload des photos vers le serveur
+  const uploadPhotos = async (interventionId: string): Promise<boolean> => {
+    const photosToUpload = formState.photos.filter(p => p.status === "pending")
+    
+    if (photosToUpload.length === 0) {
+      return true
+    }
+
+    // Mettre à jour le statut des photos à "uploading"
+    updateForm({
+      photos: formState.photos.map(p => ({
+        ...p,
+        status: p.status === "pending" ? "uploading" as const : p.status
+      }))
+    })
+
+    let allSuccess = true
+
+    for (const photo of photosToUpload) {
+      try {
+        const formData = new FormData()
+        formData.append("file", photo.file)
+        formData.append("interventionId", interventionId)
+        formData.append("photoType", "diagnostic")
+        formData.append("rgpdConsent", formState.rgpdConsent.toString())
+
+        const response = await fetch("/api/photos/upload", {
+          method: "POST",
+          body: formData,
+        })
+
+        const result = await response.json()
+
+        if (!result.success) {
+          console.error("Erreur upload photo:", result.error)
+          updateForm({
+            photos: formState.photos.map(p => 
+              p.id === photo.id ? { ...p, status: "error" as const, error: result.error } : p
+            )
+          })
+          allSuccess = false
+        } else {
+          updateForm({
+            photos: formState.photos.map(p => 
+              p.id === photo.id ? { ...p, status: "success" as const, progress: 100 } : p
+            )
+          })
+        }
+      } catch (error) {
+        console.error("Erreur upload photo:", error)
+        updateForm({
+          photos: formState.photos.map(p => 
+            p.id === photo.id ? { ...p, status: "error" as const, error: "Erreur réseau" } : p
+          )
+        })
+        allSuccess = false
+      }
+    }
+
+    return allSuccess
+  }
+
   // Soumettre la demande
   const handleSubmit = async () => {
     if (!formState.interventionId) {
@@ -284,6 +350,17 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
     }
 
     setLoading(true)
+
+    // 1. Upload des photos si présentes
+    if (formState.photos.length > 0) {
+      const photosSuccess = await uploadPhotos(formState.interventionId)
+      if (!photosSuccess) {
+        // Continue quand même, les photos échouées seront marquées
+        console.warn("Certaines photos n'ont pas pu être uploadées")
+      }
+    }
+
+    // 2. Soumettre l'intervention
     const result = await submitIntervention(formState.interventionId)
     setLoading(false)
 
@@ -378,6 +455,8 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
             photos={formState.photos}
             onUpdate={(photos) => updateForm({ photos })}
             onSkip={skipPhotos}
+            rgpdConsent={formState.rgpdConsent}
+            onRgpdConsentChange={(rgpdConsent) => updateForm({ rgpdConsent })}
           />
         )}
 

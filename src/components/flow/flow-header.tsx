@@ -88,7 +88,7 @@ export function FlowHeader({
                                 variant="ghost"
                                 size="sm"
                                 asChild
-                                className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2"
+                                className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 active:scale-95 active:bg-gray-200 touch-manipulation transition-transform"
                             >
                                 <Link href={backHref} aria-label="Retour à l'accueil">
                                     <ChevronLeft className="w-4 h-4" />
@@ -100,7 +100,7 @@ export function FlowHeader({
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleBack}
-                                className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2"
+                                className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 active:scale-95 active:bg-gray-200 touch-manipulation transition-transform"
                                 aria-label="Retour à l'étape précédente"
                             >
                                 <ChevronLeft className="w-4 h-4" />
@@ -138,7 +138,7 @@ export function FlowHeader({
                         variant="ghost"
                         size="icon-sm"
                         onClick={onClose}
-                        className="text-muted-foreground hover:text-foreground flex-shrink-0 -mr-2"
+                        className="text-muted-foreground hover:text-foreground flex-shrink-0 -mr-2 active:scale-95 active:bg-gray-200 touch-manipulation transition-transform"
                         aria-label="Fermer et retourner à l'accueil"
                     >
                         <X className="w-5 h-5" />
@@ -148,7 +148,7 @@ export function FlowHeader({
                         variant="ghost"
                         size="icon-sm"
                         asChild
-                        className="text-muted-foreground hover:text-foreground flex-shrink-0 -mr-2"
+                        className="text-muted-foreground hover:text-foreground flex-shrink-0 -mr-2 active:scale-95 active:bg-gray-200 touch-manipulation transition-transform"
                     >
                         <Link href={closeHref} aria-label="Fermer et retourner à l'accueil">
                             <X className="w-5 h-5" />

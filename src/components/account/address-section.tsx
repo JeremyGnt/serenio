@@ -5,6 +5,7 @@ import { MapPin, Search, Loader2, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PostalCodeInput } from "@/components/ui/postal-code-input"
 import { updateAddress } from "@/lib/account/actions"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 
@@ -130,20 +131,25 @@ export function AddressSection({ user }: AddressSectionProps) {
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Recherche d'adresse avec autocomplétion */}
+        {/* Champ adresse unifié avec autocomplétion */}
         <div className="space-y-2" ref={wrapperRef}>
-          <Label htmlFor="search" className="text-sm font-medium">
-            Rechercher une adresse
+          <Label htmlFor="street" className="text-sm font-medium">
+            Adresse
           </Label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              id="search"
+              id="street"
               type="text"
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
+              value={street || searchQuery}
+              onChange={(e) => {
+                const value = e.target.value
+                handleSearchChange(value)
+                setStreet(value)
+                setSuccess(false)
+              }}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-              placeholder="Tapez votre adresse pour la rechercher..."
+              placeholder="Tapez pour rechercher une adresse..."
               className="h-12 sm:h-14 pl-10 text-base"
             />
             {isSearching && (
@@ -169,40 +175,15 @@ export function AddressSection({ user }: AddressSectionProps) {
           )}
         </div>
 
-        {/* Séparateur */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200" />
-          </div>
-          <div className="relative flex justify-center">
-            <span className="bg-white px-3 text-xs text-muted-foreground">ou saisissez manuellement</span>
-          </div>
-        </div>
-
-        {/* Rue */}
-        <div className="space-y-2">
-          <Label htmlFor="street" className="text-sm font-medium">Rue</Label>
-          <Input
-            id="street"
-            type="text"
-            value={street}
-            onChange={(e) => { setStreet(e.target.value); setSuccess(false) }}
-            placeholder="12 rue de la République"
-            className="h-12 sm:h-14 text-base"
-          />
-        </div>
-
         {/* Code postal & Ville */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="postalCode" className="text-sm font-medium">Code postal</Label>
-            <Input
+            <PostalCodeInput
               id="postalCode"
-              type="text"
               value={postalCode}
-              onChange={(e) => { setPostalCode(e.target.value); setSuccess(false) }}
+              onChange={(value) => { setPostalCode(value); setSuccess(false) }}
               placeholder="69003"
-              maxLength={5}
               className="h-12 sm:h-14 text-base"
             />
           </div>

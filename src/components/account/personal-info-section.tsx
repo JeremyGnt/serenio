@@ -5,6 +5,7 @@ import { CheckCircle, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PhoneInput } from "@/components/ui/phone-input"
 import { updateProfile } from "@/lib/account/actions"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 
@@ -97,11 +98,10 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
         {/* Téléphone */}
         <div className="space-y-2">
           <Label htmlFor="phone" className="text-sm font-medium">Téléphone</Label>
-          <Input
+          <PhoneInput
             id="phone"
-            type="tel"
             value={phone}
-            onChange={(e) => { setPhone(e.target.value); setSuccess(false) }}
+            onChange={(value) => { setPhone(value); setSuccess(false) }}
             placeholder="06 12 34 56 78"
             className="h-12 sm:h-14 text-base"
           />

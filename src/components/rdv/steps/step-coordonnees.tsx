@@ -4,6 +4,8 @@ import { User, Mail, Phone, MapPin, Info, Lock, Eye, EyeOff, Loader2 } from "luc
 import { useState, useEffect, useRef } from "react"
 import type { RdvFormState } from "@/types/rdv"
 import { cn } from "@/lib/utils"
+import { PhoneInput } from "@/components/ui/phone-input"
+import { PostalCodeInput } from "@/components/ui/postal-code-input"
 
 interface AddressSuggestion {
   label: string
@@ -265,12 +267,10 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
             <label className="block text-sm text-gray-700">
               Téléphone <span className="text-red-500">*</span>
             </label>
-            <input
-              type="tel"
+            <PhoneInput
               value={formState.clientPhone}
-              onChange={(e) => onUpdate({ clientPhone: e.target.value })}
+              onChange={(value) => onUpdate({ clientPhone: value })}
               placeholder="06 12 34 56 78"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
           </div>
         </div>
@@ -284,6 +284,7 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
         />
       )}
 
+
       {/* Adresse */}
       <div className="space-y-4">
         <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
@@ -292,16 +293,20 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
         </h3>
 
         <div className="space-y-4">
-          {/* Recherche d'adresse avec autocomplétion */}
+          {/* Champ adresse unifié avec autocomplétion */}
           <div className="space-y-2" ref={searchRef}>
             <label className="block text-sm text-gray-700">
-              Rechercher une adresse
+              Adresse <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input
                 type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={formState.addressStreet || searchQuery}
+                onChange={(e) => {
+                  const value = e.target.value
+                  setSearchQuery(value)
+                  onUpdate({ addressStreet: value })
+                }}
                 onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                 placeholder="Tapez pour rechercher une adresse..."
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
@@ -335,31 +340,15 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-sm text-gray-700">
-              Adresse <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formState.addressStreet}
-              onChange={(e) => onUpdate({ addressStreet: e.target.value })}
-              placeholder="123 rue de la Paix"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-            />
-          </div>
-
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <label className="block text-sm text-gray-700">
                 Code postal <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
+              <PostalCodeInput
                 value={formState.addressPostalCode}
-                onChange={(e) => onUpdate({ addressPostalCode: e.target.value })}
+                onChange={(value) => onUpdate({ addressPostalCode: value })}
                 placeholder="69001"
-                maxLength={5}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
 

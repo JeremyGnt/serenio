@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { PostalCodeInput } from "@/components/ui/postal-code-input"
 
 interface AddressSuggestion {
   label: string
@@ -277,12 +278,11 @@ export function StepLocalisation({
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
               <Label htmlFor="postalCode">Code postal</Label>
-              <Input
+              <PostalCodeInput
                 id="postalCode"
                 value={postalCode}
-                onChange={(e) => onUpdate({ addressPostalCode: e.target.value })}
+                onChange={(value) => onUpdate({ addressPostalCode: value })}
                 placeholder="69000"
-                maxLength={5}
                 className="h-12"
               />
             </div>

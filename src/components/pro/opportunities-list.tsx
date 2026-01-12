@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { 
-    MapPin, 
-    Calendar, 
-    Clock, 
-    Euro, 
-    Building2, 
+import {
+    MapPin,
+    Calendar,
+    Clock,
+    Euro,
+    Building2,
     DoorOpen,
     KeyRound,
     Layers,
@@ -121,13 +121,12 @@ export function OpportunitiesList({ opportunities, onAccept, onRefuse }: Opportu
                 const ServiceIcon = opp.serviceType ? SERVICE_ICONS[opp.serviceType.code] || HelpCircle : HelpCircle
 
                 return (
-                    <div 
-                        key={opp.id} 
+                    <div
+                        key={opp.id}
                         className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-shadow hover:shadow-md"
                     >
-                        {/* Header - Toujours visible */}
-                        <div 
-                            className="p-4 cursor-pointer"
+                        <div
+                            className="p-4 cursor-pointer touch-manipulation active:bg-gray-50 transition-colors"
                             onClick={() => setExpandedId(isExpanded ? null : opp.id)}
                         >
                             <div className="flex items-start gap-4">
@@ -176,7 +175,7 @@ export function OpportunitiesList({ opportunities, onAccept, onRefuse }: Opportu
                                     <div className="text-right flex-shrink-0 hidden sm:block">
                                         <div className="flex items-center gap-1 text-emerald-600 font-semibold">
                                             <Euro className="w-4 h-4" />
-                                            {opp.estimatedPriceMin && opp.estimatedPriceMax 
+                                            {opp.estimatedPriceMin && opp.estimatedPriceMax
                                                 ? `${opp.estimatedPriceMin} - ${opp.estimatedPriceMax}€`
                                                 : `${opp.estimatedPriceMin || opp.estimatedPriceMax}€`
                                             }
@@ -186,7 +185,7 @@ export function OpportunitiesList({ opportunities, onAccept, onRefuse }: Opportu
                                 )}
 
                                 {/* Toggle */}
-                                <button className="p-1 text-gray-400 hover:text-gray-600">
+                                <button className="p-1 text-gray-400 hover:text-gray-600 touch-manipulation active:scale-90 active:duration-75 transition-transform">
                                     {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                                 </button>
                             </div>
@@ -256,8 +255,8 @@ export function OpportunitiesList({ opportunities, onAccept, onRefuse }: Opportu
                                             <h4 className="text-sm font-medium text-gray-700">
                                                 Photos ({opp.photos.length})
                                             </h4>
-                                            <Button 
-                                                variant="ghost" 
+                                            <Button
+                                                variant="ghost"
                                                 size="sm"
                                                 onClick={() => setShowPhotos(showPhotos === opp.id ? null : opp.id)}
                                             >
@@ -268,13 +267,13 @@ export function OpportunitiesList({ opportunities, onAccept, onRefuse }: Opportu
                                         {showPhotos === opp.id && (
                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                                                 {opp.photos.map((photo) => (
-                                                    <div 
-                                                        key={photo.id} 
+                                                    <div
+                                                        key={photo.id}
                                                         className="aspect-video bg-gray-200 rounded-lg overflow-hidden"
                                                     >
                                                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                        <img 
-                                                            src={photo.url} 
+                                                        <img
+                                                            src={photo.url}
                                                             alt={photo.description || "Photo diagnostic"}
                                                             className="w-full h-full object-cover"
                                                         />
@@ -291,7 +290,7 @@ export function OpportunitiesList({ opportunities, onAccept, onRefuse }: Opportu
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm text-emerald-700">Estimation client</span>
                                             <span className="font-semibold text-emerald-700">
-                                                {opp.estimatedPriceMin && opp.estimatedPriceMax 
+                                                {opp.estimatedPriceMin && opp.estimatedPriceMax
                                                     ? `${opp.estimatedPriceMin} - ${opp.estimatedPriceMax}€`
                                                     : `${opp.estimatedPriceMin || opp.estimatedPriceMax}€`
                                                 }
@@ -302,8 +301,8 @@ export function OpportunitiesList({ opportunities, onAccept, onRefuse }: Opportu
 
                                 {/* Actions */}
                                 <div className="p-4 flex gap-3">
-                                    <Button 
-                                        variant="outline" 
+                                    <Button
+                                        variant="outline"
                                         className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
                                         onClick={() => handleRefuse(opp.id)}
                                         disabled={isLoading}
@@ -311,7 +310,7 @@ export function OpportunitiesList({ opportunities, onAccept, onRefuse }: Opportu
                                         <X className="w-4 h-4 mr-2" />
                                         Refuser
                                     </Button>
-                                    <Button 
+                                    <Button
                                         className="flex-1 bg-emerald-600 hover:bg-emerald-700"
                                         onClick={() => handleAccept(opp.id)}
                                         disabled={isLoading}

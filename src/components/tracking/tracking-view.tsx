@@ -24,7 +24,8 @@ import {
     Loader2,
     Wrench,
     Wifi,
-    WifiOff
+    WifiOff,
+    Camera
 } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
 import type { RealtimePostgresChangesPayload, RealtimeChannel } from "@supabase/supabase-js"
@@ -47,6 +48,7 @@ import { TrackingTimeline } from "./tracking-timeline"
 import { TrackingQuote } from "./tracking-quote"
 import { clearActiveTracking } from "@/lib/active-tracking"
 import { ClientChatWrapper } from "@/components/chat/client-chat-wrapper"
+import { InterventionPhotos } from "@/components/ui/intervention-photos"
 
 interface TrackingViewProps {
     data: LiveTrackingData
@@ -455,6 +457,20 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    )}
+
+                    {/* Photos uploadées - Visible si non annulé */}
+                    {!isCancelled && (
+                        <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                            <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <Camera className="w-5 h-5 text-gray-400" />
+                                Vos photos
+                            </h2>
+                            <InterventionPhotos
+                                interventionId={intervention.id}
+                                thumbnailMode={false}
+                            />
                         </div>
                     )}
 

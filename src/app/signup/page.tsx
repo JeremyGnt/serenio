@@ -41,6 +41,8 @@ export default function SignupPage() {
               href="/pro/register"
               className="group inline-flex items-center gap-1.5 mt-3 text-sm text-blue-600 hover:text-blue-700 hover:underline"
             >
+              {/* Élément fantôme pour l'équilibre visuel (centrage optique du texte) */}
+              <ArrowRight className="w-4 h-4 opacity-0 pointer-events-none select-none" aria-hidden="true" />
               <span>Vous êtes artisan serrurier ?</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>

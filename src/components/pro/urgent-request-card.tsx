@@ -11,9 +11,11 @@ import {
     ShieldAlert,
     KeySquare,
     Eye,
-    CheckCircle
+    CheckCircle,
+    Camera
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { InterventionPhotos } from "@/components/ui/intervention-photos"
 import type { AnonymizedIntervention } from "@/lib/interventions"
 import type { SituationType } from "@/types/intervention"
 import { UrgentRequestModal, isInterventionViewed } from "./urgent-request-modal"
@@ -76,9 +78,14 @@ export function UrgentRequestCard({ intervention, onAccept, onRefuse }: UrgentRe
         <>
             <div className={`bg-white rounded-xl border p-4 hover:shadow-md transition-all ${viewed ? "border-gray-200" : "border-gray-300 shadow-sm"}`}>
                 <div className="flex items-start gap-4">
-                    {/* Icône situation */}
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${urgencyColor}`}>
-                        {SITUATION_ICONS[intervention.situationType] || <AlertTriangle className="w-5 h-5" />}
+                    {/* Photo thumbnail ou icône situation */}
+                    <div className="flex-shrink-0">
+                        <InterventionPhotos
+                            interventionId={intervention.id}
+                            thumbnailMode={true}
+                            thumbnailSize="md"
+                            showPlaceholder={true}
+                        />
                     </div>
 
                     {/* Contenu */}

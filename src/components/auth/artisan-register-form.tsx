@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { PasswordInput } from "@/components/ui/password-input"
+import { PhoneInput } from "@/components/ui/phone-input"
+import { PostalCodeInput } from "@/components/ui/postal-code-input"
 import { registerArtisan } from "@/lib/auth/artisan-actions"
 
 interface FormErrors {
@@ -15,7 +17,7 @@ interface FormErrors {
 
 export function ArtisanRegisterForm() {
   const router = useRouter()
-  
+
   const [formData, setFormData] = useState({
     companyName: "",
     siret: "",
@@ -30,7 +32,7 @@ export function ArtisanRegisterForm() {
     password: "",
     confirmPassword: "",
   })
-  
+
   const [errors, setErrors] = useState<FormErrors>({})
   const [serverError, setServerError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -202,11 +204,10 @@ export function ArtisanRegisterForm() {
 
           <div className="space-y-2">
             <Label htmlFor="phone">Téléphone *</Label>
-            <Input
+            <PhoneInput
               id="phone"
-              type="tel"
               value={formData.phone}
-              onChange={(e) => updateField("phone", e.target.value)}
+              onChange={(value) => updateField("phone", value)}
               placeholder="06 12 34 56 78"
               className={`h-12 ${errors.phone ? "border-red-300" : ""}`}
             />
@@ -233,11 +234,11 @@ export function ArtisanRegisterForm() {
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="postalCode">Code postal *</Label>
-              <Input
+              <PostalCodeInput
                 id="postalCode"
                 value={formData.postalCode}
-                onChange={(e) => updateField("postalCode", e.target.value)}
-                maxLength={5}
+                onChange={(value) => updateField("postalCode", value)}
+                placeholder="69001"
                 className={`h-12 ${errors.postalCode ? "border-red-300" : ""}`}
               />
               {errors.postalCode && <p className="text-xs text-red-500">{errors.postalCode}</p>}
