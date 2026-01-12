@@ -3,6 +3,7 @@ import { createClient, getUser } from "@/lib/supabase/server"
 import { ProSidebar } from "@/components/pro/pro-sidebar"
 import { getArtisanStats } from "@/lib/interventions"
 import { getTotalUnreadCount } from "@/lib/chat/actions"
+import { getArtisanStatus } from "@/lib/auth/artisan-guard"
 
 export default async function ProLayout({
     children,
@@ -15,35 +16,48 @@ export default async function ProLayout({
         redirect("/login?redirect=/pro/urgences")
     }
 
-    const role = user.user_metadata?.role
+    // Verify artisan status from database (source of truth, not user_metadata)
+    const artisanStatus = await getArtisanStatus(user.id)
 
-    // Redirect non-artisans to account page
-    if (role !== "artisan" && role !== "artisan_pending") {
+    // User is not an artisan at all
+    if (!artisanStatus) {
         redirect("/compte")
     }
 
-    // Redirect pending artisans to waiting page
-    if (role === "artisan_pending") {
+    // Pending artisans go to waiting page
+    if (artisanStatus === "pending") {
         redirect("/artisan-en-attente")
     }
 
-    // Fetch stats only if artisan is validated
-    const stats = role === "artisan" ? await getArtisanStats() : { pendingCount: 0, opportunitiesCount: 0 }
+    // Rejected artisans get explicit feedback
+    if (artisanStatus === "rejected") {
+        redirect("/artisan-refuse")
+    }
 
-    // Fetch global unread messages count
-    const totalUnreadMessages = role === "artisan" ? await getTotalUnreadCount(user.id) : 0
+    // Suspended artisans
+    if (artisanStatus === "suspended") {
+        redirect("/compte")
+    }
+
+    // Only approved artisans can proceed
+    if (artisanStatus !== "approved") {
+        redirect("/compte")
+    }
+
+    // Fetch stats for approved artisan
+    const stats = await getArtisanStats()
+
+    // Fetch global unread messages count (user is approved artisan at this point)
+    const totalUnreadMessages = await getTotalUnreadCount(user.id)
 
     // Fetch artisan availability status
-    let isAvailable = true
-    if (role === "artisan") {
-        const supabase = await createClient()
-        const { data: artisan } = await supabase
-            .from("artisans")
-            .select("is_available")
-            .eq("id", user.id)
-            .single()
-        isAvailable = artisan?.is_available ?? true
-    }
+    const supabase = await createClient()
+    const { data: artisan } = await supabase
+        .from("artisans")
+        .select("is_available")
+        .eq("id", user.id)
+        .single()
+    const isAvailable = artisan?.is_available ?? true
 
     const firstName = user.user_metadata?.first_name || "Artisan"
 

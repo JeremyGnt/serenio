@@ -111,22 +111,22 @@ export function FlowHeader({
                 )}
 
                 {/* Center spacer on mobile, badges container on desktop */}
-                <div className="flex-1 flex items-center justify-center sm:justify-start sm:ml-4 gap-2">
+                <div className="flex-1 flex items-center justify-center gap-3">
                     {/* Mode badge */}
                     <span
                         className={cn(
-                            "inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-full border",
+                            "inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold rounded-full border",
                             config.badgeClasses
                         )}
                     >
-                        <ModeIcon className={cn("w-3 h-3", config.iconClasses)} />
-                        <span className="hidden xs:inline">{config.label}</span>
+                        <ModeIcon className={cn("w-4 h-4 sm:w-5 sm:h-5", config.iconClasses)} />
+                        <span>{config.label}</span>
                     </span>
 
                     {/* Estimated time badge - now visible on mobile */}
                     {estimatedTime && (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 text-[10px] sm:text-xs font-medium rounded-full border border-emerald-200 whitespace-nowrap">
-                            <Clock className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-emerald-50 text-emerald-700 text-xs sm:text-sm font-semibold rounded-full border border-emerald-200 whitespace-nowrap">
+                            <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
                             {estimatedTime}
                         </span>
                     )}

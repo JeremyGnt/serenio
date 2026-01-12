@@ -295,14 +295,14 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
             </header>
 
             <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-                {/* Bouton retour */}
-                <button
-                    onClick={() => router.back()}
+                {/* Bouton retour - redirige vers l'accueil au lieu de l'historique */}
+                <Link
+                    href="/"
                     className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-all duration-200 touch-manipulation active:scale-[0.98] active:duration-75"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     <span>Retour</span>
-                </button>
+                </Link>
 
                 {/* Header de page avec statut - caché pour pending/searching/cancelled car redondant */}
                 {!["pending", "searching", "cancelled"].includes(intervention.status) && (

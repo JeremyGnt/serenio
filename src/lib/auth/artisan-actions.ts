@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import type { AuthResult } from "@/types/auth"
 
 interface ArtisanRegisterPayload {
@@ -50,8 +51,10 @@ export async function registerArtisan(payload: ArtisanRegisterPayload): Promise<
     return { success: false, error: "Erreur lors de la création du compte" }
   }
 
-  // Créer l'entrée dans la table artisans
-  const { error: artisanError } = await supabase.from("artisans").insert({
+  // Utiliser le client admin pour bypasser les RLS lors de l'insertion
+  const adminClient = createAdminClient()
+
+  const { error: artisanError } = await adminClient.from("artisans").insert({
     id: data.user.id,
     email: payload.email,
     company_name: payload.companyName,
@@ -70,8 +73,8 @@ export async function registerArtisan(payload: ArtisanRegisterPayload): Promise<
   })
 
   if (artisanError) {
-    console.error("Erreur création artisan:", artisanError)
-    // On ne bloque pas si erreur table artisans
+    console.error("Erreur création artisan:", JSON.stringify(artisanError, null, 2))
+    return { success: false, error: `Erreur: ${artisanError.message || artisanError.code || "Erreur inconnue"}` }
   }
 
   // Déconnecter l'utilisateur (il ne peut pas accéder tant que non validé)

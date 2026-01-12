@@ -83,6 +83,17 @@ export function AccountTabs({ user }: AccountTabsProps) {
           </div>
         )}
 
+        {/* Message si artisan refusé */}
+        {userRole === "artisan_rejected" && (
+          <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-100">
+            <p className="text-sm text-red-800">
+              <strong>Demande Pro refusée</strong>
+              <br />
+              <a href="/artisan-refuse" className="underline">Voir les détails →</a>
+            </p>
+          </div>
+        )}
+
         {/* Message si artisan validé */}
         {userRole === "artisan" && (
           <div className="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
