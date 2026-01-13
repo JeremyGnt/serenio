@@ -275,7 +275,7 @@ export function StepLocalisation({
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="space-y-2">
               <Label htmlFor="postalCode">Code postal</Label>
               <PostalCodeInput
@@ -286,7 +286,7 @@ export function StepLocalisation({
                 className="h-12"
               />
             </div>
-            <div className="col-span-2 space-y-2">
+            <div className="sm:col-span-2 space-y-2">
               <Label htmlFor="city">Ville</Label>
               <Input
                 id="city"

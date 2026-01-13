@@ -124,21 +124,7 @@
   }
 }
 
-/* Animation clignotante pour le bouton urgence */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 8px 20px -5px rgb(239 68 68 / 0.35);
-    transform: scale(1);
-  }
-  50% {
-    box-shadow: 0 10px 30px -5px rgb(239 68 68 / 0.5);
-    transform: scale(1.015);
-  }
-}
 
-.animate-pulse-subtle {
-  animation: pulse-glow 1.5s ease-in-out infinite;
-}
 
 /* Hide scrollbar for Chrome, Safari and Opera */
 .no-scrollbar::-webkit-scrollbar {

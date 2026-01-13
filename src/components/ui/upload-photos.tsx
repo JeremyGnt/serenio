@@ -5,11 +5,11 @@ import { Camera, X, ImagePlus, ChevronRight, Loader2, AlertCircle, CheckCircle, 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
-import { 
-  STORAGE_CONFIG, 
-  validatePhotoFile, 
+import {
+  STORAGE_CONFIG,
+  validatePhotoFile,
   getPhotoErrorMessage,
-  type PhotoErrorCode 
+  type PhotoErrorCode
 } from "@/lib/storage"
 
 // ============================================
@@ -238,10 +238,10 @@ export function UploadPhotos({
               isDragging ? "text-emerald-500" : "text-gray-400"
             )} />
           </div>
-          
+
           <p className="text-gray-600 mb-2 font-medium">
-            {isDragging 
-              ? "Déposez vos photos ici" 
+            {isDragging
+              ? "Déposez vos photos ici"
               : "Glissez-déposez ou cliquez pour ajouter"}
           </p>
           <p className="text-sm text-muted-foreground">
@@ -298,7 +298,7 @@ export function UploadPhotos({
           <div>
             <p className="text-sm text-blue-800 font-medium mb-1">Conseils photo</p>
             <p className="text-sm text-blue-700">
-              Prenez des photos de la serrure, de la porte, et de tout élément 
+              Prenez des photos de la serrure, de la porte, et de tout élément
               qui pourrait aider le serrurier à préparer son intervention.
             </p>
           </div>
@@ -318,9 +318,8 @@ export function UploadPhotos({
                   className="mt-0.5"
                 />
                 <span className="text-sm text-gray-600 leading-relaxed">
-                  J'accepte que mes photos soient utilisées uniquement dans le cadre 
-                  de cette intervention. Elles seront automatiquement supprimées 
-                  {STORAGE_CONFIG.retentionDays} jours après la fin de l'intervention.
+                  J'accepte que mes photos soient utilisées uniquement dans le cadre
+                  de cette intervention. Elles seront automatiquement supprimées {STORAGE_CONFIG.retentionDays} jours après la fin de l'intervention.
                 </span>
               </label>
             </div>
@@ -328,19 +327,6 @@ export function UploadPhotos({
         </div>
       )}
 
-      {/* Bouton skip */}
-      {onSkip && (
-        <div className="text-center">
-          <Button
-            variant="ghost"
-            className="text-muted-foreground hover:text-foreground"
-            onClick={onSkip}
-          >
-            {photos.length > 0 ? "Continuer" : "Passer cette étape"}
-            <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
-        </div>
-      )}
     </div>
   )
 }

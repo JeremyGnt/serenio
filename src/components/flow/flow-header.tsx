@@ -1,12 +1,17 @@
 "use client"
 
 import Link from "next/link"
-import { ChevronLeft, X, AlertTriangle, Clock, Calendar } from "lucide-react"
+import { ChevronLeft, X, AlertTriangle, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { FlowStepper, type FlowStep } from "./flow-stepper"
 import { cn } from "@/lib/utils"
 
 export type FlowMode = "urgence" | "rdv"
+
+export interface FlowStep {
+    id: string
+    label: string
+    shortLabel?: string
+}
 
 interface FlowHeaderProps {
     /** Flow mode - determines styling and badge */
@@ -35,16 +40,16 @@ const modeConfig = {
     urgence: {
         icon: AlertTriangle,
         label: "Urgence",
-        badgeClasses: "bg-red-50 text-red-700 border-red-200",
-        iconClasses: "text-red-600",
-        accentColor: "red" as const,
+        pillClasses: "bg-red-50 text-red-600 border-red-100",
+        iconClasses: "text-red-500",
+        progressColor: "bg-red-500",
     },
     rdv: {
         icon: Calendar,
         label: "Rendez-vous",
-        badgeClasses: "bg-blue-50 text-blue-700 border-blue-200",
-        iconClasses: "text-blue-600",
-        accentColor: "blue" as const,
+        pillClasses: "bg-blue-50 text-blue-600 border-blue-100",
+        iconClasses: "text-blue-500",
+        progressColor: "bg-blue-500",
     },
 }
 
@@ -63,23 +68,24 @@ export function FlowHeader({
     const config = modeConfig[mode]
     const ModeIcon = config.icon
     const isFirstStep = currentStepIndex === 0
+    const totalSteps = steps.length
+    const progressPercent = ((currentStepIndex + 1) / totalSteps) * 100
 
     const handleBack = () => {
         if (onBack) {
             onBack()
         }
-        // If no onBack and not first step, the parent should handle navigation
     }
 
     return (
         <header
             className={cn(
-                "sticky top-0 z-50 bg-white border-b border-gray-200",
+                "sticky top-0 z-50 bg-white/95 backdrop-blur-sm",
                 className
             )}
         >
-            {/* Level A: Utility bar */}
-            <div className="w-full px-4 sm:px-6 lg:px-8 h-12 md:h-14 flex items-center justify-between border-b border-gray-100">
+            {/* Single compact row */}
+            <div className="w-full px-3 sm:px-4 lg:px-6 h-11 sm:h-12 flex items-center justify-between gap-2">
                 {/* Back button */}
                 {showBack && (
                     <div className="flex-shrink-0">
@@ -88,11 +94,11 @@ export function FlowHeader({
                                 variant="ghost"
                                 size="sm"
                                 asChild
-                                className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 active:scale-95 active:bg-gray-200 touch-manipulation transition-transform"
+                                className="h-8 sm:w-auto sm:px-2.5 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 active:scale-95 touch-manipulation transition-all gap-1.5"
                             >
                                 <Link href={backHref} aria-label="Retour à l'accueil">
-                                    <ChevronLeft className="w-4 h-4" />
-                                    <span className="hidden sm:inline">Retour</span>
+                                    <ChevronLeft className="w-5 h-5" />
+                                    <span className="hidden md:inline text-xs font-semibold">Retour</span>
                                 </Link>
                             </Button>
                         ) : (
@@ -100,45 +106,48 @@ export function FlowHeader({
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleBack}
-                                className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 active:scale-95 active:bg-gray-200 touch-manipulation transition-transform"
+                                className="h-8 sm:w-auto sm:px-2.5 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 active:scale-95 touch-manipulation transition-all gap-1.5"
                                 aria-label="Retour à l'étape précédente"
                             >
-                                <ChevronLeft className="w-4 h-4" />
-                                <span className="hidden sm:inline">Retour</span>
+                                <ChevronLeft className="w-5 h-5" />
+                                <span className="hidden md:inline text-xs font-semibold">Retour</span>
                             </Button>
                         )}
                     </div>
                 )}
 
-                {/* Center spacer on mobile, badges container on desktop */}
-                <div className="flex-1 flex items-center justify-center gap-3">
-                    {/* Mode badge */}
+                {/* Center: Badge + Step info */}
+                <div className="flex-1 flex items-center justify-center gap-2 sm:gap-3 min-w-0">
+                    {/* Discrete mode pill */}
                     <span
                         className={cn(
-                            "inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold rounded-full border",
-                            config.badgeClasses
+                            "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border",
+                            config.pillClasses
                         )}
                     >
-                        <ModeIcon className={cn("w-4 h-4 sm:w-5 sm:h-5", config.iconClasses)} />
-                        <span>{config.label}</span>
+                        <ModeIcon className={cn("w-3.5 h-3.5", config.iconClasses)} />
+                        <span className="hidden sm:inline">{config.label}</span>
                     </span>
 
-                    {/* Estimated time badge - now visible on mobile */}
-                    {estimatedTime && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-emerald-50 text-emerald-700 text-xs sm:text-sm font-semibold rounded-full border border-emerald-200 whitespace-nowrap">
-                            <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
-                            {estimatedTime}
-                        </span>
-                    )}
+                    {/* Step indicator + time - single line */}
+                    <span className="text-xs sm:text-sm text-gray-500 font-medium whitespace-nowrap">
+                        Étape {currentStepIndex + 1} sur {totalSteps}
+                        {estimatedTime && (
+                            <span className="text-gray-300 mx-1.5">·</span>
+                        )}
+                        {estimatedTime && (
+                            <span className="text-emerald-600">{estimatedTime}</span>
+                        )}
+                    </span>
                 </div>
 
                 {/* Close button */}
                 {onClose ? (
                     <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="sm"
                         onClick={onClose}
-                        className="text-muted-foreground hover:text-foreground flex-shrink-0 -mr-2 active:scale-95 active:bg-gray-200 touch-manipulation transition-transform"
+                        className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 flex-shrink-0 active:scale-95 touch-manipulation transition-all"
                         aria-label="Fermer et retourner à l'accueil"
                     >
                         <X className="w-5 h-5" />
@@ -146,9 +155,9 @@ export function FlowHeader({
                 ) : (
                     <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="sm"
                         asChild
-                        className="text-muted-foreground hover:text-foreground flex-shrink-0 -mr-2 active:scale-95 active:bg-gray-200 touch-manipulation transition-transform"
+                        className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 flex-shrink-0 active:scale-95 touch-manipulation transition-all"
                     >
                         <Link href={closeHref} aria-label="Fermer et retourner à l'accueil">
                             <X className="w-5 h-5" />
@@ -157,18 +166,16 @@ export function FlowHeader({
                 )}
             </div>
 
-            {/* Level B: Stepper bar */}
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-3 md:py-4">
-                <div className="max-w-2xl lg:max-w-4xl mx-auto">
-                    <FlowStepper
-                        steps={steps}
-                        currentStepIndex={currentStepIndex}
-                        accentColor={config.accentColor}
-                    />
-                </div>
+            {/* Ultra thin progress bar */}
+            <div className="w-full h-[3px] bg-gray-100">
+                <div
+                    className={cn(
+                        "h-full transition-all duration-500 ease-out",
+                        config.progressColor
+                    )}
+                    style={{ width: `${progressPercent}%` }}
+                />
             </div>
         </header>
     )
 }
-
-export type { FlowStep }

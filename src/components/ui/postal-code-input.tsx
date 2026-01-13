@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface PostalCodeInputProps extends Omit<React.ComponentProps<"input">, "onChange" | "value" | "type"> {
@@ -66,18 +65,10 @@ function PostalCodeInput({
                     "focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent",
                     // Disabled styles
                     "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-                    // Valid state styling
-                    showValidation && isValid && "border-emerald-400 pr-10",
                     className
                 )}
                 {...props}
             />
-            {/* Validation checkmark */}
-            {showValidation && isValid && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <Check className="w-5 h-5 text-emerald-500" />
-                </div>
-            )}
         </div>
     )
 }

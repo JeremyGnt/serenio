@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { WifiOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import type { PriceScenarioDisplay, SituationType, DiagnosticAnswers } from "@/types/intervention"
 import { URGENCE_STEPS, DIAGNOSTIC_QUESTIONS } from "@/lib/interventions/config"
 import { createIntervention, updateDiagnostic, submitIntervention } from "@/lib/interventions"
@@ -19,501 +20,532 @@ import { StepPhotos } from "./steps/step-photos"
 import { StepLocalisation } from "./steps/step-localisation"
 import { StepContact } from "./steps/step-contact"
 import { StepRecap } from "./steps/step-recap"
+import { ScrollToTop } from "@/components/ui/scroll-to-top"
 
 
 interface UrgenceFlowProps {
-  priceScenarios: PriceScenarioDisplay[]
-  userEmail?: string | null
-  userName?: string | null
+    priceScenarios: PriceScenarioDisplay[]
+    userEmail?: string | null
+    userName?: string | null
 }
 
 // État du formulaire
 interface FormState {
-  // Situation
-  situationType: SituationType | null
+    // Situation
+    situationType: SituationType | null
 
-  // Diagnostic
-  diagnosticAnswers: DiagnosticAnswers
-  doorType: string | null
-  lockType: string | null
-  situationDetails: string
+    // Diagnostic
+    diagnosticAnswers: DiagnosticAnswers
+    doorType: string | null
+    lockType: string | null
+    situationDetails: string
 
-  // Photos
-  photos: PhotoPreview[]
-  rgpdConsent: boolean
+    // Photos
+    photos: PhotoPreview[]
+    rgpdConsent: boolean
 
-  // Localisation
-  addressStreet: string
-  addressPostalCode: string
-  addressCity: string
-  addressComplement: string
-  addressInstructions: string
-  latitude: number | null
-  longitude: number | null
+    // Localisation
+    addressStreet: string
+    addressPostalCode: string
+    addressCity: string
+    addressComplement: string
+    addressInstructions: string
+    latitude: number | null
+    longitude: number | null
 
-  // Contact
-  clientEmail: string
-  clientPhone: string
-  clientFirstName: string
-  clientLastName: string
+    // Contact
+    clientEmail: string
+    clientPhone: string
+    clientFirstName: string
+    clientLastName: string
 
-  // Intervention créée
-  interventionId: string | null
-  trackingNumber: string | null
+    // Intervention créée
+    interventionId: string | null
+    trackingNumber: string | null
 }
 
 const initialFormState: FormState = {
-  situationType: null,
-  diagnosticAnswers: {},
-  doorType: null,
-  lockType: null,
-  situationDetails: "",
-  photos: [],
-  rgpdConsent: false,
-  addressStreet: "",
-  addressPostalCode: "",
-  addressCity: "",
-  addressComplement: "",
-  addressInstructions: "",
-  latitude: null,
-  longitude: null,
-  clientEmail: "",
-  clientPhone: "",
-  clientFirstName: "",
-  clientLastName: "",
-  interventionId: null,
-  trackingNumber: null,
+    situationType: null,
+    diagnosticAnswers: {},
+    doorType: null,
+    lockType: null,
+    situationDetails: "",
+    photos: [],
+    rgpdConsent: false,
+    addressStreet: "",
+    addressPostalCode: "",
+    addressCity: "",
+    addressComplement: "",
+    addressInstructions: "",
+    latitude: null,
+    longitude: null,
+    clientEmail: "",
+    clientPhone: "",
+    clientFirstName: "",
+    clientLastName: "",
+    interventionId: null,
+    trackingNumber: null,
 }
 
 export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlowProps) {
-  const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(0)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+    const router = useRouter()
+    const [currentStep, setCurrentStep] = useState(0)
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState("")
 
-  // Hook de sauvegarde automatique
-  const {
-    formState,
-    updateForm,
-    isRestored,
-    isOffline,
-    clearDraft,
-    setPendingSubmit,
-  } = useFormAutoSave<FormState>({
-    key: "urgence_form",
-    initialState: {
-      ...initialFormState,
-      clientEmail: userEmail || "",
-      clientFirstName: userName || "",
-    },
-  })
-
-  const isLoggedIn = !!userEmail
-
-  const currentStepId = URGENCE_STEPS[currentStep]?.id
-
-  // Fonction pour afficher une erreur et scroller en haut
-  const showError = (message: string) => {
-    setError(message)
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
-
-  // Wrapper pour updateForm qui clear les erreurs
-  const handleUpdateForm = (updates: Partial<FormState>) => {
-    updateForm(updates)
-    setError("")
-  }
-
-
-  // Vérifier si toutes les questions obligatoires du diagnostic sont remplies
-  const validateDiagnostic = (): string | null => {
-    if (!formState.situationType) return null
-
-    const steps = DIAGNOSTIC_QUESTIONS[formState.situationType] || []
-
-    for (const step of steps) {
-      for (const question of step.questions) {
-        if (question.required) {
-          const answer = formState.diagnosticAnswers[question.id]
-
-          // Vérifier si la réponse existe
-          if (answer === undefined || answer === null || answer === "") {
-            return `Veuillez répondre à : "${question.question}"`
-          }
-
-          // Si c'est un tableau vide (multiple)
-          if (Array.isArray(answer) && answer.length === 0) {
-            return `Veuillez répondre à : "${question.question}"`
-          }
-
-          // Si "Autre" est sélectionné, vérifier le champ "Préciser"
-          if (answer === "other") {
-            const detailsAnswer = formState.diagnosticAnswers[`${question.id}_details`]
-            if (!detailsAnswer || (typeof detailsAnswer === "string" && !detailsAnswer.trim())) {
-              return `Veuillez préciser votre réponse pour : "${question.question}"`
-            }
-          }
-        }
-      }
-    }
-
-    return null
-  }
-
-  // Aller à l'étape suivante
-  const nextStep = async () => {
-    // Validation selon l'étape
-    if (currentStepId === "situation") {
-      if (!formState.situationType) {
-        showError("Veuillez sélectionner votre situation")
-        return
-      }
-    }
-
-    if (currentStepId === "diagnostic") {
-      const diagnosticError = validateDiagnostic()
-      if (diagnosticError) {
-        showError(diagnosticError)
-        return
-      }
-    }
-
-    if (currentStepId === "localisation") {
-      if (!formState.addressStreet.trim()) {
-        showError("Veuillez renseigner votre rue")
-        return
-      }
-      if (!formState.addressPostalCode.trim()) {
-        showError("Veuillez renseigner votre code postal")
-        return
-      }
-      if (!formState.addressCity.trim()) {
-        showError("Veuillez renseigner votre ville")
-        return
-      }
-      // Vérifier le format du code postal (5 chiffres)
-      if (!/^\d{5}$/.test(formState.addressPostalCode.trim())) {
-        showError("Le code postal doit contenir 5 chiffres")
-        return
-      }
-    }
-
-    if (currentStepId === "contact") {
-      if (!formState.clientPhone.trim()) {
-        showError("Le numéro de téléphone est requis")
-        return
-      }
-      if (!formState.clientEmail.trim()) {
-        showError("L'adresse email est requise")
-        return
-      }
-      // Vérifier le format de l'email
-      if (!formState.clientEmail.includes("@") || !formState.clientEmail.includes(".")) {
-        showError("Veuillez entrer une adresse email valide")
-        return
-      }
-      // Vérifier le format du téléphone (au moins 10 chiffres)
-      const phoneDigits = formState.clientPhone.replace(/\D/g, "")
-      if (phoneDigits.length < 10) {
-        showError("Veuillez entrer un numéro de téléphone valide")
-        return
-      }
-
-      // Créer l'intervention
-      setLoading(true)
-      const result = await createIntervention({
-        interventionType: "urgence",
-        clientEmail: formState.clientEmail,
-        clientPhone: formState.clientPhone,
-        clientFirstName: formState.clientFirstName,
-        clientLastName: formState.clientLastName,
-        addressStreet: formState.addressStreet,
-        addressPostalCode: formState.addressPostalCode,
-        addressCity: formState.addressCity,
-        addressComplement: formState.addressComplement,
-        addressInstructions: formState.addressInstructions,
-        latitude: formState.latitude || undefined,
-        longitude: formState.longitude || undefined,
-        situationType: formState.situationType!,
-      })
-      setLoading(false)
-
-      if (!result.success) {
-        showError(result.error || "Erreur lors de la création")
-        return
-      }
-
-      updateForm({
-        interventionId: result.intervention?.id || null,
-        trackingNumber: result.trackingNumber || null,
-      })
-
-      // Mettre à jour le diagnostic
-      if (result.intervention?.id) {
-        await updateDiagnostic(result.intervention.id, {
-          situationType: formState.situationType || undefined,
-          situationDetails: formState.situationDetails,
-          diagnosticAnswers: formState.diagnosticAnswers,
-          doorType: formState.doorType as "standard" | "blindee" | "cave" | "garage" | "other" | undefined,
-          lockType: formState.lockType as "standard" | "multipoint" | "electronique" | "other" | undefined,
-        })
-      }
-    }
-
-    if (currentStep < URGENCE_STEPS.length - 1) {
-      setError("") // Effacer les erreurs avant de passer à l'étape suivante
-      setCurrentStep((prev) => prev + 1)
-    }
-  }
-
-  // Retour à l'étape précédente
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1)
-    }
-  }
-
-  // Passer l'étape photos
-  const skipPhotos = () => {
-    if (currentStepId === "photos") {
-      setCurrentStep((prev) => prev + 1)
-    }
-  }
-
-  // Upload des photos vers le serveur
-  const uploadPhotos = async (interventionId: string): Promise<boolean> => {
-    const photosToUpload = formState.photos.filter(p => p.status === "pending")
-    
-    if (photosToUpload.length === 0) {
-      return true
-    }
-
-    // Mettre à jour le statut des photos à "uploading"
-    updateForm({
-      photos: formState.photos.map(p => ({
-        ...p,
-        status: p.status === "pending" ? "uploading" as const : p.status
-      }))
+    // Hook de sauvegarde automatique
+    const {
+        formState,
+        updateForm,
+        isRestored,
+        isOffline,
+        clearDraft,
+        setPendingSubmit,
+    } = useFormAutoSave<FormState>({
+        key: "urgence_form",
+        initialState: {
+            ...initialFormState,
+            clientEmail: userEmail || "",
+            clientFirstName: userName || "",
+        },
     })
 
-    let allSuccess = true
+    const isLoggedIn = !!userEmail
 
-    for (const photo of photosToUpload) {
-      try {
-        const formData = new FormData()
-        formData.append("file", photo.file)
-        formData.append("interventionId", interventionId)
-        formData.append("photoType", "diagnostic")
-        formData.append("rgpdConsent", formState.rgpdConsent.toString())
+    const currentStepId = URGENCE_STEPS[currentStep]?.id
 
-        const response = await fetch("/api/photos/upload", {
-          method: "POST",
-          body: formData,
+    // Fonction pour afficher une erreur et scroller en haut
+    const showError = (message: string) => {
+        setError(message)
+        window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+
+    // Wrapper pour updateForm qui clear les erreurs
+    const handleUpdateForm = (updates: Partial<FormState>) => {
+        updateForm(updates)
+        setError("")
+    }
+
+
+    // Vérifier si toutes les questions obligatoires du diagnostic sont remplies
+    const validateDiagnostic = (): string | null => {
+        if (!formState.situationType) return null
+
+        const steps = DIAGNOSTIC_QUESTIONS[formState.situationType] || []
+
+        for (const step of steps) {
+            for (const question of step.questions) {
+                if (question.required) {
+                    const answer = formState.diagnosticAnswers[question.id]
+
+                    // Vérifier si la réponse existe
+                    if (answer === undefined || answer === null || answer === "") {
+                        return `Veuillez répondre à : "${question.question}"`
+                    }
+
+                    // Si c'est un tableau vide (multiple)
+                    if (Array.isArray(answer) && answer.length === 0) {
+                        return `Veuillez répondre à : "${question.question}"`
+                    }
+
+                    // Si "Autre" est sélectionné, vérifier le champ "Préciser"
+                    if (answer === "other") {
+                        const detailsAnswer = formState.diagnosticAnswers[`${question.id}_details`]
+                        if (!detailsAnswer || (typeof detailsAnswer === "string" && !detailsAnswer.trim())) {
+                            return `Veuillez préciser votre réponse pour : "${question.question}"`
+                        }
+                    }
+                }
+            }
+        }
+
+        return null
+    }
+
+    // Aller à l'étape suivante
+    const nextStep = async () => {
+        // Validation selon l'étape
+        if (currentStepId === "situation") {
+            if (!formState.situationType) {
+                showError("Veuillez sélectionner votre situation")
+                return
+            }
+        }
+
+        if (currentStepId === "diagnostic") {
+            const diagnosticError = validateDiagnostic()
+            if (diagnosticError) {
+                showError(diagnosticError)
+                return
+            }
+        }
+
+        if (currentStepId === "photos") {
+            if (formState.photos.length > 0 && !formState.rgpdConsent) {
+                showError("Veuillez accepter l'utilisation des photos pour continuer")
+                return
+            }
+        }
+
+        if (currentStepId === "localisation") {
+            if (!formState.addressStreet.trim()) {
+                showError("Veuillez renseigner votre rue")
+                return
+            }
+            if (!formState.addressPostalCode.trim()) {
+                showError("Veuillez renseigner votre code postal")
+                return
+            }
+            if (!formState.addressCity.trim()) {
+                showError("Veuillez renseigner votre ville")
+                return
+            }
+            // Vérifier le format du code postal (5 chiffres)
+            if (!/^\d{5}$/.test(formState.addressPostalCode.trim())) {
+                showError("Le code postal doit contenir 5 chiffres")
+                return
+            }
+        }
+
+        if (currentStepId === "contact") {
+            if (!formState.clientPhone.trim()) {
+                showError("Le numéro de téléphone est requis")
+                return
+            }
+            if (!formState.clientEmail.trim()) {
+                showError("L'adresse email est requise")
+                return
+            }
+            // Vérifier le format de l'email
+            if (!formState.clientEmail.includes("@") || !formState.clientEmail.includes(".")) {
+                showError("Veuillez entrer une adresse email valide")
+                return
+            }
+            // Vérifier le format du téléphone (au moins 10 chiffres)
+            const phoneDigits = formState.clientPhone.replace(/\D/g, "")
+            if (phoneDigits.length < 10) {
+                showError("Veuillez entrer un numéro de téléphone valide")
+                return
+            }
+
+            // Créer l'intervention
+            setLoading(true)
+            const result = await createIntervention({
+                interventionType: "urgence",
+                clientEmail: formState.clientEmail,
+                clientPhone: formState.clientPhone,
+                clientFirstName: formState.clientFirstName,
+                clientLastName: formState.clientLastName,
+                addressStreet: formState.addressStreet,
+                addressPostalCode: formState.addressPostalCode,
+                addressCity: formState.addressCity,
+                addressComplement: formState.addressComplement,
+                addressInstructions: formState.addressInstructions,
+                latitude: formState.latitude || undefined,
+                longitude: formState.longitude || undefined,
+                situationType: formState.situationType!,
+            })
+            setLoading(false)
+
+            if (!result.success) {
+                showError(result.error || "Erreur lors de la création")
+                return
+            }
+
+            updateForm({
+                interventionId: result.intervention?.id || null,
+                trackingNumber: result.trackingNumber || null,
+            })
+
+            // Mettre à jour le diagnostic
+            if (result.intervention?.id) {
+                await updateDiagnostic(result.intervention.id, {
+                    situationType: formState.situationType || undefined,
+                    situationDetails: formState.situationDetails,
+                    diagnosticAnswers: formState.diagnosticAnswers,
+                    doorType: formState.doorType as "standard" | "blindee" | "cave" | "garage" | "other" | undefined,
+                    lockType: formState.lockType as "standard" | "multipoint" | "electronique" | "other" | undefined,
+                })
+            }
+        }
+
+        if (currentStep < URGENCE_STEPS.length - 1) {
+            setError("") // Effacer les erreurs avant de passer à l'étape suivante
+            setCurrentStep((prev) => prev + 1)
+        }
+    }
+
+    // Retour à l'étape précédente
+    const prevStep = () => {
+        if (currentStep > 0) {
+            setCurrentStep((prev) => prev - 1)
+        }
+    }
+
+    // Passer l'étape photos
+    const skipPhotos = () => {
+        if (currentStepId === "photos") {
+            setCurrentStep((prev) => prev + 1)
+        }
+    }
+
+    // Upload des photos vers le serveur
+    const uploadPhotos = async (interventionId: string): Promise<boolean> => {
+        const photosToUpload = formState.photos.filter(p => p.status === "pending")
+
+        if (photosToUpload.length === 0) {
+            return true
+        }
+
+        // Mettre à jour le statut des photos à "uploading"
+        updateForm({
+            photos: formState.photos.map(p => ({
+                ...p,
+                status: p.status === "pending" ? "uploading" as const : p.status
+            }))
         })
 
-        const result = await response.json()
+        let allSuccess = true
+
+        for (const photo of photosToUpload) {
+            try {
+                const formData = new FormData()
+                formData.append("file", photo.file)
+                formData.append("interventionId", interventionId)
+                formData.append("photoType", "diagnostic")
+                formData.append("rgpdConsent", formState.rgpdConsent.toString())
+
+                const response = await fetch("/api/photos/upload", {
+                    method: "POST",
+                    body: formData,
+                })
+
+                const result = await response.json()
+
+                if (!result.success) {
+                    console.error("Erreur upload photo:", result.error)
+                    updateForm({
+                        photos: formState.photos.map(p =>
+                            p.id === photo.id ? { ...p, status: "error" as const, error: result.error } : p
+                        )
+                    })
+                    allSuccess = false
+                } else {
+                    updateForm({
+                        photos: formState.photos.map(p =>
+                            p.id === photo.id ? { ...p, status: "success" as const, progress: 100 } : p
+                        )
+                    })
+                }
+            } catch (error) {
+                console.error("Erreur upload photo:", error)
+                updateForm({
+                    photos: formState.photos.map(p =>
+                        p.id === photo.id ? { ...p, status: "error" as const, error: "Erreur réseau" } : p
+                    )
+                })
+                allSuccess = false
+            }
+        }
+
+        return allSuccess
+    }
+
+    // Soumettre la demande
+    const handleSubmit = async () => {
+        if (!formState.interventionId) {
+            showError("Erreur: intervention non créée")
+            return
+        }
+
+        setLoading(true)
+
+        // 1. Upload des photos si présentes
+        if (formState.photos.length > 0) {
+            const photosSuccess = await uploadPhotos(formState.interventionId)
+            if (!photosSuccess) {
+                // Continue quand même, les photos échouées seront marquées
+                console.warn("Certaines photos n'ont pas pu être uploadées")
+            }
+        }
+
+        // 2. Soumettre l'intervention
+        const result = await submitIntervention(formState.interventionId)
+        setLoading(false)
 
         if (!result.success) {
-          console.error("Erreur upload photo:", result.error)
-          updateForm({
-            photos: formState.photos.map(p => 
-              p.id === photo.id ? { ...p, status: "error" as const, error: result.error } : p
-            )
-          })
-          allSuccess = false
-        } else {
-          updateForm({
-            photos: formState.photos.map(p => 
-              p.id === photo.id ? { ...p, status: "success" as const, progress: 100 } : p
-            )
-          })
+            showError(result.error || "Erreur lors de l'envoi")
+            return
         }
-      } catch (error) {
-        console.error("Erreur upload photo:", error)
-        updateForm({
-          photos: formState.photos.map(p => 
-            p.id === photo.id ? { ...p, status: "error" as const, error: "Erreur réseau" } : p
-          )
-        })
-        allSuccess = false
-      }
+
+        // Stocker le tracking pour redirection future
+        if (formState.trackingNumber) {
+            setActiveTracking(formState.trackingNumber)
+        }
+
+        // Nettoyer le brouillon après soumission réussie
+        clearDraft()
+
+        // Rediriger vers la page de suivi
+        router.push(`/suivi/${formState.trackingNumber}`)
     }
 
-    return allSuccess
-  }
+    // Trouver le scénario de prix correspondant
+    const selectedScenario = formState.situationType
+        ? priceScenarios.find((s) => s.code === formState.situationType) ?? null
+        : null
 
-  // Soumettre la demande
-  const handleSubmit = async () => {
-    if (!formState.interventionId) {
-      showError("Erreur: intervention non créée")
-      return
+    // Transform steps for FlowHeader
+    const flowSteps: FlowStep[] = URGENCE_STEPS.map((step) => ({
+        id: step.id,
+        label: step.label,
+        shortLabel: step.label.slice(0, 3),
+    }))
+
+    // Vérifier si l'étape actuelle est valide pour permettre de continuer
+    const isStepValid = () => {
+        if (currentStepId === "situation") return !!formState.situationType
+        // On laisse les autres étapes gérées par la validation au clic pour éviter de bloquer l'UX
+        // (sauf si on veut désactiver le bouton pour le diagnostic etc)
+        return true
     }
 
-    setLoading(true)
+    const canContinue = isStepValid() && !loading
 
-    // 1. Upload des photos si présentes
-    if (formState.photos.length > 0) {
-      const photosSuccess = await uploadPhotos(formState.interventionId)
-      if (!photosSuccess) {
-        // Continue quand même, les photos échouées seront marquées
-        console.warn("Certaines photos n'ont pas pu être uploadées")
-      }
-    }
+    return (
+        <div className="min-h-screen flex flex-col">
+            {/* Flow Header with integrated stepper */}
+            <FlowHeader
+                mode="urgence"
+                steps={flowSteps}
+                currentStepIndex={currentStep}
+                estimatedTime="~3 min"
+                onBack={currentStep > 0 ? prevStep : undefined}
+                showBack={true}
+                closeHref="/"
+                backHref="/"
+            />
 
-    // 2. Soumettre l'intervention
-    const result = await submitIntervention(formState.interventionId)
-    setLoading(false)
+            {/* Content */}
+            <main className="flex-1 max-w-2xl lg:max-w-4xl mx-auto w-full px-4 py-6">
+                {/* Erreur */}
+                {error && (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                        {error}
+                    </div>
+                )}
 
-    if (!result.success) {
-      showError(result.error || "Erreur lors de l'envoi")
-      return
-    }
-
-    // Stocker le tracking pour redirection future
-    if (formState.trackingNumber) {
-      setActiveTracking(formState.trackingNumber)
-    }
-
-    // Nettoyer le brouillon après soumission réussie
-    clearDraft()
-
-    // Rediriger vers la page de suivi
-    router.push(`/suivi/${formState.trackingNumber}`)
-  }
-
-  // Trouver le scénario de prix correspondant
-  const selectedScenario = formState.situationType
-    ? priceScenarios.find((s) => s.code === formState.situationType) ?? null
-    : null
-
-  // Transform steps for FlowHeader
-  const flowSteps: FlowStep[] = URGENCE_STEPS.map((step) => ({
-    id: step.id,
-    label: step.label,
-    shortLabel: step.label.slice(0, 3),
-  }))
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      {/* Flow Header with integrated stepper */}
-      <FlowHeader
-        mode="urgence"
-        steps={flowSteps}
-        currentStepIndex={currentStep}
-        estimatedTime="~3 min"
-        onBack={currentStep > 0 ? prevStep : undefined}
-        showBack={true}
-        closeHref="/"
-        backHref="/"
-      />
-
-      {/* Content */}
-      <main className="flex-1 max-w-2xl lg:max-w-4xl mx-auto w-full px-4 py-6">
-        {/* Erreur */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-            {error}
-          </div>
-        )}
-
-        {/* Bannière Mode hors-ligne */}
-        {isOffline && (
-          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3">
-            <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <WifiOff className="w-4 h-4 text-amber-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-amber-800">Mode hors-ligne</p>
-              <p className="text-xs text-amber-600">Vos données sont sauvegardées localement</p>
-            </div>
-          </div>
-        )}
+                {/* Bannière Mode hors-ligne */}
+                {isOffline && (
+                    <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3">
+                        <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <WifiOff className="w-4 h-4 text-amber-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-amber-800">Mode hors-ligne</p>
+                            <p className="text-xs text-amber-600">Vos données sont sauvegardées localement</p>
+                        </div>
+                    </div>
+                )}
 
 
-        {/* Étapes */}
-        {currentStepId === "situation" && (
-          <StepSituation
-            selected={formState.situationType}
-            onSelect={(situationType) => updateForm({ situationType })}
-            priceScenarios={priceScenarios}
-          />
-        )}
+                {/* Étapes */}
+                {currentStepId === "situation" && (
+                    <StepSituation
+                        selected={formState.situationType}
+                        onSelect={(situationType) => updateForm({ situationType })}
+                        priceScenarios={priceScenarios}
+                    />
+                )}
 
-        {currentStepId === "diagnostic" && formState.situationType && (
-          <StepDiagnostic
-            situationType={formState.situationType}
-            answers={formState.diagnosticAnswers}
-            doorType={formState.doorType}
-            lockType={formState.lockType}
-            situationDetails={formState.situationDetails}
-            onUpdate={(updates) => updateForm(updates)}
-          />
-        )}
+                {currentStepId === "diagnostic" && formState.situationType && (
+                    <StepDiagnostic
+                        situationType={formState.situationType}
+                        answers={formState.diagnosticAnswers}
+                        doorType={formState.doorType}
+                        lockType={formState.lockType}
+                        situationDetails={formState.situationDetails}
+                        onUpdate={(updates) => updateForm(updates)}
+                    />
+                )}
 
-        {currentStepId === "photos" && (
-          <StepPhotos
-            photos={formState.photos}
-            onUpdate={(photos) => updateForm({ photos })}
-            onSkip={skipPhotos}
-            rgpdConsent={formState.rgpdConsent}
-            onRgpdConsentChange={(rgpdConsent) => updateForm({ rgpdConsent })}
-          />
-        )}
+                {currentStepId === "photos" && (
+                    <StepPhotos
+                        photos={formState.photos}
+                        onUpdate={(photos) => updateForm({ photos })}
+                        onSkip={skipPhotos}
+                        rgpdConsent={formState.rgpdConsent}
+                        onRgpdConsentChange={(rgpdConsent) => updateForm({ rgpdConsent })}
+                    />
+                )}
 
-        {currentStepId === "localisation" && (
-          <StepLocalisation
-            street={formState.addressStreet}
-            postalCode={formState.addressPostalCode}
-            city={formState.addressCity}
-            complement={formState.addressComplement}
-            instructions={formState.addressInstructions}
-            onUpdate={(updates) => updateForm(updates)}
-          />
-        )}
+                {currentStepId === "localisation" && (
+                    <StepLocalisation
+                        street={formState.addressStreet}
+                        postalCode={formState.addressPostalCode}
+                        city={formState.addressCity}
+                        complement={formState.addressComplement}
+                        instructions={formState.addressInstructions}
+                        onUpdate={(updates) => updateForm(updates)}
+                    />
+                )}
 
-        {currentStepId === "contact" && (
-          <StepContact
-            email={formState.clientEmail}
-            phone={formState.clientPhone}
-            firstName={formState.clientFirstName}
-            lastName={formState.clientLastName}
-            isLoggedIn={isLoggedIn}
-            onUpdate={(updates) => updateForm(updates)}
-          />
-        )}
+                {currentStepId === "contact" && (
+                    <StepContact
+                        email={formState.clientEmail}
+                        phone={formState.clientPhone}
+                        firstName={formState.clientFirstName}
+                        lastName={formState.clientLastName}
+                        isLoggedIn={isLoggedIn}
+                        onUpdate={(updates) => updateForm(updates)}
+                    />
+                )}
 
-        {currentStepId === "recap" && (
-          <StepRecap
-            formState={formState}
-            selectedScenario={selectedScenario}
-          />
-        )}
-      </main>
+                {currentStepId === "recap" && (
+                    <StepRecap
+                        formState={formState}
+                        selectedScenario={selectedScenario}
+                    />
+                )}
+            </main>
 
-      {/* Footer avec bouton */}
-      <footer className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
-        <div className="max-w-2xl mx-auto">
-          {currentStepId === "recap" ? (
-            <Button
-              onClick={handleSubmit}
-              disabled={loading}
-              size="lg"
-              className="w-full h-14 bg-red-500 hover:bg-red-600 text-white font-bold text-lg"
-            >
-              {loading ? "Envoi en cours..." : "Envoyer ma demande"}
-            </Button>
-          ) : (
-            <Button
-              onClick={nextStep}
-              disabled={loading}
-              size="lg"
-              className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white font-bold"
-            >
-              {loading ? "Chargement..." : "Continuer"}
-            </Button>
-          )}
+            {/* Footer avec bouton */}
+            <footer className="sticky bottom-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-4 pb-6 sm:pb-4 transition-all duration-300">
+                <div className="max-w-2xl mx-auto flex flex-col items-center gap-2">
+                    {currentStepId === "recap" ? (
+                        <Button
+                            onClick={handleSubmit}
+                            disabled={loading}
+                            size="lg"
+                            className="w-full h-[56px] sm:h-[52px] bg-red-600 hover:bg-red-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-red-500/10 active:scale-[0.98] transition-all"
+                        >
+                            {loading ? "Envoi en cours..." : "Envoyer ma demande"}
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={nextStep}
+                            disabled={!canContinue}
+                            size="lg"
+                            className={cn(
+                                "w-full h-[56px] sm:h-[52px] font-bold rounded-xl transition-all duration-200 active:scale-[0.98]",
+                                canContinue
+                                    ? "bg-gray-900 hover:bg-black text-white shadow-xl shadow-gray-200"
+                                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            )}
+                        >
+                            {loading ? "Chargement..." : "Continuer"}
+                        </Button>
+                    )}
+
+                    {/* Micro-texte d'aide quand désactivé */}
+                    {!isStepValid() && currentStepId === "situation" && (
+                        <p className="text-[11px] text-gray-400 font-medium animate-in fade-in slide-in-from-bottom-1">
+                            Sélectionnez votre situation pour continuer
+                        </p>
+                    )}
+                </div>
+            </footer>
+            <ScrollToTop />
         </div>
-      </footer>
-    </div>
-  )
+    )
 }
