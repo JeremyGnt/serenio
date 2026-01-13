@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { Zap } from "lucide-react"
 import { getActiveTracking, setActiveTracking } from "@/lib/active-tracking"
-import { PressableLink } from "@/components/ui/pressable-link"
 
 interface SosLinkProps {
     isLoggedIn: boolean
@@ -43,13 +43,12 @@ export function SosLink({ isLoggedIn }: SosLinkProps) {
     }, [isLoggedIn])
 
     return (
-        <PressableLink
+        <Link
             href={targetUrl}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 active:bg-red-100 active:scale-95 touch-manipulation transition-all duration-200 ease-out active:duration-75"
         >
             <Zap className={`w-4 h-4 ${isChecking ? "animate-pulse" : ""}`} />
             <span>SOS</span>
-        </PressableLink>
+        </Link>
     )
 }
-

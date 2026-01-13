@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { PostalCodeInput } from "@/components/ui/postal-code-input"
-import { useTouchFeedback } from "@/hooks/useTouchFeedback"
 
 interface AddressSuggestion {
   label: string
@@ -33,32 +32,6 @@ interface StepLocalisationProps {
     latitude?: number | null
     longitude?: number | null
   }) => void
-}
-
-// Composant de suggestion avec feedback tactile
-function SuggestionButton({
-  suggestion,
-  onSelect
-}: {
-  suggestion: AddressSuggestion
-  onSelect: () => void
-}) {
-  const { handlers, style } = useTouchFeedback({ scale: 0.98 })
-
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors duration-200 ease-out touch-manipulation"
-      style={style}
-      {...handlers}
-    >
-      <p className="font-medium text-gray-900 text-sm">{suggestion.label}</p>
-      {suggestion.context && (
-        <p className="text-xs text-muted-foreground">{suggestion.context}</p>
-      )}
-    </button>
-  )
 }
 
 export function StepLocalisation({
@@ -270,11 +243,17 @@ export function StepLocalisation({
         {showSuggestions && suggestions.length > 0 && (
           <div className="absolute z-10 w-full mt-1 bg-white rounded-lg border border-gray-200 shadow-lg overflow-hidden">
             {suggestions.map((suggestion, index) => (
-              <SuggestionButton
+              <button
                 key={index}
-                suggestion={suggestion}
-                onSelect={() => selectSuggestion(suggestion)}
-              />
+                type="button"
+                onClick={() => selectSuggestion(suggestion)}
+                className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-gray-100 active:duration-75"
+              >
+                <p className="font-medium text-gray-900 text-sm">{suggestion.label}</p>
+                {suggestion.context && (
+                  <p className="text-xs text-muted-foreground">{suggestion.context}</p>
+                )}
+              </button>
             ))}
           </div>
         )}

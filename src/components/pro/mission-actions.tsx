@@ -146,7 +146,7 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                     {!["in_progress", "completed", "cancelled"].includes(status) && (
                         <Button
                             size="lg"
-                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-lg h-14 transition-all duration-200 ease-out touch-manipulation active:bg-emerald-800 active:duration-75"
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-lg h-14 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-emerald-800 active:duration-75"
                             onClick={handleStartIntervention}
                             disabled={isPending}
                         >
@@ -164,7 +164,7 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                         <Button
                             size="lg"
                             variant="outline"
-                            className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 text-lg h-14 transition-all duration-200 ease-out touch-manipulation active:bg-emerald-100 active:duration-75"
+                            className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 text-lg h-14 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-emerald-100 active:duration-75"
                             onClick={() => setShowCompleteDialog(true)}
                             disabled={isPending}
                         >

@@ -1,28 +1,12 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Camera, X, Upload, Info } from "lucide-react"
+import { Camera, X, Upload, Image as ImageIcon, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useTouchFeedback } from "@/hooks/useTouchFeedback"
 
 interface StepPhotosProps {
   photos: File[]
   onUpdate: (photos: File[]) => void
-}
-
-// Composant bouton de suppression avec feedback tactile
-function RemoveButton({ onClick }: { onClick: (e: React.MouseEvent) => void }) {
-  const { handlers, style } = useTouchFeedback({ scale: 0.90 })
-  return (
-    <button
-      onClick={onClick}
-      className="absolute top-2 right-2 w-7 h-7 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors duration-200 ease-out touch-manipulation"
-      style={style}
-      {...handlers}
-    >
-      <X className="w-4 h-4" />
-    </button>
-  )
 }
 
 export function StepPhotos({ photos, onUpdate }: StepPhotosProps) {
@@ -92,10 +76,10 @@ export function StepPhotos({ photos, onUpdate }: StepPhotosProps) {
         onDragLeave={handleDragLeave}
         onClick={() => fileInputRef.current?.click()}
         className={cn(
-          "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors touch-manipulation",
+          "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all touch-manipulation active:scale-[0.98] active:duration-75",
           dragOver
             ? "border-emerald-500 bg-emerald-50"
-            : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100"
+            : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100 active:bg-gray-200"
         )}
       >
         <input
@@ -134,7 +118,7 @@ export function StepPhotos({ photos, onUpdate }: StepPhotosProps) {
             </span>
             <button
               onClick={() => onUpdate([])}
-              className="text-sm text-red-600 hover:text-red-700 transition-colors duration-200 touch-manipulation"
+              className="text-sm text-red-600 hover:text-red-700 transition-all duration-200 touch-manipulation active:scale-[0.98]"
             >
               Tout supprimer
             </button>
@@ -148,12 +132,15 @@ export function StepPhotos({ photos, onUpdate }: StepPhotosProps) {
                   alt={`Photo ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
-                <RemoveButton
+                <button
                   onClick={(e) => {
                     e.stopPropagation()
                     removePhoto(index)
                   }}
-                />
+                  className="absolute top-2 right-2 w-7 h-7 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-all duration-200 ease-out touch-manipulation active:scale-90 active:duration-75"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             ))}
 
@@ -161,7 +148,7 @@ export function StepPhotos({ photos, onUpdate }: StepPhotosProps) {
             {photos.length < 5 && (
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors duration-200 ease-out touch-manipulation"
+                className="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 active:bg-gray-50"
               >
                 <Camera className="w-6 h-6" />
                 <span className="text-xs font-medium">Ajouter</span>

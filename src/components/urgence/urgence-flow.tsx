@@ -517,7 +517,7 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
                             onClick={handleSubmit}
                             disabled={loading}
                             size="lg"
-                            className="w-full h-[56px] sm:h-[52px] bg-red-600 hover:bg-red-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-red-500/10 transition-all font-sans"
+                            className="w-full h-[56px] sm:h-[52px] bg-red-600 hover:bg-red-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-red-500/10 active:scale-[0.98] transition-all"
                         >
                             {loading ? "Envoi en cours..." : "Envoyer ma demande"}
                         </Button>
@@ -527,7 +527,7 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
                             disabled={!canContinue}
                             size="lg"
                             className={cn(
-                                "w-full h-[56px] sm:h-[52px] font-bold rounded-xl transition-all duration-200",
+                                "w-full h-[56px] sm:h-[52px] font-bold rounded-xl transition-all duration-200 active:scale-[0.98]",
                                 canContinue
                                     ? "bg-gray-900 hover:bg-black text-white shadow-xl shadow-gray-200"
                                     : "bg-gray-100 text-gray-400 cursor-not-allowed"

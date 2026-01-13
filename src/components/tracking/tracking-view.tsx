@@ -274,7 +274,7 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
 
                         <button
                             onClick={copyTrackingNumber}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all duration-200 touch-manipulation text-sm"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all duration-200 touch-manipulation active:scale-95 active:duration-75 text-sm"
                         >
                             <span className="font-mono text-gray-600">{intervention.trackingNumber}</span>
                             {copied ? (
@@ -287,7 +287,7 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                         <button
                             onClick={handleRefresh}
                             disabled={refreshing}
-                            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all duration-200 touch-manipulation"
+                            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75"
                             title="Rafraîchir manuellement"
                         >
                             <RefreshCw className={cn("w-5 h-5", refreshing && "animate-spin")} />
@@ -300,7 +300,7 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                 {/* Bouton retour - redirige vers l'accueil au lieu de l'historique */}
                 <Link
                     href="/"
-                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-all duration-200 touch-manipulation"
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-all duration-200 touch-manipulation active:scale-[0.98] active:duration-75"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     <span>Retour</span>

@@ -1,9 +1,8 @@
 "use client"
 
-import { Building2, Home, Briefcase, Store, HelpCircle, DoorOpen, Shield, Lock, Zap, ArrowUp, Minus } from "lucide-react"
+import { Building2, Home, Briefcase, Store, HelpCircle, DoorOpen, Shield, Lock, Zap, ArrowUp, ArrowDown, Minus } from "lucide-react"
 import type { RdvServiceCode, RdvDiagnosticAnswers } from "@/types/rdv"
 import { cn } from "@/lib/utils"
-import { PressableOption } from "@/components/ui/pressable-option"
 
 interface StepDiagnosticProps {
   serviceType: RdvServiceCode | null
@@ -64,16 +63,19 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
             const Icon = type.icon
 
             return (
-              <PressableOption
+              <button
                 key={type.value}
-                selected={isSelected}
-                variant="success"
-                className="flex flex-col items-center gap-2"
                 onClick={() => onUpdate({ propertyType: type.value as RdvDiagnosticAnswers["propertyType"] })}
+                className={cn(
+                  "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98] active:duration-75",
+                  isSelected
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700 active:bg-gray-50"
+                )}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-sm font-medium">{type.label}</span>
-              </PressableOption>
+              </button>
             )
           })}
         </div>
@@ -108,12 +110,15 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
             const Icon = type.icon
 
             return (
-              <PressableOption
+              <button
                 key={type.value}
-                selected={isSelected}
-                variant="success"
-                className="flex items-center gap-3 text-left"
                 onClick={() => onUpdate({ doorType: type.value as RdvDiagnosticAnswers["doorType"] })}
+                className={cn(
+                  "flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left touch-manipulation active:scale-[0.98] active:duration-75",
+                  isSelected
+                    ? "border-emerald-500 bg-emerald-50"
+                    : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
+                )}
               >
                 <div className={cn(
                   "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
@@ -129,7 +134,7 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
                     <p className="text-sm text-gray-500">{type.description}</p>
                   )}
                 </div>
-              </PressableOption>
+              </button>
             )
           })}
         </div>
@@ -164,12 +169,15 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
             const Icon = type.icon
 
             return (
-              <PressableOption
+              <button
                 key={type.value}
-                selected={isSelected}
-                variant="success"
-                className="flex items-center gap-3 text-left"
                 onClick={() => onUpdate({ lockType: type.value as RdvDiagnosticAnswers["lockType"] })}
+                className={cn(
+                  "flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left touch-manipulation active:scale-[0.98] active:duration-75",
+                  isSelected
+                    ? "border-emerald-500 bg-emerald-50"
+                    : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
+                )}
               >
                 <div className={cn(
                   "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
@@ -185,7 +193,7 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
                     <p className="text-sm text-gray-500">{type.description}</p>
                   )}
                 </div>
-              </PressableOption>
+              </button>
             )
           })}
         </div>
@@ -220,16 +228,19 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
             const Icon = level.icon
 
             return (
-              <PressableOption
+              <button
                 key={level.value}
-                selected={isSelected}
-                variant="success"
-                className="flex flex-col items-center gap-1"
                 onClick={() => onUpdate({ accessDifficulty: level.value as RdvDiagnosticAnswers["accessDifficulty"] })}
+                className={cn(
+                  "flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98] active:duration-75",
+                  isSelected
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700 active:bg-gray-50"
+                )}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-sm font-medium">{level.label}</span>
-              </PressableOption>
+              </button>
             )
           })}
         </div>
@@ -257,22 +268,28 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
               Ascenseur
             </label>
             <div className="flex gap-2">
-              <PressableOption
-                selected={diagnostic.hasElevator === true}
-                variant="success"
-                className="flex-1 py-3 px-4 font-medium"
+              <button
                 onClick={() => onUpdate({ hasElevator: true })}
+                className={cn(
+                  "flex-1 py-3 px-4 rounded-xl border-2 font-medium transition-all touch-manipulation active:scale-[0.98] active:duration-75",
+                  diagnostic.hasElevator === true
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700 active:bg-gray-50"
+                )}
               >
                 Oui
-              </PressableOption>
-              <PressableOption
-                selected={diagnostic.hasElevator === false}
-                variant="success"
-                className="flex-1 py-3 px-4 font-medium"
+              </button>
+              <button
                 onClick={() => onUpdate({ hasElevator: false })}
+                className={cn(
+                  "flex-1 py-3 px-4 rounded-xl border-2 font-medium transition-all touch-manipulation active:scale-[0.98] active:duration-75",
+                  diagnostic.hasElevator === false
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700 active:bg-gray-50"
+                )}
               >
                 Non
-              </PressableOption>
+              </button>
             </div>
           </div>
         </div>

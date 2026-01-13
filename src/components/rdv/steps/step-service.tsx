@@ -1,9 +1,9 @@
 "use client"
 
+import { useState } from "react"
 import { KeyRound, ShieldCheck, Wrench, HelpCircle, Clock, Check } from "lucide-react"
 import type { RdvServiceTypeDisplay, RdvServiceCode } from "@/types/rdv"
 import { cn } from "@/lib/utils"
-import { PressableCard } from "@/components/ui/pressable-card"
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   KeyRound,
@@ -46,15 +46,14 @@ export function StepService({
           const Icon = ICONS[service.icon || "HelpCircle"] || HelpCircle
 
           return (
-            <PressableCard
+            <button
               key={service.id}
-              selected={isSelected}
-              variant="success"
-              scale={0.98}
               onClick={() => onSelect(service.code, service.id)}
               className={cn(
-                "h-full flex flex-col p-5",
-                isSelected && "ring-2 ring-emerald-500/20"
+                "w-full h-full text-left p-5 rounded-xl border-2 transition-all flex flex-col touch-manipulation active:scale-[0.98] active:duration-75",
+                isSelected
+                  ? "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/20"
+                  : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm active:bg-gray-50"
               )}
             >
               <div className="flex gap-4 flex-1">
@@ -104,7 +103,7 @@ export function StepService({
                   </div>
                 </div>
               </div>
-            </PressableCard>
+            </button>
           )
         })}
       </div>

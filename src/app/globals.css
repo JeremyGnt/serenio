@@ -149,18 +149,3 @@ input[type="password"]::-ms-clear {
 input[type="password"]::-webkit-credentials-auto-fill-button {
   visibility: hidden;
 }
-
-/* Safari iOS Touch Fix */
-button,
-a,
-[role="button"],
-.interactive {
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-}
-
-/* Classe utilitaire pour le feedback tactile programmatique */
-.touch-active {
-  transform: scale(0.97);
-  transition: transform 75ms ease-out;
-}

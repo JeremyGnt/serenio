@@ -189,7 +189,7 @@ export function UserRequestsList({ requests, userId }: UserRequestsListProps) {
                     <button
                         onClick={() => setFilter("active")}
                         className={cn(
-                            "px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 touch-manipulation",
+                            "px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 touch-manipulation active:scale-[0.98] active:duration-75",
                             filter === "active"
                                 ? "bg-emerald-100 text-emerald-700"
                                 : "bg-white text-gray-600 hover:bg-gray-100 active:bg-gray-200"
@@ -200,7 +200,7 @@ export function UserRequestsList({ requests, userId }: UserRequestsListProps) {
                     <button
                         onClick={() => setFilter("completed")}
                         className={cn(
-                            "px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 touch-manipulation",
+                            "px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 touch-manipulation active:scale-[0.98] active:duration-75",
                             filter === "completed"
                                 ? "bg-gray-200 text-gray-700"
                                 : "bg-white text-gray-600 hover:bg-gray-100 active:bg-gray-200"
@@ -306,7 +306,7 @@ export function UserRequestsList({ requests, userId }: UserRequestsListProps) {
                                                                 e.stopPropagation()
                                                                 window.location.href = `tel:${request.artisan!.phone}`
                                                             }}
-                                                            className="p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all duration-200 touch-manipulation"
+                                                            className="p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all duration-200 touch-manipulation active:scale-95 active:duration-75"
                                                         >
                                                             <Phone className="w-4 h-4" />
                                                         </button>

@@ -25,7 +25,7 @@ export default async function AccountPage() {
           {/* Bouton retour */}
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground active:text-gray-900 mb-4 sm:mb-6 transition-all duration-200 touch-manipulation"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground active:text-gray-900 mb-4 sm:mb-6 transition-all duration-200 active:scale-95 touch-manipulation"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Retour à l'accueil</span>

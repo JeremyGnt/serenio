@@ -185,7 +185,7 @@ export function OpportunitiesList({ opportunities, onAccept, onRefuse }: Opportu
                                 )}
 
                                 {/* Toggle */}
-                                <button className="p-1 text-gray-400 hover:text-gray-600 touch-manipulation transition-transform">
+                                <button className="p-1 text-gray-400 hover:text-gray-600 touch-manipulation active:scale-90 active:duration-75 transition-transform">
                                     {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                                 </button>
                             </div>

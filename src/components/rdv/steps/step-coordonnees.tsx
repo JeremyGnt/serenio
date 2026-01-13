@@ -6,8 +6,6 @@ import type { RdvFormState } from "@/types/rdv"
 import { cn } from "@/lib/utils"
 import { PhoneInput } from "@/components/ui/phone-input"
 import { PostalCodeInput } from "@/components/ui/postal-code-input"
-import { PressableOption } from "@/components/ui/pressable-option"
-import { useTouchFeedback } from "@/hooks/useTouchFeedback"
 
 interface AddressSuggestion {
   label: string
@@ -29,9 +27,6 @@ function PasswordField({ value, onChange }: { value: string; onChange: (value: s
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [confirmPassword, setConfirmPassword] = useState("")
-
-  const showPasswordFeedback = useTouchFeedback({ scale: 0.90 })
-  const showConfirmFeedback = useTouchFeedback({ scale: 0.90 })
 
   const passwordsMatch = value === confirmPassword
   const isValidLength = value.length >= 6
@@ -59,9 +54,7 @@ function PasswordField({ value, onChange }: { value: string; onChange: (value: s
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200 touch-manipulation p-1 rounded-full hover:bg-gray-100"
-              style={showPasswordFeedback.style}
-              {...showPasswordFeedback.handlers}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 p-1 rounded-full hover:bg-gray-100 active:bg-gray-200"
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -89,9 +82,7 @@ function PasswordField({ value, onChange }: { value: string; onChange: (value: s
             <button
               type="button"
               onClick={() => setShowConfirm(!showConfirm)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200 touch-manipulation p-1 rounded-full hover:bg-gray-100"
-              style={showConfirmFeedback.style}
-              {...showConfirmFeedback.handlers}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 p-1 rounded-full hover:bg-gray-100 active:bg-gray-200"
             >
               {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -416,20 +407,23 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
             const isSelected = formState.diagnostic.preferredContactMethod === method.value
 
             return (
-              <PressableOption
+              <button
                 key={method.value}
-                selected={isSelected}
-                variant="success"
-                className="py-3 px-4 font-medium text-sm"
                 onClick={() => onUpdate({
                   diagnostic: {
                     ...formState.diagnostic,
                     preferredContactMethod: method.value as "phone" | "email"
                   }
                 })}
+                className={cn(
+                  "py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all touch-manipulation active:scale-[0.98] active:duration-75",
+                  isSelected
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700 active:bg-gray-50"
+                )}
               >
                 {method.label}
-              </PressableOption>
+              </button>
             )
           })}
         </div>

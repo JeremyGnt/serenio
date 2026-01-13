@@ -10,7 +10,6 @@ import {
 } from "lucide-react"
 import type { SituationType, PriceScenarioDisplay } from "@/types/intervention"
 import { SITUATIONS } from "@/lib/interventions/config"
-import { PressableCard } from "@/components/ui/pressable-card"
 
 interface StepSituationProps {
   selected: SituationType | null
@@ -50,12 +49,13 @@ export function StepSituation({
           const Icon = ICONS[situation.icon] || DoorClosed
 
           return (
-            <PressableCard
+            <button
               key={situation.code}
-              selected={isSelected}
-              variant="danger"
-              scale={0.96}
               onClick={() => onSelect(situation.code)}
+              className={`w-full text-left p-3 lg:p-4 rounded-xl border-2 transition-all duration-200 ease-out touch-manipulation active:scale-[0.96] active:duration-75 ${isSelected
+                ? "border-red-500 bg-red-50 active:bg-red-100"
+                : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 active:bg-gray-100"
+                }`}
             >
               <div className="flex items-start gap-3 lg:gap-4">
                 <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${isSelected ? "bg-red-100" : "bg-gray-100"
@@ -83,7 +83,7 @@ export function StepSituation({
                   )}
                 </div>
               </div>
-            </PressableCard>
+            </button>
           )
         })}
       </div>
@@ -97,4 +97,3 @@ export function StepSituation({
     </div>
   )
 }
-

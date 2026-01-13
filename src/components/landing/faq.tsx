@@ -46,7 +46,7 @@ export function Faq({ faq }: FaqProps) {
               >
                 <button
                   onClick={() => toggle(item.id)}
-                  className="w-full flex items-center justify-between p-5 text-left transition-all duration-200 ease-out touch-manipulation active:bg-slate-50 active:duration-75"
+                  className="w-full flex items-center justify-between p-5 text-left transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-slate-50 active:duration-75"
                 >
                   <span className={`font-medium pr-4 transition-colors ${isOpen ? "text-emerald-700" : "text-slate-900"
                     }`}>
