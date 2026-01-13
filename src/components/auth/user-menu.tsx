@@ -177,7 +177,7 @@ export function UserMenu({ user, pendingRequestsCount = 0, unreadMessagesCount =
             {/* Accès Pro */}
             {(user.user_metadata?.role === "artisan" || user.user_metadata?.role === "artisan_pending") && (
               <Link
-                href="/pro/urgences"
+                href="/pro"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:bg-emerald-100 active:duration-75"
               >

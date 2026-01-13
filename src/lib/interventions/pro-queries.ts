@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { STORAGE_CONFIG } from "@/lib/storage"
 import type { InterventionRequest, SituationType, DoorType, LockType } from "@/types/intervention"
 
 // ============================================
@@ -664,11 +665,22 @@ export async function getMissionDetailsByTracking(
             ? intervention.rdv_service_types[0]
             : intervention.rdv_service_types
 
-        const photos = (intervention.intervention_photos || []).map((p: { id: string; storage_path: string; description?: string }) => ({
-            id: p.id,
-            url: p.storage_path,
-            description: p.description,
-        }))
+        // Préparer les photos et générer les URLs signées
+        const rawPhotos = (intervention.intervention_photos || []) as { id: string; storage_path: string; description?: string }[]
+        let photos: { id: string; url: string; description?: string }[] = []
+
+        if (rawPhotos.length > 0) {
+            const paths = rawPhotos.map(p => p.storage_path)
+            const { data: signedUrls } = await adminClient.storage
+                .from(STORAGE_CONFIG.bucket)
+                .createSignedUrls(paths, STORAGE_CONFIG.signedUrlExpiry)
+
+            photos = rawPhotos.map((p, index) => ({
+                id: p.id,
+                url: signedUrls?.[index]?.signedUrl || '',
+                description: p.description,
+            }))
+        }
 
         return {
             id: intervention.id,

@@ -13,7 +13,7 @@ export default async function PendingValidationPage() {
 
     // If already validated artisan, redirect to pro dashboard
     if (role === "artisan") {
-        redirect("/pro/urgences")
+        redirect("/pro")
     }
 
     // If not an artisan at all, redirect to account

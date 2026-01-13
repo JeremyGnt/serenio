@@ -28,7 +28,7 @@ export default async function RejectedArtisanPage() {
     }
 
     if (artisan.status === "approved") {
-        redirect("/pro/urgences")
+        redirect("/pro")
     }
 
     if (artisan.status !== "rejected") {

@@ -120,6 +120,6 @@ export async function loginArtisan(email: string, password: string): Promise<Aut
     }
   }
 
-  return { success: true, redirectTo: "/pro/urgences" }
+  return { success: true, redirectTo: "/pro" }
 }
 

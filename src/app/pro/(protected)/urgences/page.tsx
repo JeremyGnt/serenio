@@ -14,7 +14,7 @@ export default async function UrgencesPage() {
     const user = await getUser()
 
     if (!user) {
-        redirect("/login?redirect=/pro/urgences")
+        redirect("/login?redirect=/pro")
     }
 
     const [pendingInterventions, isAvailable] = await Promise.all([

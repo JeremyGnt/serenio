@@ -44,12 +44,12 @@ export async function GET(request: Request) {
 
       // Vérifier si c'est un artisan (rediriger vers dashboard pro)
       if (userRole === "artisan") {
-        return NextResponse.redirect(`${origin}/pro/urgences`)
+        return NextResponse.redirect(`${origin}/pro`)
       }
 
       // Vérifier si artisan en attente
       if (userRole === "artisan_pending") {
-        return NextResponse.redirect(`${origin}/pro/urgences`)
+        return NextResponse.redirect(`${origin}/pro`)
       }
 
       return NextResponse.redirect(`${origin}${next}`)

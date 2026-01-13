@@ -25,7 +25,8 @@ import {
     Wrench,
     Wifi,
     WifiOff,
-    Camera
+    Camera,
+    MessageCircle
 } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
 import type { RealtimePostgresChangesPayload, RealtimeChannel } from "@supabase/supabase-js"
@@ -196,6 +197,19 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                     ) {
                         handleRefresh()
                     }
+                }
+            )
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "artisan_assignments",
+                    filter: `intervention_id=eq.${intervention.id}`
+                },
+                () => {
+                    // Quand une assignation change (ex: artisan accepte), on rafraîchit
+                    handleRefresh()
                 }
             )
             .subscribe((status) => {
@@ -370,12 +384,27 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                                             </div>
                                         )}
                                     </div>
-                                    <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
-                                        <a href={`tel:${artisan.phone}`}>
-                                            <Phone className="w-4 h-4 mr-2" />
-                                            Appeler
-                                        </a>
-                                    </Button>
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                                            <a href={`tel:${artisan.phone}`}>
+                                                <Phone className="w-4 h-4 mr-2" />
+                                                Appeler
+                                            </a>
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                                            onClick={() => {
+                                                const chatSection = document.getElementById('chat-section')
+                                                if (chatSection) {
+                                                    chatSection.scrollIntoView({ behavior: 'smooth' })
+                                                }
+                                            }}
+                                        >
+                                            <MessageCircle className="w-4 h-4 mr-2" />
+                                            Message
+                                        </Button>
+                                    </div>
                                 </div>
                                 {artisan.estimatedArrivalMinutes && intervention.status === "en_route" && (
                                     <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
@@ -428,10 +457,12 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
 
                     {/* Chat Flottant - visible quand utilisateur connecté */}
                     {currentUserId && !isCancelled && !isCompleted && intervention.status !== "draft" && (
-                        <ClientChatWrapper
-                            interventionId={intervention.id}
-                            currentUserId={currentUserId}
-                        />
+                        <div id="chat-section">
+                            <ClientChatWrapper
+                                interventionId={intervention.id}
+                                currentUserId={currentUserId}
+                            />
+                        </div>
                     )}
 
                     {/* Deuxième ligne : Adresse + Coordonnées - Caché pour annulé */}
