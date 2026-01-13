@@ -7,9 +7,13 @@ import type { UserRequest } from "./client-types"
 // RÉCUPÉRER LES DEMANDES D'UN UTILISATEUR
 // ============================================
 
-export async function getUserRequests(userEmail: string): Promise<UserRequest[]> {
+// ============================================
+// RÉCUPÉRER LES DEMANDES D'UN UTILISATEUR
+// ============================================
+
+export async function getUserRequests(userEmail: string, userId: string): Promise<UserRequest[]> {
     const adminClient = createAdminClient()
-    
+
     try {
         const { data: interventions, error } = await adminClient
             .from("intervention_requests")
@@ -42,29 +46,29 @@ export async function getUserRequests(userEmail: string): Promise<UserRequest[]>
                     )
                 )
             `)
-            .eq("client_email", userEmail)
+            .or(`client_email.eq.${userEmail},client_id.eq.${userId}`)
             .order("created_at", { ascending: false })
             .limit(20)
-        
+
         if (error || !interventions) {
             console.error("Erreur getUserRequests:", error)
             return []
         }
-        
+
         return interventions.map(intervention => {
             // Trouver l'artisan accepté
             const assignments = intervention.artisan_assignments as unknown as Array<{
                 status: string
                 artisans: { company_name: string; phone: string; rating: number } | null
             }> | null
-            
+
             const acceptedAssignment = assignments?.find(a => a.status === "accepted")
             const artisan = acceptedAssignment?.artisans
-            
+
             // Service type
             const serviceTypes = intervention.rdv_service_types as unknown as Array<{ name: string; icon: string }> | null
             const serviceType = serviceTypes && serviceTypes.length > 0 ? serviceTypes[0] : null
-            
+
             return {
                 id: intervention.id,
                 trackingNumber: intervention.tracking_number,
@@ -75,11 +79,11 @@ export async function getUserRequests(userEmail: string): Promise<UserRequest[]>
                 scheduledDate: intervention.scheduled_date,
                 scheduledTimeStart: intervention.scheduled_time_start,
                 scheduledTimeEnd: intervention.scheduled_time_end,
-                estimatedPriceMin: intervention.rdv_price_estimate_min_cents 
-                    ? intervention.rdv_price_estimate_min_cents / 100 
+                estimatedPriceMin: intervention.rdv_price_estimate_min_cents
+                    ? intervention.rdv_price_estimate_min_cents / 100
                     : undefined,
-                estimatedPriceMax: intervention.rdv_price_estimate_max_cents 
-                    ? intervention.rdv_price_estimate_max_cents / 100 
+                estimatedPriceMax: intervention.rdv_price_estimate_max_cents
+                    ? intervention.rdv_price_estimate_max_cents / 100
                     : undefined,
                 serviceType: serviceType ? {
                     name: serviceType.name,
@@ -108,7 +112,7 @@ export async function getUserRequests(userEmail: string): Promise<UserRequest[]>
 
 export async function getUserPendingRequestsCount(userEmail: string): Promise<number> {
     const adminClient = createAdminClient()
-    
+
     try {
         const { count, error } = await adminClient
             .from("intervention_requests")
@@ -116,12 +120,12 @@ export async function getUserPendingRequestsCount(userEmail: string): Promise<nu
             .eq("client_email", userEmail)
             .neq("status", "completed")
             .neq("status", "cancelled")
-        
+
         if (error) {
             console.error("Erreur getUserPendingRequestsCount:", error)
             return 0
         }
-        
+
         return count || 0
     } catch (error) {
         console.error("Erreur getUserPendingRequestsCount:", error)

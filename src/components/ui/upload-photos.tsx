@@ -155,7 +155,8 @@ export function UploadPhotos({
     e.preventDefault()
     e.stopPropagation()
     dragCounterRef.current--
-    if (dragCounterRef.current === 0) {
+    if (dragCounterRef.current <= 0) {
+      dragCounterRef.current = 0
       setIsDragging(false)
     }
   }, [])
@@ -163,7 +164,14 @@ export function UploadPhotos({
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-  }, [])
+    // Indiquer au navigateur qu'on accepte le drop
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = "copy"
+    }
+    if (!isDragging) {
+      setIsDragging(true)
+    }
+  }, [isDragging])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -174,6 +182,7 @@ export function UploadPhotos({
     if (disabled) return
 
     const files = e.dataTransfer.files
+    console.log("Files dropped:", files?.length)
     if (files && files.length > 0) {
       processFiles(files)
     }

@@ -1,14 +1,27 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Calendar, MapPin, Clock, Shield, CheckCircle } from "lucide-react"
+import { Calendar, MapPin, Clock, Shield, CheckCircle, Loader2, ArrowRight, X } from "lucide-react"
 import { UrgenceButton } from "./urgence-button"
+import { getActiveTracking, clearActiveTracking } from "@/lib/active-tracking"
+import { cn } from "@/lib/utils"
 
 interface HeroProps {
   isLoggedIn: boolean
 }
 
 export function Hero({ isLoggedIn }: HeroProps) {
+  const [activeTrackingNumber, setActiveTrackingNumber] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Vérifier si une demande est en cours au chargement
+    const tracking = getActiveTracking()
+    if (tracking) {
+      setActiveTrackingNumber(tracking)
+    }
+  }, [])
+
   return (
     <section className="relative overflow-hidden">
       {/* Background avec gradient subtil */}
@@ -19,8 +32,40 @@ export function Hero({ isLoggedIn }: HeroProps) {
       <div className="absolute top-20 -right-20 w-72 h-72 bg-emerald-100/30 rounded-full blur-3xl animate-pulse" />
       <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-red-100/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
-      <div className="relative px-4 pt-10 pb-12 md:pt-16 md:pb-20">
+      <div className={cn(
+        "relative px-4 pb-12 md:pb-20 transition-all duration-300",
+        activeTrackingNumber ? "pt-2 md:pt-4" : "pt-10 md:pt-16"
+      )}>
         <div className="max-w-4xl mx-auto">
+          {/* Active Tracking Banner - Affiché si une demande est en cours */}
+          {activeTrackingNumber && (
+            <div className="mb-6 p-4 bg-white rounded-2xl border border-amber-200 shadow-lg shadow-amber-100/50 animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 relative">
+                    <Loader2 className="w-5 h-5 text-amber-600 animate-spin" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900">Recherche en cours</h3>
+                    <p className="text-sm text-gray-600">Demande #{activeTrackingNumber}</p>
+                  </div>
+                </div>
+
+                <div className="flex-1 hidden sm:block h-px bg-gray-100 mx-4" />
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Link
+                    href={`/suivi/${activeTrackingNumber}`}
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-colors text-sm whitespace-nowrap"
+                  >
+                    Voir mon suivi
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Titre principal */}
           <h1 className="text-center text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-4">
             <span className="block text-slate-900">Besoin d'un serrurier ?</span>

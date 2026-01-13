@@ -31,6 +31,9 @@ interface UrgenceFlowProps {
 
 // État du formulaire
 interface FormState {
+    // Navigation
+    currentStep: number
+
     // Situation
     situationType: SituationType | null
 
@@ -65,6 +68,7 @@ interface FormState {
 }
 
 const initialFormState: FormState = {
+    currentStep: 0,
     situationType: null,
     diagnosticAnswers: {},
     doorType: null,
@@ -89,7 +93,7 @@ const initialFormState: FormState = {
 
 export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlowProps) {
     const router = useRouter()
-    const [currentStep, setCurrentStep] = useState(0)
+    // const [currentStep, setCurrentStep] = useState(0) // Removed in favor of formState
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
 
@@ -111,6 +115,9 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
     })
 
     const isLoggedIn = !!userEmail
+
+    // Derived state for easier access
+    const currentStep = formState.currentStep
 
     const currentStepId = URGENCE_STEPS[currentStep]?.id
 
@@ -208,6 +215,14 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
         }
 
         if (currentStepId === "contact") {
+            if (!formState.clientFirstName.trim()) {
+                showError("Le prénom est requis")
+                return
+            }
+            if (!formState.clientLastName.trim()) {
+                showError("Le nom est requis")
+                return
+            }
             if (!formState.clientPhone.trim()) {
                 showError("Le numéro de téléphone est requis")
                 return
@@ -271,21 +286,21 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
 
         if (currentStep < URGENCE_STEPS.length - 1) {
             setError("") // Effacer les erreurs avant de passer à l'étape suivante
-            setCurrentStep((prev) => prev + 1)
+            updateForm({ currentStep: currentStep + 1 })
         }
     }
 
     // Retour à l'étape précédente
     const prevStep = () => {
         if (currentStep > 0) {
-            setCurrentStep((prev) => prev - 1)
+            updateForm({ currentStep: currentStep - 1 })
         }
     }
 
     // Passer l'étape photos
     const skipPhotos = () => {
         if (currentStepId === "photos") {
-            setCurrentStep((prev) => prev + 1)
+            updateForm({ currentStep: currentStep + 1 })
         }
     }
 
@@ -378,16 +393,19 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
             return
         }
 
-        // Stocker le tracking pour redirection future
-        if (formState.trackingNumber) {
-            setActiveTracking(formState.trackingNumber)
+        // Mémoriser le tracking car clearDraft va réinitialiser formState
+        const trackingNumber = formState.trackingNumber
+
+        // Stocker le tracking pour redirection future (bannière landing, bouton SOS)
+        if (trackingNumber) {
+            setActiveTracking(trackingNumber)
         }
 
-        // Nettoyer le brouillon après soumission réussie
+        // Nettoyer le brouillon local pour que si l'utilisateur revient, il reparte de l'étape 1
         clearDraft()
 
-        // Rediriger vers la page de suivi
-        router.push(`/suivi/${formState.trackingNumber}`)
+        // Rediriger vers la page de suivi avec le bon numéro
+        router.push(`/suivi/${trackingNumber}`)
     }
 
     // Trouver le scénario de prix correspondant
@@ -513,14 +531,33 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
             <footer className="sticky bottom-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-4 pb-6 sm:pb-4 transition-all duration-300">
                 <div className="max-w-2xl mx-auto flex flex-col items-center gap-2">
                     {currentStepId === "recap" ? (
-                        <Button
-                            onClick={handleSubmit}
-                            disabled={loading}
-                            size="lg"
-                            className="w-full h-[56px] sm:h-[52px] bg-red-600 hover:bg-red-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-red-500/10 active:scale-[0.98] transition-all"
-                        >
-                            {loading ? "Envoi en cours..." : "Envoyer ma demande"}
-                        </Button>
+                        <div className="w-full space-y-3">
+                            <p className="text-xs text-center text-gray-500 flex items-center justify-center gap-2">
+                                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Intervention garantie</span>
+                                <span className="w-0.5 h-0.5 bg-gray-300 rounded-full"></span>
+                                <span>Paiement sur place</span>
+                            </p>
+                            <Button
+                                onClick={handleSubmit}
+                                disabled={loading}
+                                size="lg"
+                                className="w-full h-[56px] sm:h-[52px] bg-red-500 hover:bg-red-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-red-500/25 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group ring-4 ring-red-50"
+                            >
+                                {loading ? (
+                                    "Envoi en cours..."
+                                ) : (
+                                    <>
+                                        <span>Confirmer l'intervention</span>
+                                        <div className="bg-white/20 p-1 rounded-full group-hover:bg-white/30 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="transform group-hover:translate-x-0.5 transition-transform text-white">
+                                                <path d="M5 12h14" />
+                                                <path d="m12 5 7 7-7 7" />
+                                            </svg>
+                                        </div>
+                                    </>
+                                )}
+                            </Button>
+                        </div>
                     ) : (
                         <Button
                             onClick={nextStep}

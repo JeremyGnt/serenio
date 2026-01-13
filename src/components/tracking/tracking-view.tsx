@@ -249,12 +249,31 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
     return (
         <div className="min-h-screen bg-secondary/30">
             {/* Header global - sticky */}
-            <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Image src="/logo.svg" alt="Serenio" width={28} height={28} />
-                        <span className="font-semibold text-gray-900">Serenio</span>
-                    </div>
+            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+                <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 h-14 flex items-center justify-between">
+                    <Link href="/" className="flex items-center gap-2 font-bold text-lg active:scale-95 transition-all duration-200 ease-out active:duration-75 touch-manipulation">
+                        {/* Logo seul sur mobile (< sm) */}
+                        <Image
+                            src="/logo.svg"
+                            alt="Serenio"
+                            width={28}
+                            height={28}
+                            className="sm:hidden"
+                        />
+
+                        {/* Texte seul sur tablette (sm à lg) */}
+                        <span className="hidden sm:inline lg:hidden">Serenio</span>
+
+                        {/* Logo + Texte sur desktop (lg+) */}
+                        <Image
+                            src="/logo.svg"
+                            alt="Serenio"
+                            width={28}
+                            height={28}
+                            className="hidden lg:block"
+                        />
+                        <span className="hidden lg:inline">Serenio</span>
+                    </Link>
 
                     <div className="flex items-center gap-2">
                         {/* Indicateur de connexion temps réel */}
@@ -551,7 +570,7 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
 
             {/* Cancel Dialog */}
             <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-                <AlertDialogContent className="max-w-md mx-4">
+                <AlertDialogContent className="max-w-md w-[90vw] sm:w-full p-6 bg-white rounded-2xl">
                     <AlertDialogHeader className="text-center sm:text-center">
                         <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
                             <AlertTriangle className="w-8 h-8 text-red-600" />
@@ -564,9 +583,9 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                             Cette action ne peut pas être annulée.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter className="mt-6 sm:flex-col sm:space-x-0 sm:space-y-3">
+                    <AlertDialogFooter className="mt-6 flex flex-col gap-3 sm:flex-col sm:space-x-0">
                         <AlertDialogCancel
-                            className="w-full h-12 text-base font-medium"
+                            className="w-full h-12 text-base font-medium mt-0"
                             disabled={cancelling}
                         >
                             Non, garder ma demande
@@ -574,7 +593,7 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                         <AlertDialogAction
                             onClick={handleCancel}
                             disabled={cancelling}
-                            className="w-full h-12 text-base font-medium bg-red-600 hover:bg-red-700 text-white"
+                            className="w-full h-12 text-base font-medium bg-red-600 hover:bg-red-700 text-white mt-0"
                         >
                             {cancelling ? (
                                 <span className="flex items-center gap-2">

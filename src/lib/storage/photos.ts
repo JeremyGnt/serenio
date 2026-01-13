@@ -49,14 +49,14 @@ export async function uploadInterventionPhoto(
     // Vérifier l'autorisation
     // Pour les utilisateurs connectés: vérifier qu'ils sont propriétaires ou artisan assigné
     // Pour les demandes récentes sans utilisateur connecté: autoriser si l'intervention est en draft/pending
-    const isOwner = user?.id === intervention.client_id || 
-                    user?.email === intervention.client_email
+    const isOwner = user?.id === intervention.client_id ||
+      user?.email === intervention.client_email
 
     // Permettre l'upload pour les interventions récentes en draft/pending (demandes anonymes)
     // L'intervention vient d'être créée, l'utilisateur peut ajouter des photos
-    const isRecentAnonymousRequest = !user && 
-                                      intervention.status === 'pending' &&
-                                      !intervention.client_id // Pas de client_id = demande anonyme
+    const isRecentAnonymousRequest = !user &&
+      ['draft', 'pending'].includes(intervention.status) &&
+      !intervention.client_id // Pas de client_id = demande anonyme
 
     // Pour les artisans, vérifier s'ils sont assignés
     let isAssignedArtisan = false
@@ -68,7 +68,7 @@ export async function uploadInterventionPhoto(
         .eq("artisan_id", user.id)
         .eq("status", "accepted")
         .single()
-      
+
       isAssignedArtisan = !!assignment
     }
 
@@ -83,10 +83,10 @@ export async function uploadInterventionPhoto(
       .eq("intervention_id", interventionId)
 
     if ((existingCount || 0) >= STORAGE_CONFIG.maxPhotosPerIntervention) {
-      return { 
-        success: false, 
-        error: `Maximum ${STORAGE_CONFIG.maxPhotosPerIntervention} photos par intervention`, 
-        errorCode: "TOO_MANY_PHOTOS" 
+      return {
+        success: false,
+        error: `Maximum ${STORAGE_CONFIG.maxPhotosPerIntervention} photos par intervention`,
+        errorCode: "TOO_MANY_PHOTOS"
       }
     }
 
@@ -137,7 +137,7 @@ export async function uploadInterventionPhoto(
     try {
       const expiresAt = new Date()
       expiresAt.setDate(expiresAt.getDate() + STORAGE_CONFIG.retentionDays)
-      
+
       photoRecord.rgpd_consent = rgpdConsent
       photoRecord.rgpd_consent_at = rgpdConsent ? new Date().toISOString() : null
       photoRecord.expires_at = expiresAt.toISOString()
@@ -260,8 +260,8 @@ export async function deleteInterventionPhoto(
 
     // Vérifier l'autorisation (propriétaire ou service role)
     const intervention = photo.intervention_requests
-    const isOwner = user?.id === intervention.client_id || 
-                    user?.email === intervention.client_email
+    const isOwner = user?.id === intervention.client_id ||
+      user?.email === intervention.client_email
 
     if (!isOwner) {
       return { success: false, error: "Non autorisé à supprimer cette photo" }
@@ -322,7 +322,7 @@ export async function getInterventionPhotos(
     }
 
     // Filtrer les photos supprimées si la colonne existe
-    const activePhotos = photos.filter(photo => 
+    const activePhotos = photos.filter(photo =>
       photo.is_deleted === undefined || photo.is_deleted === false
     )
 
@@ -383,7 +383,7 @@ export async function getSignedPhotoUrls(
   try {
     // Utiliser createSignedUrls pour batch
     const paths = photos.map((p) => p.storagePath)
-    
+
     const { data, error } = await adminClient.storage
       .from(STORAGE_CONFIG.bucket)
       .createSignedUrls(paths, STORAGE_CONFIG.signedUrlExpiry)
@@ -411,7 +411,7 @@ export async function getInterventionPhotosWithUrls(
   interventionId: string
 ): Promise<UploadedPhoto[]> {
   const photos = await getInterventionPhotos(interventionId)
-  
+
   if (photos.length === 0) {
     return []
   }

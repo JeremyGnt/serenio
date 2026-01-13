@@ -19,7 +19,7 @@ export default async function UserRequestsPage() {
         redirect("/login?redirect=/compte/demandes")
     }
 
-    const requests = await getUserRequests(user.email!)
+    const requests = await getUserRequests(user.email!, user.id)
 
     return (
         <>
@@ -51,9 +51,7 @@ export default async function UserRequestsPage() {
                     </div>
 
                     {/* Contenu */}
-                    <div className="bg-white rounded-xl border border-border p-5 sm:p-6 md:p-8">
-                        <UserRequestsList requests={requests} userId={user.id} />
-                    </div>
+                    <UserRequestsList requests={requests} userId={user.id} />
                 </div>
             </main>
         </>

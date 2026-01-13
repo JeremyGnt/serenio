@@ -8,7 +8,6 @@ import {
   Faq,
   Footer,
 } from "@/components/landing"
-import { ActiveSearchBanner } from "@/components/landing/active-search-banner"
 import { ScrollToTop } from "@/components/ui/scroll-to-top"
 import { getLandingPageData } from "@/lib/api/landing"
 import { getUser } from "@/lib/supabase/server"
@@ -24,7 +23,6 @@ export default async function Home() {
   return (
     <>
       <Header />
-      <ActiveSearchBanner isLoggedIn={isLoggedIn} />
       <main className="min-h-screen">
         <Hero isLoggedIn={isLoggedIn} />
         <Stats stats={stats} />

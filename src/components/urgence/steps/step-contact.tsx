@@ -91,7 +91,9 @@ export function StepContact({
 
         {/* Nom */}
         <div className="space-y-1.5">
-          <Label htmlFor="lastName" className="text-sm">Nom</Label>
+          <Label htmlFor="lastName" className="text-sm">
+            Nom <span className="text-red-500">*</span>
+          </Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
@@ -100,19 +102,23 @@ export function StepContact({
               onChange={(e) => onUpdate({ clientLastName: e.target.value })}
               placeholder="Dupont"
               className="h-11 lg:h-12 pl-10"
+              required
             />
           </div>
         </div>
 
         {/* Prénom */}
         <div className="space-y-1.5">
-          <Label htmlFor="firstName" className="text-sm">Prénom</Label>
+          <Label htmlFor="firstName" className="text-sm">
+            Prénom <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="firstName"
             value={firstName}
             onChange={(e) => onUpdate({ clientFirstName: e.target.value })}
             placeholder="Jean"
             className="h-11 lg:h-12"
+            required
           />
         </div>
       </div>

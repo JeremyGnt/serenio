@@ -305,11 +305,11 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
                                     className={cn(
                                         "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 text-sm font-semibold",
                                         isActive
-                                            ? "bg-red-50 text-red-600 border border-red-200 ring-2 ring-red-100/50 shadow-sm"
+                                            ? "bg-red-100 text-red-900 border border-red-200 shadow-sm"
                                             : "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
                                     )}
                                 >
-                                    <Icon className={cn("w-5 h-5", isActive ? "text-red-600" : "text-red-500")} />
+                                    <Icon className={cn("w-5 h-5", isActive ? "text-red-700" : "text-red-600")} />
                                     <span className="flex-1">{URGENCE_ITEM.label}</span>
                                     {available && urgentCountState > 0 && (
                                         <span className={cn(

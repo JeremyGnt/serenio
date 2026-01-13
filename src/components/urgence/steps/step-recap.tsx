@@ -1,6 +1,6 @@
 "use client"
 
-import { MapPin, Phone, Mail, AlertTriangle, Clock, Euro, User } from "lucide-react"
+import { MapPin, Phone, Mail, AlertTriangle, Clock, Euro, User, Camera } from "lucide-react"
 import {
     DoorClosed,
     KeyRound,
@@ -12,6 +12,7 @@ import {
 } from "lucide-react"
 import type { PriceScenarioDisplay, SituationType } from "@/types/intervention"
 import { SITUATIONS } from "@/lib/interventions/config"
+import Image from "next/image"
 
 // Map des icônes
 const ICONS: Record<string, LucideIcon> = {
@@ -23,7 +24,7 @@ const ICONS: Record<string, LucideIcon> = {
     MessageCircleQuestion,
 }
 
-interface FormState {
+interface StepRecapFormState {
     situationType: SituationType | null
     addressStreet: string
     addressPostalCode: string
@@ -35,12 +36,14 @@ interface FormState {
     clientFirstName: string
     clientLastName: string
     otherDetails?: string
+    photos: Array<{ id: string; previewUrl: string }>
 }
 
 interface StepRecapProps {
-    formState: FormState
+    formState: StepRecapFormState
     selectedScenario: PriceScenarioDisplay | null
 }
+
 
 export function StepRecap({ formState, selectedScenario }: StepRecapProps) {
     const situation = SITUATIONS.find((s) => s.code === formState.situationType)
@@ -59,6 +62,7 @@ export function StepRecap({ formState, selectedScenario }: StepRecapProps) {
 
             {/* Grille 2 colonnes sur desktop */}
             <div className="grid gap-3 lg:grid-cols-2 lg:gap-4">
+
                 {/* Situation */}
                 <div className="bg-white rounded-xl border border-gray-200 p-4 lg:col-span-2">
                     <div className="flex items-center gap-4">
@@ -92,39 +96,52 @@ export function StepRecap({ formState, selectedScenario }: StepRecapProps) {
 
                 {/* Contact */}
                 <div className="bg-white rounded-xl border border-gray-200 p-4">
-                    <h3 className="font-semibold text-gray-900 mb-2">Contact</h3>
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                            <Phone className="w-4 h-4 text-gray-400" />
-                            <span className="text-sm">{formState.clientPhone}</span>
+                    <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <User className="w-5 h-5 text-gray-600" />
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-gray-400" />
-                            <span className="text-sm truncate">{formState.clientEmail}</span>
-                        </div>
-                        {(formState.clientFirstName || formState.clientLastName) && (
-                            <div className="flex items-center gap-2">
-                                <User className="w-4 h-4 text-gray-400" />
-                                <span className="text-sm text-muted-foreground">
-                                    {formState.clientFirstName} {formState.clientLastName}
-                                </span>
+                        <div className="min-w-0 flex-1">
+                            <h3 className="font-semibold text-gray-900 mb-1">Contact</h3>
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                    <Phone className="w-3.5 h-3.5 text-gray-400" />
+                                    <span className="text-sm text-gray-600">{formState.clientPhone}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Mail className="w-3.5 h-3.5 text-gray-400" />
+                                    <span className="text-sm text-gray-600 truncate">{formState.clientEmail}</span>
+                                </div>
+                                {(formState.clientFirstName || formState.clientLastName) && (
+                                    <div className="flex items-center gap-2">
+                                        <User className="w-3.5 h-3.5 text-gray-400" />
+                                        <span className="text-sm text-gray-600">
+                                            {formState.clientFirstName} {formState.clientLastName}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
 
                 {/* Prix indicatif */}
                 {selectedScenario && (
-                    <div className="bg-amber-50 rounded-xl border border-amber-200 p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Euro className="w-5 h-5 text-amber-600" />
+                    <div className="relative overflow-hidden bg-gradient-to-br from-amber-50/50 to-orange-50/50 rounded-2xl border border-orange-100/50 p-4">
+                        <div className="relative flex items-center gap-4">
+                            <div className="w-10 h-10 bg-white/60 rounded-xl flex items-center justify-center flex-shrink-0 border border-orange-100/50 shadow-sm">
+                                <Euro className="w-5 h-5 text-orange-400" />
                             </div>
-                            <div>
-                                <h3 className="font-semibold text-amber-900">Prix indicatif</h3>
-                                <p className="text-xl font-bold text-amber-700">
-                                    {selectedScenario.priceMin}€ – {selectedScenario.priceMax}€
-                                </p>
+                            <div className="flex-1">
+                                <p className="text-xs font-normal text-amber-900/50 mb-0.5">Prix estimé</p>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-lg font-semibold text-gray-800 tracking-tight">
+                                        {selectedScenario.priceMin}€
+                                    </span>
+                                    <span className="text-gray-400 font-normal">–</span>
+                                    <span className="text-lg font-semibold text-gray-800 tracking-tight">
+                                        {selectedScenario.priceMax}€
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -132,17 +149,46 @@ export function StepRecap({ formState, selectedScenario }: StepRecapProps) {
 
                 {/* Temps estimé */}
                 {selectedScenario && selectedScenario.durationMinMinutes && (
-                    <div className="bg-blue-50 rounded-xl border border-blue-200 p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <Clock className="w-5 h-5 text-blue-600" />
+                    <div className="relative overflow-hidden bg-gradient-to-br from-blue-50/50 to-indigo-50/50 rounded-2xl border border-blue-100/50 p-4">
+                        <div className="relative flex items-center gap-4">
+                            <div className="w-10 h-10 bg-white/60 rounded-xl flex items-center justify-center flex-shrink-0 border border-blue-100/50 shadow-sm">
+                                <Clock className="w-5 h-5 text-blue-400" />
                             </div>
-                            <div>
-                                <h3 className="font-semibold text-blue-900">Durée estimée</h3>
-                                <p className="text-base text-blue-700">
-                                    {selectedScenario.durationMinMinutes} – {selectedScenario.durationMaxMinutes} min
-                                </p>
+                            <div className="flex-1">
+                                <p className="text-xs font-normal text-blue-900/50 mb-0.5">Intervention</p>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-lg font-semibold text-gray-800 tracking-tight">
+                                        {selectedScenario.durationMinMinutes}
+                                    </span>
+                                    <span className="text-gray-400 font-normal">–</span>
+                                    <span className="text-lg font-semibold text-gray-800 tracking-tight">
+                                        {selectedScenario.durationMaxMinutes} min
+                                    </span>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Photos */}
+                {formState.photos && formState.photos.length > 0 && (
+                    <div className="bg-white rounded-xl border border-gray-200 p-4 lg:col-span-2">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <Camera className="w-4 h-4 text-gray-600" />
+                            </div>
+                            <h3 className="font-semibold text-gray-900 text-sm">Photos jointes ({formState.photos.length})</h3>
+                        </div>
+                        <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
+                            {formState.photos.map((photo) => (
+                                <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden border border-gray-100 shadow-sm bg-gray-50">
+                                    <img
+                                        src={photo.previewUrl}
+                                        alt="Preview"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )}

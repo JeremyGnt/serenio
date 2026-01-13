@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ChevronLeft, X, AlertTriangle, Calendar } from "lucide-react"
+import { ChevronLeft, X, AlertTriangle, Calendar, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -85,85 +85,91 @@ export function FlowHeader({
             )}
         >
             {/* Single compact row */}
-            <div className="w-full px-3 sm:px-4 lg:px-6 h-11 sm:h-12 flex items-center justify-between gap-2">
-                {/* Back button */}
-                {showBack && (
-                    <div className="flex-shrink-0">
-                        {isFirstStep ? (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                asChild
-                                className="h-8 sm:w-auto sm:px-2.5 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 active:scale-95 touch-manipulation transition-all gap-1.5"
-                            >
-                                <Link href={backHref} aria-label="Retour à l'accueil">
+            <div className="w-full px-3 sm:px-4 lg:px-6 h-11 sm:h-12 flex items-center justify-between relative">
+                {/* Left: Back + Badge */}
+                <div className="flex items-center gap-2 sm:gap-4 z-10">
+                    {/* Back button */}
+                    {showBack && (
+                        <div className="flex-shrink-0">
+                            {isFirstStep ? (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    asChild
+                                    className="h-8 w-8 sm:w-auto sm:px-2.5 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 active:scale-95 touch-manipulation transition-all gap-1.5"
+                                >
+                                    <Link href={backHref} aria-label="Retour à l'accueil">
+                                        <ChevronLeft className="w-5 h-5" />
+                                        <span className="hidden md:inline text-xs font-semibold">Retour</span>
+                                    </Link>
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleBack}
+                                    className="h-8 w-8 sm:w-auto sm:px-2.5 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 active:scale-95 touch-manipulation transition-all gap-1.5"
+                                    aria-label="Retour à l'étape précédente"
+                                >
                                     <ChevronLeft className="w-5 h-5" />
                                     <span className="hidden md:inline text-xs font-semibold">Retour</span>
-                                </Link>
-                            </Button>
-                        ) : (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleBack}
-                                className="h-8 sm:w-auto sm:px-2.5 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 active:scale-95 touch-manipulation transition-all gap-1.5"
-                                aria-label="Retour à l'étape précédente"
-                            >
-                                <ChevronLeft className="w-5 h-5" />
-                                <span className="hidden md:inline text-xs font-semibold">Retour</span>
-                            </Button>
-                        )}
-                    </div>
-                )}
+                                </Button>
+                            )}
+                        </div>
+                    )}
 
-                {/* Center: Badge + Step info */}
-                <div className="flex-1 flex items-center justify-center gap-2 sm:gap-3 min-w-0">
-                    {/* Discrete mode pill */}
+                    {/* Discrete mode pill (Visible icon only on mobile) */}
                     <span
                         className={cn(
-                            "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border",
+                            "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border hidden xs:inline-flex",
                             config.pillClasses
                         )}
                     >
                         <ModeIcon className={cn("w-3.5 h-3.5", config.iconClasses)} />
                         <span className="hidden sm:inline">{config.label}</span>
                     </span>
+                </div>
 
-                    {/* Step indicator + time - single line */}
-                    <span className="text-xs sm:text-sm text-gray-500 font-medium whitespace-nowrap">
+                {/* Center: Step info (Absolute) */}
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+                    <span className="text-xs sm:text-sm text-gray-900 font-semibold whitespace-nowrap">
                         Étape {currentStepIndex + 1} sur {totalSteps}
-                        {estimatedTime && (
-                            <span className="text-gray-300 mx-1.5">·</span>
-                        )}
-                        {estimatedTime && (
-                            <span className="text-emerald-600">{estimatedTime}</span>
-                        )}
                     </span>
                 </div>
 
-                {/* Close button */}
-                {onClose ? (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={onClose}
-                        className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 flex-shrink-0 active:scale-95 touch-manipulation transition-all"
-                        aria-label="Fermer et retourner à l'accueil"
-                    >
-                        <X className="w-5 h-5" />
-                    </Button>
-                ) : (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 flex-shrink-0 active:scale-95 touch-manipulation transition-all"
-                    >
-                        <Link href={closeHref} aria-label="Fermer et retourner à l'accueil">
+                {/* Right: Timer + Close */}
+                <div className="flex items-center gap-2 sm:gap-4 z-10">
+                    {estimatedTime && (
+                        <span className="text-xs sm:text-sm text-emerald-600 font-medium flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100/50">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>{estimatedTime}</span>
+                        </span>
+                    )}
+
+                    {/* Close button */}
+                    {onClose ? (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={onClose}
+                            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 flex-shrink-0 active:scale-95 touch-manipulation transition-all"
+                            aria-label="Fermer et retourner à l'accueil"
+                        >
                             <X className="w-5 h-5" />
-                        </Link>
-                    </Button>
-                )}
+                        </Button>
+                    ) : (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 flex-shrink-0 active:scale-95 touch-manipulation transition-all"
+                        >
+                            <Link href={closeHref} aria-label="Fermer et retourner à l'accueil">
+                                <X className="w-5 h-5" />
+                            </Link>
+                        </Button>
+                    )}
+                </div>
             </div>
 
             {/* Ultra thin progress bar */}

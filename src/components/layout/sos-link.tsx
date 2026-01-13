@@ -15,7 +15,7 @@ export function SosLink({ isLoggedIn }: SosLinkProps) {
 
     useEffect(() => {
         async function checkActiveTracking() {
-            // Si l'utilisateur est connecté, vérifier son compte
+            // Si l'utilisateur est connecté, vérifier son compte en priorité
             if (isLoggedIn) {
                 try {
                     const response = await fetch("/api/tracking/active")
@@ -25,16 +25,19 @@ export function SosLink({ isLoggedIn }: SosLinkProps) {
                         setTargetUrl(`/suivi/${data.trackingNumber}`)
                         // Synchroniser le localStorage avec le compte
                         setActiveTracking(data.trackingNumber)
+                        setIsChecking(false)
+                        return
                     }
                 } catch {
-                    // En cas d'erreur, vérifier localStorage en fallback
-                    const localTracking = getActiveTracking()
-                    if (localTracking) {
-                        setTargetUrl(`/suivi/${localTracking}`)
-                    }
+                    // En cas d'erreur API, on continuera vers la vérification locale
                 }
             }
-            // Si déconnecté, pas de redirection (même si localStorage a une valeur)
+
+            // Vérification locale (pour non-connectés ou fallback)
+            const localTracking = getActiveTracking()
+            if (localTracking) {
+                setTargetUrl(`/suivi/${localTracking}`)
+            }
 
             setIsChecking(false)
         }
