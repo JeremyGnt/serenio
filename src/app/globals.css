@@ -119,6 +119,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -133,8 +134,10 @@
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 /* Hide browser native password reveal button (Edge/Chrome) */
@@ -145,4 +148,19 @@ input[type="password"]::-ms-clear {
 
 input[type="password"]::-webkit-credentials-auto-fill-button {
   visibility: hidden;
+}
+
+/* Safari iOS Touch Fix */
+button,
+a,
+[role="button"],
+.interactive {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Classe utilitaire pour le feedback tactile programmatique */
+.touch-active {
+  transform: scale(0.97);
+  transition: transform 75ms ease-out;
 }

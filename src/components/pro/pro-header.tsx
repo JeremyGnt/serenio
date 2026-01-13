@@ -39,7 +39,7 @@ export function ProHeader({ firstName }: ProHeaderProps) {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/pro/urgences" className="flex items-center gap-2 font-bold text-lg active:scale-95 transition-all duration-200 ease-out active:duration-75 touch-manipulation">
+        <Link href="/pro/urgences" className="flex items-center gap-2 font-bold text-lg transition-all duration-200 ease-out touch-manipulation">
           {/* Logo seul sur mobile */}
           <Image
             src="/logo.svg"
@@ -64,7 +64,7 @@ export function ProHeader({ firstName }: ProHeaderProps) {
         <nav className="hidden md:flex items-center gap-6 text-sm">
           <Link
             href="/pro/urgences"
-            className={`flex items-center gap-2 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:duration-75 ${isDashboard ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            className={`flex items-center gap-2 transition-all duration-200 ease-out touch-manipulation ${isDashboard ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           >
             <LayoutDashboard className="w-4 h-4" />
             Urgences
@@ -78,7 +78,7 @@ export function ProHeader({ firstName }: ProHeaderProps) {
             onMouseLeave={() => setShowSettings(false)}
           >
             <button
-              className={`flex items-center gap-2 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:duration-75 ${isCompte ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              className={`flex items-center gap-2 transition-all duration-200 ease-out touch-manipulation ${isCompte ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
               <Settings className="w-4 h-4" />
               Réglages
@@ -91,14 +91,14 @@ export function ProHeader({ firstName }: ProHeaderProps) {
                 <div className="bg-white rounded-xl border border-gray-200 shadow-lg py-2 min-w-48">
                   <Link
                     href="/pro/compte"
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-all duration-200 ease-out touch-manipulation active:bg-gray-100 active:scale-[0.98] active:duration-75"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-all duration-200 ease-out touch-manipulation active:bg-gray-100"
                   >
                     <User className="w-4 h-4 text-gray-500" />
                     Mon profil
                   </Link>
                   <Link
                     href="/pro/compte?tab=billing"
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-all duration-200 ease-out touch-manipulation active:bg-gray-100 active:scale-[0.98] active:duration-75"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-all duration-200 ease-out touch-manipulation active:bg-gray-100"
                   >
                     <CreditCard className="w-4 h-4 text-gray-500" />
                     Facturation
@@ -106,7 +106,7 @@ export function ProHeader({ firstName }: ProHeaderProps) {
                   <hr className="my-2 border-gray-100" />
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 ease-out touch-manipulation active:bg-red-100 active:scale-[0.98] active:duration-75"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 ease-out touch-manipulation active:bg-red-100"
                   >
                     <LogOut className="w-4 h-4" />
                     Déconnexion
@@ -119,7 +119,7 @@ export function ProHeader({ firstName }: ProHeaderProps) {
 
         {/* Menu Mobile */}
         <button
-          className="md:hidden p-2 text-gray-600 transition-all duration-200 ease-out touch-manipulation active:scale-[0.85] active:duration-75"
+          className="md:hidden p-2 text-gray-600 transition-all duration-200 ease-out touch-manipulation"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -133,7 +133,7 @@ export function ProHeader({ firstName }: ProHeaderProps) {
             <Link
               href="/pro/urgences"
               onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 ${isDashboard ? "bg-gray-100 font-medium" : "hover:bg-gray-50 active:bg-gray-100"}`}
+              className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ease-out touch-manipulation ${isDashboard ? "bg-gray-100 font-medium" : "hover:bg-gray-50 active:bg-gray-100"}`}
             >
               <LayoutDashboard className="w-5 h-5" />
               Urgences
@@ -141,7 +141,7 @@ export function ProHeader({ firstName }: ProHeaderProps) {
             <Link
               href="/pro/compte"
               onClick={() => setMobileMenuOpen(false)}
-              className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 ${isCompte ? "bg-gray-100 font-medium" : "hover:bg-gray-50 active:bg-gray-100"}`}
+              className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ease-out touch-manipulation ${isCompte ? "bg-gray-100 font-medium" : "hover:bg-gray-50 active:bg-gray-100"}`}
             >
               <User className="w-5 h-5" />
               Mon profil
@@ -149,7 +149,7 @@ export function ProHeader({ firstName }: ProHeaderProps) {
             <Link
               href="/pro/compte?tab=billing"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200 ease-out touch-manipulation active:bg-gray-100 active:scale-[0.98] active:duration-75"
+              className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200 ease-out touch-manipulation active:bg-gray-100"
             >
               <CreditCard className="w-5 h-5" />
               Facturation
@@ -157,7 +157,7 @@ export function ProHeader({ firstName }: ProHeaderProps) {
             <hr className="my-2 border-gray-100" />
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all duration-200 ease-out touch-manipulation active:bg-red-100 active:scale-[0.98] active:duration-75"
+              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all duration-200 ease-out touch-manipulation active:bg-red-100"
             >
               <LogOut className="w-5 h-5" />
               Déconnexion

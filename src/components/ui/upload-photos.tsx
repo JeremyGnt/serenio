@@ -226,7 +226,7 @@ export function UploadPhotos({
               : "border-gray-300 hover:border-gray-400 hover:bg-gray-50",
             disabled
               ? "opacity-50 cursor-not-allowed"
-              : "cursor-pointer touch-manipulation active:scale-[0.98] active:bg-gray-100 active:duration-75"
+              : "cursor-pointer touch-manipulation active:bg-gray-100"
           )}
         >
           <div className={cn(
@@ -281,7 +281,7 @@ export function UploadPhotos({
                 "aspect-square rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 transition-all duration-200 ease-out",
                 disabled
                   ? "opacity-50 cursor-not-allowed"
-                  : "hover:border-gray-400 hover:text-gray-500 touch-manipulation active:scale-[0.96] active:duration-75"
+                  : "hover:border-gray-400 hover:text-gray-500 touch-manipulation"
               )}
             >
               <ImagePlus className="w-6 h-6 mb-1" />
@@ -389,7 +389,7 @@ function PhotoThumbnail({ photo, onRemove, disabled }: PhotoThumbnailProps) {
           className={cn(
             "absolute top-1 right-1 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center text-white",
             "opacity-0 group-hover:opacity-100 transition-all duration-200",
-            "hover:bg-black/70 touch-manipulation active:scale-90 active:duration-75",
+            "hover:bg-black/70 touch-manipulation",
             // Toujours visible sur mobile
             "sm:opacity-0 opacity-100"
           )}

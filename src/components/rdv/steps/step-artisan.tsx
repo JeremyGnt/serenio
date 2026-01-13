@@ -5,6 +5,7 @@ import { Star, Clock, CheckCircle2, Sparkles, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getAvailableArtisans } from "@/lib/rdv/actions"
 import type { ArtisanForSelection } from "@/types/rdv"
+import { PressableCard } from "@/components/ui/pressable-card"
 
 interface StepArtisanProps {
   autoAssign: boolean
@@ -50,14 +51,12 @@ export function StepArtisan({
       </div>
 
       {/* Option automatique */}
-      <button
+      <PressableCard
+        selected={autoAssign}
+        variant="success"
+        scale={0.98}
         onClick={() => onToggleAutoAssign(true)}
-        className={cn(
-          "w-full p-5 rounded-xl border-2 transition-all text-left touch-manipulation active:scale-[0.98] active:duration-75",
-          autoAssign
-            ? "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/20"
-            : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
-        )}
+        className={autoAssign ? "ring-2 ring-emerald-500/20" : ""}
       >
         <div className="flex gap-4">
           <div className={cn(
@@ -88,7 +87,7 @@ export function StepArtisan({
             </div>
           </div>
         </div>
-      </button>
+      </PressableCard>
 
       {/* Séparateur */}
       <div className="flex items-center gap-4">
@@ -99,14 +98,12 @@ export function StepArtisan({
 
       {/* Sélection manuelle */}
       <div className="space-y-3">
-        <button
+        <PressableCard
+          selected={!autoAssign}
+          variant="success"
+          scale={0.98}
           onClick={() => onToggleAutoAssign(false)}
-          className={cn(
-            "w-full p-4 rounded-xl border-2 transition-all text-left touch-manipulation active:scale-[0.98] active:duration-75",
-            !autoAssign
-              ? "border-emerald-500 bg-emerald-50"
-              : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
-          )}
+          className="p-4"
         >
           <div className="flex items-center gap-3">
             <div className={cn(
@@ -127,7 +124,7 @@ export function StepArtisan({
               </p>
             </div>
           </div>
-        </button>
+        </PressableCard>
 
         {/* Liste des artisans */}
         {!autoAssign && (
@@ -148,15 +145,13 @@ export function StepArtisan({
                 const isSelected = selectedArtisanId === artisan.id
 
                 return (
-                  <button
+                  <PressableCard
                     key={artisan.id}
+                    selected={isSelected}
+                    variant="success"
+                    scale={0.98}
                     onClick={() => onSelectArtisan(artisan.id)}
-                    className={cn(
-                      "w-full p-4 rounded-xl border-2 transition-all text-left touch-manipulation active:scale-[0.98] active:duration-75",
-                      isSelected
-                        ? "border-emerald-500 bg-emerald-50"
-                        : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
-                    )}
+                    className="p-4"
                   >
                     <div className="flex gap-3">
                       {/* Avatar */}
@@ -208,7 +203,7 @@ export function StepArtisan({
                         </div>
                       </div>
                     </div>
-                  </button>
+                  </PressableCard>
                 )
               })
             )}

@@ -5,6 +5,7 @@ import { CalendarDays, Clock, AlertTriangle, ChevronLeft, ChevronRight } from "l
 import { cn } from "@/lib/utils"
 import { generateAvailableDays } from "@/lib/rdv/queries"
 import type { DayAvailability } from "@/types/rdv"
+import { PressableOption } from "@/components/ui/pressable-option"
 
 interface StepPlanningProps {
   selectedDate: string | null
@@ -71,26 +72,30 @@ export function StepPlanning({
             Date
           </label>
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => setWeekOffset(w => w - 1)}
+            <PressableOption
+              selected={false}
               disabled={!canGoPrev}
+              scale={0.90}
               className={cn(
-                "p-1.5 rounded-lg transition-colors touch-manipulation active:scale-[0.90] active:duration-75",
-                canGoPrev ? "hover:bg-gray-100 text-gray-700 active:bg-gray-200" : "text-gray-300 cursor-not-allowed"
+                "p-1.5",
+                canGoPrev ? "text-gray-700" : "text-gray-300 cursor-not-allowed"
               )}
+              onClick={() => setWeekOffset(w => w - 1)}
             >
               <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setWeekOffset(w => w + 1)}
+            </PressableOption>
+            <PressableOption
+              selected={false}
               disabled={!canGoNext}
+              scale={0.90}
               className={cn(
-                "p-1.5 rounded-lg transition-colors touch-manipulation active:scale-[0.90] active:duration-75",
-                canGoNext ? "hover:bg-gray-100 text-gray-700 active:bg-gray-200" : "text-gray-300 cursor-not-allowed"
+                "p-1.5",
+                canGoNext ? "text-gray-700" : "text-gray-300 cursor-not-allowed"
               )}
+              onClick={() => setWeekOffset(w => w + 1)}
             >
               <ChevronRight className="w-4 h-4" />
-            </button>
+            </PressableOption>
           </div>
         </div>
 
@@ -100,15 +105,12 @@ export function StepPlanning({
             const isSelected = selectedDate === day.date
 
             return (
-              <button
+              <PressableOption
                 key={day.date}
+                selected={isSelected}
+                variant="success"
+                className="flex flex-col items-center"
                 onClick={() => onSelectDate(day.date)}
-                className={cn(
-                  "flex flex-col items-center p-3 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98] active:duration-75",
-                  isSelected
-                    ? "border-emerald-500 bg-emerald-50"
-                    : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
-                )}
               >
                 <span className={cn(
                   "text-xs font-medium",
@@ -128,7 +130,7 @@ export function StepPlanning({
                 )}>
                   {day.month.substring(0, 3)}
                 </span>
-              </button>
+              </PressableOption>
             )
           })}
         </div>
@@ -148,15 +150,12 @@ export function StepPlanning({
               const highDemand = isHighDemand(slot)
 
               return (
-                <button
+                <PressableOption
                   key={slot.start}
+                  selected={isSelected}
+                  variant="success"
+                  className="relative flex flex-col items-center"
                   onClick={() => onSelectTime(slot.start, slot.end)}
-                  className={cn(
-                    "relative flex flex-col items-center p-3 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98] active:duration-75",
-                    isSelected
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
-                  )}
                 >
                   <span className={cn(
                     "font-semibold",
@@ -171,7 +170,7 @@ export function StepPlanning({
                       Forte demande
                     </span>
                   )}
-                </button>
+                </PressableOption>
               )
             })}
           </div>

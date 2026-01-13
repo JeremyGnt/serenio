@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react"
 import { ArrowUp } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTouchFeedback } from "@/hooks/useTouchFeedback"
 
 export function ScrollToTop() {
     const [isVisible, setIsVisible] = useState(false)
+    const { handlers, style } = useTouchFeedback({ scale: 0.95 })
 
     useEffect(() => {
         const toggleVisibility = () => {
@@ -40,16 +42,19 @@ export function ScrollToTop() {
                 // Style discret : Serenio green (emerald-600), opacité 0.85
                 "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20",
                 "flex items-center justify-center translate-y-4",
-                "hover:bg-emerald-700 hover:scale-105 active:scale-95",
+                "hover:bg-emerald-700 hover:scale-105",
                 "opacity-85 hover:opacity-100",
                 // Animation : fade + slide léger depuis le bas
                 isVisible
                     ? "translate-y-0 opacity-85 pointer-events-auto"
                     : "translate-y-8 opacity-0 pointer-events-none"
             )}
+            style={style}
+            {...handlers}
             aria-label="Remonter en haut"
         >
             <ArrowUp className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
     )
 }
+

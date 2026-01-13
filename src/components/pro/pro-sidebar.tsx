@@ -187,7 +187,7 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
 
                 <button
                     onClick={() => setMobileOpen(!mobileOpen)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-90 active:duration-75"
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200 ease-out touch-manipulation active:bg-gray-100"
                 >
                     {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
@@ -303,7 +303,7 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
                                     href={URGENCE_ITEM.href}
                                     onClick={() => setMobileOpen(false)}
                                     className={cn(
-                                        "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 text-sm font-semibold",
+                                        "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ease-out touch-manipulation text-sm font-semibold",
                                         isActive
                                             ? "bg-red-50 text-red-600 border border-red-200 ring-2 ring-red-100/50 shadow-sm"
                                             : "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
@@ -343,7 +343,7 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
                                         href={item.href}
                                         onClick={() => setMobileOpen(false)}
                                         className={cn(
-                                            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 text-sm font-medium",
+                                            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ease-out touch-manipulation text-sm font-medium",
                                             isActive
                                                 ? "bg-emerald-50 text-emerald-700"
                                                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -372,7 +372,7 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
                 <div className="p-4 border-t border-gray-100 flex-shrink-0">
                     <Link
                         href="/"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 ease-out touch-manipulation"
                     >
                         <LogOut className="w-5 h-5" />
                         <span>Retour au site</span>
@@ -393,7 +393,7 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                    "flex flex-col items-center justify-center gap-1 px-3 py-2 relative transition-all duration-200 ease-out touch-manipulation active:scale-[0.92] active:duration-75 rounded-xl",
+                                    "flex flex-col items-center justify-center gap-1 px-3 py-2 relative transition-all duration-200 ease-out touch-manipulation rounded-xl",
                                     isUrgent
                                         ? isActive
                                             ? "text-red-600 bg-red-50"

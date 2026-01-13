@@ -50,7 +50,7 @@ export function ActiveSearchBanner({ isLoggedIn }: ActiveSearchBannerProps) {
             <div className="max-w-4xl mx-auto">
                 <Link
                     href={`/suivi/${trackingNumber}`}
-                    className="flex items-center justify-center gap-3 py-2.5 px-4 bg-amber-500 text-white rounded-xl shadow-md hover:bg-amber-600 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-amber-700 active:duration-75"
+                    className="flex items-center justify-center gap-3 py-2.5 px-4 bg-amber-500 text-white rounded-xl shadow-md hover:bg-amber-600 transition-all duration-200 ease-out touch-manipulation active:bg-amber-700 active:duration-75"
                 >
                     <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
                     <span className="text-sm font-medium">

@@ -26,7 +26,7 @@ function Toggle({ label, description, checked, onChange }: ToggleProps) {
       <button
         type="button"
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-200 ease-out touch-manipulation active:scale-[0.95] active:duration-75 ${checked ? "bg-emerald-500" : "bg-gray-200"
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-200 ease-out touch-manipulation active:duration-75 ${checked ? "bg-emerald-500" : "bg-gray-200"
           }`}
       >
         <span

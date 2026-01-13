@@ -13,6 +13,22 @@ import {
 } from "lucide-react"
 import type { RdvFormState, RdvServiceTypeDisplay } from "@/types/rdv"
 import { Button } from "@/components/ui/button"
+import { useTouchFeedback } from "@/hooks/useTouchFeedback"
+
+// Composant bouton d'édition avec feedback tactile
+function EditButton({ onClick }: { onClick: () => void }) {
+  const { handlers, style } = useTouchFeedback({ scale: 0.90 })
+  return (
+    <button
+      onClick={onClick}
+      className="text-emerald-600 hover:text-emerald-700 p-2 rounded-full hover:bg-emerald-50 transition-colors duration-200 touch-manipulation"
+      style={style}
+      {...handlers}
+    >
+      <Edit2 className="w-4 h-4" />
+    </button>
+  )
+}
 
 interface StepRecapitulatifProps {
   formState: RdvFormState
@@ -58,12 +74,7 @@ export function StepRecapitulatif({ formState, serviceType, onEdit }: StepRecapi
               <p className="text-sm text-gray-500 mt-0.5">{serviceType.description}</p>
             </div>
           </div>
-          <button
-            onClick={() => onEdit(0)}
-            className="text-emerald-600 hover:text-emerald-700 p-2 rounded-full hover:bg-emerald-50 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 active:bg-emerald-100"
-          >
-            <Edit2 className="w-4 h-4" />
-          </button>
+          <EditButton onClick={() => onEdit(0)} />
         </div>
       </div>
 
@@ -88,12 +99,7 @@ export function StepRecapitulatif({ formState, serviceType, onEdit }: StepRecapi
               </p>
             </div>
           </div>
-          <button
-            onClick={() => onEdit(4)}
-            className="text-emerald-600 hover:text-emerald-700 p-2 rounded-full hover:bg-emerald-50 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 active:bg-emerald-100"
-          >
-            <Edit2 className="w-4 h-4" />
-          </button>
+          <EditButton onClick={() => onEdit(4)} />
         </div>
       </div>
 
@@ -117,12 +123,7 @@ export function StepRecapitulatif({ formState, serviceType, onEdit }: StepRecapi
               </p>
             </div>
           </div>
-          <button
-            onClick={() => onEdit(5)}
-            className="text-emerald-600 hover:text-emerald-700 p-2 rounded-full hover:bg-emerald-50 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 active:bg-emerald-100"
-          >
-            <Edit2 className="w-4 h-4" />
-          </button>
+          <EditButton onClick={() => onEdit(5)} />
         </div>
       </div>
 
@@ -144,12 +145,7 @@ export function StepRecapitulatif({ formState, serviceType, onEdit }: StepRecapi
               </p>
             </div>
           </div>
-          <button
-            onClick={() => onEdit(6)}
-            className="text-emerald-600 hover:text-emerald-700 p-2 rounded-full hover:bg-emerald-50 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 active:bg-emerald-100"
-          >
-            <Edit2 className="w-4 h-4" />
-          </button>
+          <EditButton onClick={() => onEdit(6)} />
         </div>
       </div>
 

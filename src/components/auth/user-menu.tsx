@@ -122,7 +122,7 @@ export function UserMenu({ user, pendingRequestsCount = 0, unreadMessagesCount =
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary active:bg-secondary/80 transition-all duration-200 ease-out touch-manipulation"
       >
         <div className="relative">
           <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-700">
@@ -156,7 +156,7 @@ export function UserMenu({ user, pendingRequestsCount = 0, unreadMessagesCount =
             <Link
               href="/compte"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-secondary transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-secondary/80 active:duration-75"
+              className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-secondary transition-all duration-200 ease-out touch-manipulation active:bg-secondary/80 active:duration-75"
             >
               <User className="w-4 h-4" />
               Mon compte
@@ -165,7 +165,7 @@ export function UserMenu({ user, pendingRequestsCount = 0, unreadMessagesCount =
             <Link
               href="/compte/demandes"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-secondary transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-secondary/80 active:duration-75"
+              className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-secondary transition-all duration-200 ease-out touch-manipulation active:bg-secondary/80 active:duration-75"
             >
               <ClipboardList className="w-4 h-4" />
               Mes demandes
@@ -177,7 +177,7 @@ export function UserMenu({ user, pendingRequestsCount = 0, unreadMessagesCount =
             <button
               onClick={handleLogout}
               disabled={loading}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-red-100 active:duration-75"
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 ease-out touch-manipulation active:bg-red-100 active:duration-75"
             >
               <LogOut className="w-4 h-4" />
               {loading ? "Déconnexion..." : "Se déconnecter"}

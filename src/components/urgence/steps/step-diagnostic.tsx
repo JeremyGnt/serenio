@@ -5,6 +5,7 @@ import { DIAGNOSTIC_QUESTIONS } from "@/lib/interventions/config"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { PressableOption } from "@/components/ui/pressable-option"
 
 interface StepDiagnosticProps {
   situationType: SituationType
@@ -93,17 +94,15 @@ export function StepDiagnostic({
                   <div className="space-y-2">
                     <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
                       {question.options.map((option) => (
-                        <button
+                        <PressableOption
                           key={option.value}
-                          type="button"
+                          selected={currentValue === option.value}
+                          variant="danger"
+                          className="w-full text-left h-full"
                           onClick={() => handleAnswerChange(question.id, option.value)}
-                          className={`w-full text-left p-3 rounded-lg border transition-all duration-200 ease-out h-full touch-manipulation active:scale-[0.96] active:duration-75 ${currentValue === option.value
-                            ? "border-red-500 bg-red-50 active:bg-red-100"
-                            : "border-gray-200 hover:border-gray-300 active:bg-gray-50 bg-white"
-                            }`}
                         >
                           <span className="block font-medium">{option.label}</span>
-                        </button>
+                        </PressableOption>
                       ))}
                     </div>
                     {/* Champ "Préciser" si "Autre" est sélectionné */}
@@ -127,26 +126,22 @@ export function StepDiagnostic({
                 {/* Question type: boolean */}
                 {question.type === "boolean" && (
                   <div className="flex gap-3">
-                    <button
-                      type="button"
+                    <PressableOption
+                      selected={currentValue === true}
+                      variant="danger"
+                      className="flex-1"
                       onClick={() => handleAnswerChange(question.id, true)}
-                      className={`flex-1 p-3 rounded-lg border transition-all duration-200 ease-out touch-manipulation active:scale-[0.96] active:duration-75 ${currentValue === true
-                        ? "border-red-500 bg-red-50 active:bg-red-100"
-                        : "border-gray-200 hover:border-gray-300 active:bg-gray-50 bg-white"
-                        }`}
                     >
                       Oui
-                    </button>
-                    <button
-                      type="button"
+                    </PressableOption>
+                    <PressableOption
+                      selected={currentValue === false}
+                      variant="danger"
+                      className="flex-1"
                       onClick={() => handleAnswerChange(question.id, false)}
-                      className={`flex-1 p-3 rounded-lg border transition-all duration-200 ease-out touch-manipulation active:scale-[0.96] active:duration-75 ${currentValue === false
-                        ? "border-red-500 bg-red-50 active:bg-red-100"
-                        : "border-gray-200 hover:border-gray-300 active:bg-gray-50 bg-white"
-                        }`}
                     >
                       Non
-                    </button>
+                    </PressableOption>
                   </div>
                 )}
 
@@ -168,19 +163,17 @@ export function StepDiagnostic({
                       const isSelected = values.includes(option.value)
 
                       return (
-                        <button
+                        <PressableOption
                           key={option.value}
-                          type="button"
+                          selected={isSelected}
+                          variant="danger"
+                          className="w-full text-left flex items-center gap-3 h-full"
                           onClick={() => {
                             const newValues = isSelected
                               ? values.filter((v) => v !== option.value)
                               : [...values, option.value]
                             handleAnswerChange(question.id, newValues)
                           }}
-                          className={`w-full text-left p-3 rounded-lg border transition-all duration-200 ease-out flex items-center gap-3 h-full touch-manipulation active:scale-[0.96] active:duration-75 ${isSelected
-                            ? "border-red-500 bg-red-50 active:bg-red-100"
-                            : "border-gray-200 hover:border-gray-300 active:bg-gray-50 bg-white"
-                            }`}
                         >
                           <div
                             className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? "border-red-500 bg-red-500" : "border-gray-300"
@@ -197,7 +190,7 @@ export function StepDiagnostic({
                             )}
                           </div>
                           <span className="font-medium">{option.label}</span>
-                        </button>
+                        </PressableOption>
                       )
                     })}
                   </div>
@@ -221,4 +214,5 @@ export function StepDiagnostic({
     </div>
   )
 }
+
 

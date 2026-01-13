@@ -1,8 +1,8 @@
 "use client"
 
-import Link from "next/link"
 import { Calendar, MapPin, Clock, Shield, CheckCircle } from "lucide-react"
 import { UrgenceButton } from "./urgence-button"
+import { PressableLink } from "@/components/ui/pressable-link"
 
 interface HeroProps {
   isLoggedIn: boolean
@@ -48,13 +48,13 @@ export function Hero({ isLoggedIn }: HeroProps) {
             <UrgenceButton isLoggedIn={isLoggedIn} />
 
             {/* Bouton RDV */}
-            <Link
+            <PressableLink
               href="/rdv"
-              className="group flex items-center justify-center gap-2 h-14 sm:h-16 sm:flex-1 px-6 bg-white hover:bg-slate-50 text-slate-900 font-semibold rounded-xl sm:rounded-2xl border-2 border-slate-200 hover:border-emerald-300 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] active:duration-75 touch-manipulation"
+              className="group flex items-center justify-center gap-2 h-14 sm:h-16 sm:flex-1 px-6 bg-white hover:bg-slate-50 text-slate-900 font-semibold rounded-xl sm:rounded-2xl border-2 border-slate-200 hover:border-emerald-300 shadow-sm hover:shadow-md hover:-translate-y-0.5"
             >
               <Calendar className="w-5 h-5 text-emerald-600" />
               <span>Planifier un RDV</span>
-            </Link>
+            </PressableLink>
           </div>
 
           {/* Badge localisation */}

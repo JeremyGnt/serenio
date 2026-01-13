@@ -39,22 +39,22 @@ export function Faq({ faq }: FaqProps) {
               <div
                 key={item.id}
                 className={`bg-white rounded-2xl border transition-all duration-300 ${isOpen
-                    ? "border-emerald-200 shadow-lg shadow-emerald-100/50"
-                    : "border-slate-200 hover:border-slate-300"
+                  ? "border-emerald-200 shadow-lg shadow-emerald-100/50"
+                  : "border-slate-200 hover:border-slate-300"
                   }`}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <button
                   onClick={() => toggle(item.id)}
-                  className="w-full flex items-center justify-between p-5 text-left transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-slate-50 active:duration-75"
+                  className="w-full flex items-center justify-between p-5 text-left transition-all duration-200 ease-out touch-manipulation active:bg-slate-50 active:duration-75"
                 >
                   <span className={`font-medium pr-4 transition-colors ${isOpen ? "text-emerald-700" : "text-slate-900"
                     }`}>
                     {item.question}
                   </span>
                   <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${isOpen
-                      ? "bg-emerald-100 rotate-180"
-                      : "bg-slate-100"
+                    ? "bg-emerald-100 rotate-180"
+                    : "bg-slate-100"
                     }`}>
                     <ChevronDown className={`w-5 h-5 transition-colors ${isOpen ? "text-emerald-600" : "text-slate-500"
                       }`} />

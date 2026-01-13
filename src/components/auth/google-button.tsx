@@ -31,7 +31,7 @@ export function GoogleButton({ mode }: GoogleButtonProps) {
       type="button"
       variant="outline"
       size="lg"
-      className="w-full flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 active:bg-gray-100 font-medium h-12 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 shadow-sm hover:shadow"
+      className="w-full flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 active:bg-gray-100 font-medium h-12 rounded-lg transition-all duration-200 ease-out touch-manipulation shadow-sm hover:shadow"
       onClick={handleGoogleAuth}
       disabled={loading}
     >

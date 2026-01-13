@@ -355,7 +355,7 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
                     {!isCancelled && (
                         <div className="flex-1 sm:flex-initial flex justify-end w-full sm:w-auto">
                             <Link href={`/pro/mission/${mission.trackingNumber}`} className="w-full sm:w-auto">
-                                <Button variant="outline" size="sm" className="gap-1 w-full sm:w-auto justify-center active:scale-[0.98] transition-all">
+                                <Button variant="outline" size="sm" className="gap-1 w-full sm:w-auto justify-center transition-all">
                                     Détails
                                     <ChevronRight className="w-4 h-4 ml-1" />
                                 </Button>
