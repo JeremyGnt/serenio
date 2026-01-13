@@ -7,4 +7,4 @@ export { ProBillingSection } from "./pro-billing-section"
 export { ProDeleteSection } from "./pro-delete-section"
 export { ProHeader } from "./pro-header"
 export { ProLogoutButton } from "./pro-logout-button"
-
+export { ProDashboard } from "./pro-dashboard"

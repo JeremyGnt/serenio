@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Calendar, MapPin, Clock, Shield, CheckCircle, Loader2, ArrowRight, X } from "lucide-react"
+import { Calendar, MapPin, Clock, Shield, CheckCircle, Loader2, ArrowRight, Truck } from "lucide-react"
 import { UrgenceButton } from "./urgence-button"
 import { getActiveTracking, clearActiveTracking } from "@/lib/active-tracking"
+import { getLiveTrackingData } from "@/lib/interventions/queries"
+import { supabase } from "@/lib/supabase/client"
+import type { LiveTrackingData } from "@/types/intervention"
 import { cn } from "@/lib/utils"
 
 interface HeroProps {
@@ -13,14 +16,79 @@ interface HeroProps {
 
 export function Hero({ isLoggedIn }: HeroProps) {
   const [activeTrackingNumber, setActiveTrackingNumber] = useState<string | null>(null)
+  const [trackingData, setTrackingData] = useState<LiveTrackingData | null>(null)
 
+  // Charger les données initiales
   useEffect(() => {
-    // Vérifier si une demande est en cours au chargement
     const tracking = getActiveTracking()
     if (tracking) {
       setActiveTrackingNumber(tracking)
+      fetchTrackingData(tracking)
     }
   }, [])
+
+  const fetchTrackingData = async (trackingNumber: string) => {
+    try {
+      const data = await getLiveTrackingData(trackingNumber)
+      if (data) {
+        setTrackingData(data)
+
+        // Nettoyer si l'intervention est terminée ou annulée
+        const finalStatuses = ["completed", "cancelled", "disputed", "quote_refused"]
+        if (finalStatuses.includes(data.intervention.status)) {
+          clearActiveTracking()
+          setActiveTrackingNumber(null)
+          setTrackingData(null)
+        }
+      } else {
+        // Si l'intervention n'existe plus (ex: supprimée), on nettoie
+        clearActiveTracking()
+        setActiveTrackingNumber(null)
+        setTrackingData(null)
+      }
+    } catch (error) {
+      console.error("Erreur fetch tracking:", error)
+    }
+  }
+
+  // S'abonner aux changements en temps réel
+  useEffect(() => {
+    if (!activeTrackingNumber) return
+
+    const channel = supabase
+      .channel(`hero-tracking-${activeTrackingNumber}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "intervention_requests",
+          filter: `tracking_number=eq.${activeTrackingNumber}`
+        },
+        () => fetchTrackingData(activeTrackingNumber)
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "artisan_assignments"
+        },
+        () => fetchTrackingData(activeTrackingNumber)
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [activeTrackingNumber])
+
+  const intervention = trackingData?.intervention
+  const hasArtisan = trackingData?.artisan && ["assigned", "accepted", "en_route", "arrived"].includes(intervention?.status || "")
+
+  // Status finaux pour masquer la bannière
+  const isFinalStatus = intervention && ["completed", "cancelled", "disputed", "quote_refused"].includes(intervention.status)
+  if (isFinalStatus) return null
 
   return (
     <section className="relative overflow-hidden">
@@ -39,14 +107,31 @@ export function Hero({ isLoggedIn }: HeroProps) {
         <div className="max-w-4xl mx-auto">
           {/* Active Tracking Banner - Affiché si une demande est en cours */}
           {activeTrackingNumber && (
-            <div className="mb-6 p-4 bg-white rounded-2xl border border-amber-200 shadow-lg shadow-amber-100/50 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className={cn(
+              "mb-6 p-4 bg-white rounded-2xl border shadow-lg animate-in fade-in slide-in-from-top-4 duration-500",
+              hasArtisan
+                ? "border-emerald-200 shadow-emerald-100/50"
+                : "border-amber-200 shadow-amber-100/50"
+            )}>
               <div className="flex flex-col sm:flex-row items-center gap-4">
                 <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 relative">
-                    <Loader2 className="w-5 h-5 text-amber-600 animate-spin" />
+                  <div className={cn(
+                    "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 relative transition-colors duration-500",
+                    hasArtisan ? "bg-emerald-100" : "bg-amber-100"
+                  )}>
+                    {hasArtisan ? (
+                      <Truck className="w-5 h-5 text-emerald-600 animate-bounce" style={{ animationDuration: '3s' }} />
+                    ) : (
+                      <Loader2 className="w-5 h-5 text-amber-600 animate-spin" />
+                    )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">Recherche en cours</h3>
+                    <h3 className={cn(
+                      "font-semibold transition-colors duration-500",
+                      hasArtisan ? "text-emerald-900" : "text-gray-900"
+                    )}>
+                      {hasArtisan ? "Serrurier trouvé !" : "Recherche en cours"}
+                    </h3>
                     <p className="text-sm text-gray-600">Demande #{activeTrackingNumber}</p>
                   </div>
                 </div>
@@ -56,7 +141,12 @@ export function Hero({ isLoggedIn }: HeroProps) {
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Link
                     href={`/suivi/${activeTrackingNumber}`}
-                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-colors text-sm whitespace-nowrap"
+                    className={cn(
+                      "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 font-bold rounded-xl transition-all active:scale-[0.98] text-sm whitespace-nowrap shadow-sm",
+                      hasArtisan
+                        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                        : "bg-amber-500 hover:bg-amber-600 text-white"
+                    )}
                   >
                     Voir mon suivi
                     <ArrowRight className="w-4 h-4 ml-1" />

@@ -13,7 +13,7 @@ export default async function ProLayout({
     const user = await getUser()
 
     if (!user) {
-        redirect("/login?redirect=/pro/urgences")
+        redirect("/login?redirect=/pro")
     }
 
     // Verify artisan status from database (source of truth, not user_metadata)

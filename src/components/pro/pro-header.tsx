@@ -32,14 +32,14 @@ export function ProHeader({ firstName }: ProHeaderProps) {
     await logout()
   }
 
-  const isDashboard = pathname === "/pro/urgences"
+  const isDashboard = pathname === "/pro" || pathname === "/pro/urgences"
   const isCompte = pathname === "/pro/compte"
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/pro/urgences" className="flex items-center gap-2 font-bold text-lg active:scale-95 transition-all duration-200 ease-out active:duration-75 touch-manipulation">
+        <Link href="/pro" className="flex items-center gap-2 font-bold text-lg active:scale-95 transition-all duration-200 ease-out active:duration-75 touch-manipulation">
           {/* Logo seul sur mobile */}
           <Image
             src="/logo.svg"

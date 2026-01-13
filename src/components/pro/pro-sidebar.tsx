@@ -180,7 +180,7 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
         <>
             {/* Header Mobile */}
             <header className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-50 flex items-center justify-between px-4">
-                <Link href="/pro/urgences" className="flex items-center gap-2 font-bold">
+                <Link href="/pro" className="flex items-center gap-2 font-bold">
                     <Image src="/logo.svg" alt="Serenio" width={28} height={28} />
                     <span className="text-emerald-600">Pro</span>
                 </Link>
@@ -214,7 +214,7 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
             >
                 {/* Logo */}
                 <div className="h-16 flex items-center px-5 border-b border-gray-100 flex-shrink-0">
-                    <Link href="/pro/urgences" className="flex items-center gap-2.5">
+                    <Link href="/pro" className="flex items-center gap-2.5">
                         <Image src="/logo.svg" alt="Serenio" width={32} height={32} />
                         <div>
                             <span className="font-bold text-gray-900">Serenio</span>
