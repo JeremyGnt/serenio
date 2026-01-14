@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { WifiOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -132,6 +132,37 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
         updateForm(updates)
         setError("")
     }
+
+    // Régénérer les URLs des photos après restauration IDB
+    useEffect(() => {
+        if (isRestored && formState.photos.length > 0) {
+            const hasInvalidUrls = formState.photos.some(p => p.file && !p.previewUrl.startsWith("blob:"))
+            // Ou simplement, si on vient de restaurer, on doit recréer les URLs car les anciennes string "blob:..." sont mortes si page refresh
+            // Mais si c'est une SPA nav, elles sont peut-être encore valides ?
+            // Le plus sûr est de toujours recréer.
+
+            const newPhotos = formState.photos.map(p => {
+                // Si on a le fichier mais pas d'URL (ou URL potentiellement périmée)
+                if ((p.file as any) instanceof File || (p.file as any) instanceof Blob) {
+                    return {
+                        ...p,
+                        previewUrl: URL.createObjectURL(p.file)
+                    }
+                }
+                return p
+            })
+
+            // On évite la boucle infinie en comparant si changement nécessaire
+            // Mais updateForm va déclencher un save... C'est pas idéal.
+            // On peut juste muter l'état ? Non.
+            // On check si les URLs sont différentes ?
+            const needsUpdate = newPhotos.some((p, i) => p.previewUrl !== formState.photos[i].previewUrl)
+
+            if (needsUpdate) {
+                updateForm({ photos: newPhotos })
+            }
+        }
+    }, [isRestored])
 
 
     // Vérifier si toutes les questions obligatoires du diagnostic sont remplies

@@ -15,6 +15,7 @@ interface AddressSuggestion {
   postcode?: string
   city?: string
   context?: string
+  coordinates?: [number, number] // [lon, lat]
 }
 
 interface StepLocalisationProps {
@@ -88,6 +89,9 @@ export function StepLocalisation({
               city?: string
               context?: string
             }
+            geometry: {
+              coordinates: [number, number]
+            }
           }) => ({
             label: f.properties.label,
             housenumber: f.properties.housenumber,
@@ -95,6 +99,7 @@ export function StepLocalisation({
             postcode: f.properties.postcode,
             city: f.properties.city,
             context: f.properties.context,
+            coordinates: f.geometry.coordinates,
           }))
           setSuggestions(results)
           setShowSuggestions(true)
@@ -116,11 +121,19 @@ export function StepLocalisation({
       ? `${suggestion.housenumber} ${suggestion.street || ""}`
       : suggestion.street || suggestion.label
 
-    onUpdate({
+    const updates: any = {
       addressStreet: fullStreet.trim(),
       addressPostalCode: suggestion.postcode || "",
       addressCity: suggestion.city || "",
-    })
+    }
+
+    // Ajouter les coordonnées si disponibles
+    if (suggestion.coordinates) {
+      updates.longitude = suggestion.coordinates[0]
+      updates.latitude = suggestion.coordinates[1]
+    }
+
+    onUpdate(updates)
     setSearchQuery("")
     setShowSuggestions(false)
   }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
+import { setDraft, getDraft, deleteDraft } from "@/lib/db"
 
 interface UseFormAutoSaveOptions<T> {
     key: string
@@ -20,33 +21,6 @@ interface UseFormAutoSaveReturn<T> {
     setPendingSubmit: (pending: boolean) => void
 }
 
-// Type guard pour vérifier si un objet peut être sérialisé
-function isSerializable(value: unknown): boolean {
-    if (value === null || value === undefined) return true
-    if (typeof value === "function") return false
-    if (value instanceof File) return false
-    if (value instanceof Blob) return false
-    if (Array.isArray(value)) return value.every(isSerializable)
-    if (typeof value === "object") {
-        return Object.values(value).every(isSerializable)
-    }
-    return true
-}
-
-// Filtrer les propriétés non-sérialisables (comme File[])
-function filterSerializable<T extends object>(state: T): Partial<T> {
-    const result: Partial<T> = {}
-    for (const key in state) {
-        if (Object.prototype.hasOwnProperty.call(state, key)) {
-            const value = state[key]
-            if (isSerializable(value)) {
-                result[key] = value
-            }
-        }
-    }
-    return result
-}
-
 export function useFormAutoSave<T extends object>({
     key,
     initialState,
@@ -61,7 +35,7 @@ export function useFormAutoSave<T extends object>({
     const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
     const isInitializedRef = useRef(false)
 
-    // Clé pour le localStorage
+    // Clés
     const storageKey = `serenio_draft_${key}`
     const pendingKey = `serenio_pending_${key}`
 
@@ -70,27 +44,33 @@ export function useFormAutoSave<T extends object>({
         if (typeof window === "undefined") return
         if (isInitializedRef.current) return
 
-        try {
-            const saved = localStorage.getItem(storageKey)
-            if (saved) {
-                const parsed = JSON.parse(saved)
-                // Merger avec l'état initial pour les champs manquants
-                setFormStateInternal(prev => ({ ...prev, ...parsed }))
-                setIsRestored(true)
-                onRestore?.()
-            }
+        const init = async () => {
+            try {
+                const saved = await getDraft<T>(storageKey)
+                if (saved) {
+                    setFormStateInternal(prev => ({ ...prev, ...saved }))
+                    setIsRestored(true)
+                }
 
-            // Vérifier s'il y a une soumission en attente
-            const pending = localStorage.getItem(pendingKey)
-            if (pending === "true") {
-                setHasPendingSubmit(true)
+                const pending = localStorage.getItem(pendingKey)
+                if (pending === "true") {
+                    setHasPendingSubmit(true)
+                }
+            } catch (e) {
+                console.error("Erreur lors de la restauration du brouillon:", e)
             }
-        } catch (e) {
-            console.error("Erreur lors de la restauration du brouillon:", e)
         }
 
+        init()
         isInitializedRef.current = true
-    }, [storageKey, pendingKey, onRestore])
+    }, [storageKey, pendingKey])
+
+    // Trigger onRestore when isRestored becomes true
+    useEffect(() => {
+        if (isRestored) {
+            onRestore?.()
+        }
+    }, [isRestored, onRestore])
 
     // Détecter le statut en ligne/hors ligne
     useEffect(() => {
@@ -120,10 +100,10 @@ export function useFormAutoSave<T extends object>({
                 clearTimeout(saveTimeoutRef.current)
             }
 
-            saveTimeoutRef.current = setTimeout(() => {
+            saveTimeoutRef.current = setTimeout(async () => {
                 try {
-                    const toSave = filterSerializable(state)
-                    localStorage.setItem(storageKey, JSON.stringify(toSave))
+                    // IDB can store Files/Blobs directly, no need to filter!
+                    await setDraft(storageKey, state)
                 } catch (e) {
                     console.error("Erreur lors de la sauvegarde du brouillon:", e)
                 }
@@ -155,11 +135,11 @@ export function useFormAutoSave<T extends object>({
     )
 
     // Effacer le brouillon
-    const clearDraft = useCallback(() => {
+    const clearDraft = useCallback(async () => {
         if (typeof window === "undefined") return
 
         try {
-            localStorage.removeItem(storageKey)
+            await deleteDraft(storageKey)
             localStorage.removeItem(pendingKey)
             setIsRestored(false)
             setHasPendingSubmit(false)
@@ -171,7 +151,7 @@ export function useFormAutoSave<T extends object>({
 
     // Marquer une soumission comme en attente
     const setPendingSubmit = useCallback(
-        (pending: boolean) => {
+        async (pending: boolean) => {
             if (typeof window === "undefined") return
 
             try {
@@ -179,7 +159,7 @@ export function useFormAutoSave<T extends object>({
                     localStorage.setItem(pendingKey, "true")
                 } else {
                     localStorage.removeItem(pendingKey)
-                    localStorage.removeItem(storageKey)
+                    await deleteDraft(storageKey)
                 }
                 setHasPendingSubmit(pending)
             } catch (e) {

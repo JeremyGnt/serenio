@@ -1,90 +1,67 @@
 "use client"
 
-import { useEffect, useRef } from "react"
-import L from "leaflet"
+import { MapContainer, TileLayer, Circle, useMap } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
+import { useEffect } from "react"
+
+// Fix for default marker icon in Next.js
+import L from "leaflet"
+// @ts-ignore
+delete L.Icon.Default.prototype._getIconUrl
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+    iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+})
 
 interface ApproximateMapProps {
     latitude: number
     longitude: number
     className?: string
+    radius?: number // en mètres
 }
 
-export function ApproximateMap({ latitude, longitude, className = "" }: ApproximateMapProps) {
-    const mapRef = useRef<HTMLDivElement>(null)
-    const mapInstanceRef = useRef<L.Map | null>(null)
-    const circleRef = useRef<L.Circle | null>(null)
-
-    const INITIAL_ZOOM = 15
-    const MIN_ZOOM = 12
-    const MAX_ZOOM = 15 // Empêcher de zoomer plus que le niveau initial
-    const CIRCLE_RADIUS = 500 // 500 mètres
-
+// Composant pour recentrer la carte quand les props changent
+function MapUpdater({ center }: { center: [number, number] }) {
+    const map = useMap()
     useEffect(() => {
-        if (!mapRef.current || mapInstanceRef.current) return
+        map.setView(center, map.getZoom())
+    }, [center, map])
+    return null
+}
 
-        // Créer la carte
-        const map = L.map(mapRef.current, {
-            center: [latitude, longitude],
-            zoom: INITIAL_ZOOM,
-            minZoom: MIN_ZOOM,
-            maxZoom: MAX_ZOOM,
-            zoomControl: true,
-            scrollWheelZoom: true,
-            doubleClickZoom: false, // Désactiver double-click zoom (qui zoome)
-            dragging: true,
-        })
-
-        // Ajouter le layer de tuiles CartoDB Positron (style moderne et épuré)
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: "abcd",
-            maxZoom: 19,
-        }).addTo(map)
-
-        // Créer le cercle approximatif (sans point central pour respecter RGPD)
-        const circle = L.circle([latitude, longitude], {
-            radius: CIRCLE_RADIUS,
-            color: "#10b981",
-            fillColor: "#10b981",
-            fillOpacity: 0.15,
-            weight: 2,
-            dashArray: "5, 10", // Pointillés pour montrer que c'est approximatif
-        }).addTo(map)
-
-        mapInstanceRef.current = map
-        circleRef.current = circle
-
-        // Gérer le zoom pour que le cercle reste visuellement cohérent
-        map.on("zoom", () => {
-            const currentZoom = map.getZoom()
-            // Ajuster visuellement le cercle selon le zoom
-            // Plus on dézoome, plus le cercle parait petit sur la carte (normal)
-            // Le rayon reste le même en mètres
-        })
-
-        // Empêcher de zoomer au-delà du niveau initial
-        map.on("zoomend", () => {
-            if (map.getZoom() > MAX_ZOOM) {
-                map.setZoom(MAX_ZOOM)
-            }
-        })
-
-        return () => {
-            if (mapInstanceRef.current) {
-                mapInstanceRef.current.remove()
-                mapInstanceRef.current = null
-            }
-        }
-    }, [latitude, longitude])
-
+export function ApproximateMap({
+    latitude,
+    longitude,
+    className,
+    radius = 200 // Rayon de 200m pour flouter la position exacte
+}: ApproximateMapProps) {
     return (
-        <div className={`relative ${className}`}>
-            <div ref={mapRef} className="w-full h-full rounded-lg" />
-            {/* Badge RGPD discret */}
-            <div className="absolute bottom-2 left-2 right-2 bg-gray-900/80 text-white text-xs px-3 py-1.5 rounded text-center z-[1000]">
-                Zone approximative • Adresse révélée après acceptation
-            </div>
+        <div className={className}>
+            <MapContainer
+                center={[latitude, longitude]}
+                zoom={15}
+                scrollWheelZoom={false}
+                dragging={false} // Carte statique pour éviter les interactions parasites
+                zoomControl={false}
+                className="h-full w-full"
+            >
+                <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                {/* Zone approximative */}
+                <Circle
+                    center={[latitude, longitude]}
+                    radius={radius}
+                    pathOptions={{
+                        color: "#10b981", // Emerald 500
+                        fillColor: "#10b981",
+                        fillOpacity: 0.2,
+                    }}
+                />
+                <MapUpdater center={[latitude, longitude]} />
+            </MapContainer>
         </div>
     )
 }
