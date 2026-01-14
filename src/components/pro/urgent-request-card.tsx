@@ -107,10 +107,15 @@ export function UrgentRequestCard({ intervention, onAccept, onRefuse }: UrgentRe
                             )}
                         </div>
 
-                        {/* Localisation approximative */}
+                        {/* Localisation approximative + distance */}
                         <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
                             <MapPin className="w-4 h-4" />
                             <span>{intervention.postalCode} {intervention.city}</span>
+                            {intervention.distance != null && (
+                                <span className="ml-2 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
+                                    {intervention.distance} km
+                                </span>
+                            )}
                         </div>
 
                         {/* Temps */}

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { STORAGE_CONFIG } from "@/lib/storage"
+import { calculateDistance } from "@/lib/utils/distance"
 import type { InterventionRequest, SituationType, DoorType, LockType } from "@/types/intervention"
 
 // ============================================
@@ -37,6 +38,9 @@ export interface AnonymizedIntervention {
     // Timestamps
     createdAt: string
     submittedAt?: string
+
+    // Distance du pro (calculée)
+    distance?: number // en km
 }
 
 /**
@@ -78,6 +82,17 @@ export async function getPendingInterventions(): Promise<AnonymizedIntervention[
     }
 
     try {
+        // Récupérer les coordonnées et rayon de l'artisan
+        const { data: artisan } = await adminClient
+            .from("artisans")
+            .select("base_latitude, base_longitude, availability_radius_km")
+            .eq("id", user.id)
+            .single()
+
+        const artisanLat = artisan?.base_latitude
+        const artisanLon = artisan?.base_longitude
+        const radiusKm = artisan?.availability_radius_km || 20
+
         // D'abord, récupérer les IDs des interventions refusées par cet artisan
         const { data: refusedAssignments } = await adminClient
             .from("artisan_assignments")
@@ -112,7 +127,7 @@ export async function getPendingInterventions(): Promise<AnonymizedIntervention[
             .in("status", ["pending", "searching"])
             .eq("intervention_type", "urgence")
             .order("submitted_at", { ascending: false })
-            .limit(20)
+            .limit(50) // On récupère plus pour filtrer après
 
         const { data: interventions, error } = await query
 
@@ -126,13 +141,30 @@ export async function getPendingInterventions(): Promise<AnonymizedIntervention[
             intervention => !refusedIds.includes(intervention.id)
         )
 
-        // Mapper vers le format anonymisé
-        return filteredInterventions.map((intervention) => {
+        // Mapper vers le format anonymisé avec calcul de distance
+        const results: AnonymizedIntervention[] = []
+
+        for (const intervention of filteredInterventions) {
             const diagnostic = Array.isArray(intervention.intervention_diagnostics)
                 ? intervention.intervention_diagnostics[0]
                 : intervention.intervention_diagnostics
 
-            return {
+            // Calculer la distance
+            const distance = calculateDistance(
+                artisanLat,
+                artisanLon,
+                intervention.latitude,
+                intervention.longitude
+            )
+
+            // Filtrer par rayon si les coordonnées de l'artisan sont définies
+            if (artisanLat != null && artisanLon != null && distance != null) {
+                if (distance > radiusKm) {
+                    continue // Hors zone, on ignore
+                }
+            }
+
+            results.push({
                 id: intervention.id,
                 trackingNumber: intervention.tracking_number,
                 latitude: intervention.latitude,
@@ -148,8 +180,12 @@ export async function getPendingInterventions(): Promise<AnonymizedIntervention[
                 urgencyLevel: intervention.urgency_level || 2,
                 createdAt: intervention.created_at,
                 submittedAt: intervention.submitted_at,
-            }
-        })
+                distance: distance ?? undefined,
+            })
+        }
+
+        // Limiter à 20 résultats
+        return results.slice(0, 20)
     } catch (error) {
         console.error("Erreur getPendingInterventions:", error)
         return []
@@ -260,6 +296,17 @@ export async function getArtisanStats(): Promise<ArtisanStats> {
     }
 
     try {
+        // Récupérer les coordonnées et rayon de l'artisan
+        const { data: artisan } = await adminClient
+            .from("artisans")
+            .select("base_latitude, base_longitude, availability_radius_km")
+            .eq("id", user.id)
+            .single()
+
+        const artisanLat = artisan?.base_latitude
+        const artisanLon = artisan?.base_longitude
+        const radiusKm = artisan?.availability_radius_km || 20
+
         // D'abord, récupérer les IDs des interventions refusées par cet artisan
         const { data: refusedAssignments } = await adminClient
             .from("artisan_assignments")
@@ -269,29 +316,65 @@ export async function getArtisanStats(): Promise<ArtisanStats> {
 
         const refusedIds = refusedAssignments?.map(a => a.intervention_id) || []
 
-        // Récupérer toutes les interventions pending (urgences)
+        // Récupérer toutes les interventions pending (urgences) avec coordonnées
         const { data: pendingInterventions } = await adminClient
             .from("intervention_requests")
-            .select("id")
+            .select("id, latitude, longitude")
             .in("status", ["pending", "searching"])
             .eq("intervention_type", "urgence")
 
-        // Filtrer pour exclure celles refusées par cet artisan
-        const filteredCount = pendingInterventions?.filter(
-            intervention => !refusedIds.includes(intervention.id)
-        ).length || 0
+        // Filtrer par refus ET par distance
+        let filteredCount = 0
+        if (pendingInterventions) {
+            for (const intervention of pendingInterventions) {
+                if (refusedIds.includes(intervention.id)) continue
 
-        // Récupérer les opportunités RDV
+                // Filtrer par distance si coordonnées artisan définies
+                if (artisanLat != null && artisanLon != null && intervention.latitude != null && intervention.longitude != null) {
+                    const distance = calculateDistance(
+                        artisanLat,
+                        artisanLon,
+                        intervention.latitude,
+                        intervention.longitude
+                    )
+                    if (distance != null && distance > radiusKm) {
+                        continue // Hors zone
+                    }
+                }
+
+                filteredCount++
+            }
+        }
+
+        // Récupérer les opportunités RDV avec coordonnées
         const { data: rdvOpportunities } = await adminClient
             .from("intervention_requests")
-            .select("id")
+            .select("id, latitude, longitude")
             .in("status", ["pending", "searching"])
             .eq("intervention_type", "rdv")
 
-        // Filtrer pour exclure celles refusées par cet artisan
-        const opportunitiesCount = rdvOpportunities?.filter(
-            intervention => !refusedIds.includes(intervention.id)
-        ).length || 0
+        // Filtrer par refus ET par distance
+        let opportunitiesCount = 0
+        if (rdvOpportunities) {
+            for (const intervention of rdvOpportunities) {
+                if (refusedIds.includes(intervention.id)) continue
+
+                // Filtrer par distance si coordonnées artisan définies
+                if (artisanLat != null && artisanLon != null && intervention.latitude != null && intervention.longitude != null) {
+                    const distance = calculateDistance(
+                        artisanLat,
+                        artisanLon,
+                        intervention.latitude,
+                        intervention.longitude
+                    )
+                    if (distance != null && distance > radiusKm) {
+                        continue // Hors zone
+                    }
+                }
+
+                opportunitiesCount++
+            }
+        }
 
         // Compter les interventions du mois
         const startOfMonth = new Date()
@@ -803,6 +886,9 @@ export interface RdvOpportunity {
     // Timestamps
     createdAt: string
     submittedAt: string | null
+
+    // Distance du pro (calculée)
+    distance?: number // en km
 }
 
 /**
@@ -825,6 +911,17 @@ export async function getRdvOpportunities(): Promise<RdvOpportunity[]> {
     }
 
     try {
+        // Récupérer les coordonnées et rayon de l'artisan
+        const { data: artisan } = await adminClient
+            .from("artisans")
+            .select("base_latitude, base_longitude, availability_radius_km")
+            .eq("id", user.id)
+            .single()
+
+        const artisanLat = artisan?.base_latitude
+        const artisanLon = artisan?.base_longitude
+        const radiusKm = artisan?.availability_radius_km || 20
+
         // Récupérer les IDs refusés par cet artisan
         const { data: refusedAssignments } = await adminClient
             .from("artisan_assignments")
@@ -874,7 +971,7 @@ export async function getRdvOpportunities(): Promise<RdvOpportunity[]> {
             .in("status", ["pending", "searching"])
             .eq("intervention_type", "rdv")
             .order("scheduled_date", { ascending: true })
-            .limit(30)
+            .limit(60) // On récupère plus pour filtrer après
 
         if (error || !interventions) {
             console.error("Erreur récupération opportunités RDV:", error)
@@ -884,8 +981,10 @@ export async function getRdvOpportunities(): Promise<RdvOpportunity[]> {
         // Filtrer les refusées
         const filtered = interventions.filter(i => !refusedIds.includes(i.id))
 
-        // Mapper vers le format anonymisé
-        return filtered.map(intervention => {
+        // Mapper vers le format anonymisé avec calcul de distance
+        const results: RdvOpportunity[] = []
+
+        for (const intervention of filtered) {
             const diagnostic = Array.isArray(intervention.intervention_diagnostics)
                 ? intervention.intervention_diagnostics[0]
                 : intervention.intervention_diagnostics
@@ -904,7 +1003,22 @@ export async function getRdvOpportunities(): Promise<RdvOpportunity[]> {
                 description: p.description
             }))
 
-            return {
+            // Calculer la distance
+            const distance = calculateDistance(
+                artisanLat,
+                artisanLon,
+                intervention.latitude,
+                intervention.longitude
+            )
+
+            // Filtrer par rayon si les coordonnées de l'artisan sont définies
+            if (artisanLat != null && artisanLon != null && distance != null) {
+                if (distance > radiusKm) {
+                    continue // Hors zone, on ignore
+                }
+            }
+
+            results.push({
                 id: intervention.id,
                 trackingNumber: intervention.tracking_number,
                 city: intervention.address_city,
@@ -928,9 +1042,13 @@ export async function getRdvOpportunities(): Promise<RdvOpportunity[]> {
                 estimatedPriceMin: intervention.rdv_price_estimate_min_cents ? intervention.rdv_price_estimate_min_cents / 100 : null,
                 estimatedPriceMax: intervention.rdv_price_estimate_max_cents ? intervention.rdv_price_estimate_max_cents / 100 : null,
                 createdAt: intervention.created_at,
-                submittedAt: intervention.submitted_at
-            }
-        })
+                submittedAt: intervention.submitted_at,
+                distance: distance ?? undefined,
+            })
+        }
+
+        // Limiter à 30 résultats
+        return results.slice(0, 30)
     } catch (error) {
         console.error("Erreur getRdvOpportunities:", error)
         return []
@@ -966,5 +1084,37 @@ export async function getArtisanAvailability(): Promise<boolean> {
     } catch (error) {
         console.error("Erreur getArtisanAvailability:", error)
         return false
+    }
+}
+
+export type ArtisanSettings = {
+    availabilityRadius: number
+    baseLatitude: number | null
+    baseLongitude: number | null
+}
+
+/**
+ * Récupère les paramètres de l'artisan (rayon, position)
+ */
+export async function getArtisanSettings(): Promise<ArtisanSettings | null> {
+    const supabase = await createClient()
+    const adminClient = createAdminClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return null
+
+    const { data: artisan } = await adminClient
+        .from("artisans")
+        .select("availability_radius_km, base_latitude, base_longitude")
+        .eq("id", user.id)
+        .single()
+
+    if (!artisan) return null
+
+    return {
+        availabilityRadius: artisan.availability_radius_km || 20,
+        baseLatitude: artisan.base_latitude,
+        baseLongitude: artisan.base_longitude
     }
 }

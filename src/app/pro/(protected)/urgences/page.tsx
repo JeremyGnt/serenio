@@ -1,5 +1,5 @@
 import { Siren } from "lucide-react"
-import { getPendingInterventions, getArtisanAvailability } from "@/lib/interventions"
+import { getPendingInterventions, getArtisanAvailability, getArtisanSettings } from "@/lib/interventions"
 import { UrgentRequestsList } from "@/components/pro/urgent-requests-list"
 import { UrgenceInfoBanner } from "@/components/pro/urgence-info-banner"
 import { getUser } from "@/lib/supabase/server"
@@ -17,9 +17,10 @@ export default async function UrgencesPage() {
         redirect("/login?redirect=/pro")
     }
 
-    const [pendingInterventions, isAvailable] = await Promise.all([
+    const [pendingInterventions, isAvailable, artisanSettings] = await Promise.all([
         getPendingInterventions(),
-        getArtisanAvailability()
+        getArtisanAvailability(),
+        getArtisanSettings()
     ])
 
     return (
@@ -45,6 +46,7 @@ export default async function UrgencesPage() {
                 initialInterventions={pendingInterventions}
                 isAvailable={isAvailable}
                 userId={user.id}
+                artisanSettings={artisanSettings}
             />
         </div>
     )

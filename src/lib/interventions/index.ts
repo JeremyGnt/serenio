@@ -34,6 +34,7 @@ export {
   getAllArtisanMissions,
   getMissionDetailsByTracking,
   getArtisanAvailability,
+  getArtisanSettings,
 } from "./pro-queries"
 
 // Types Pro
@@ -44,4 +45,5 @@ export type {
   ActiveMission,
   MissionDetails,
   MissionFilter,
+  ArtisanSettings,
 } from "./pro-queries"

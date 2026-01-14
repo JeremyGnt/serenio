@@ -8,13 +8,15 @@ import { UrgentRequestCard } from "./urgent-request-card"
 import { AvailabilityLock } from "./availability-lock"
 import { getPendingInterventions } from "@/lib/interventions/pro-queries"
 import { supabase } from "@/lib/supabase/client"
-import type { AnonymizedIntervention } from "@/lib/interventions"
+import { calculateDistance } from "@/lib/utils/distance"
+import type { AnonymizedIntervention, ArtisanSettings } from "@/lib/interventions"
 import type { RealtimePostgresChangesPayload, RealtimeChannel } from "@supabase/supabase-js"
 
 interface UrgentRequestsListProps {
     initialInterventions: AnonymizedIntervention[]
     isAvailable: boolean
     userId: string
+    artisanSettings: ArtisanSettings | null
 }
 
 // Types pour les payloads Supabase Realtime
@@ -33,7 +35,7 @@ interface InterventionPayload {
     submitted_at: string | null
 }
 
-export function UrgentRequestsList({ initialInterventions, isAvailable, userId }: UrgentRequestsListProps) {
+export function UrgentRequestsList({ initialInterventions, isAvailable, userId, artisanSettings }: UrgentRequestsListProps) {
     const router = useRouter()
     const [interventions, setInterventions] = useState(initialInterventions)
     const [refreshing, setRefreshing] = useState(false)
@@ -124,6 +126,23 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId }
                         newIntervention.intervention_type === "urgence" &&
                         ["pending", "searching"].includes(newIntervention.status)
                     ) {
+                        const lat = newIntervention.latitude
+                        const lon = newIntervention.longitude
+
+                        // Vérifier si l'intervention est dans le rayon de l'artisan
+                        if (artisanSettings && lat != null && lon != null) {
+                            const distance = calculateDistance(
+                                artisanSettings.baseLatitude,
+                                artisanSettings.baseLongitude,
+                                lat,
+                                lon
+                            )
+
+                            if (distance != null && distance > artisanSettings.availabilityRadius) {
+                                return // Hors zone, on ignore
+                            }
+                        }
+
                         // Rafraîchir les données pour récupérer toutes les infos
                         // (incluant le diagnostic qui est dans une autre table)
                         setNewUrgenceAlert(true)
@@ -144,6 +163,23 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId }
                     // Si une intervention passe en pending/searching, on actualise
                     if (["pending", "searching"].includes(updatedIntervention.status)) {
                         if (updatedIntervention.intervention_type === "urgence") {
+                            const lat = updatedIntervention.latitude
+                            const lon = updatedIntervention.longitude
+
+                            // Vérifier si l'intervention est dans le rayon de l'artisan
+                            if (artisanSettings && lat != null && lon != null) {
+                                const distance = calculateDistance(
+                                    artisanSettings.baseLatitude,
+                                    artisanSettings.baseLongitude,
+                                    lat,
+                                    lon
+                                )
+
+                                if (distance != null && distance > artisanSettings.availabilityRadius) {
+                                    return // Hors zone, on ignore
+                                }
+                            }
+
                             setNewUrgenceAlert(true)
                             await handleRefresh()
                         }

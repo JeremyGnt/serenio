@@ -428,7 +428,9 @@ export function UrgentRequestModal({
                                 <div className="text-center p-3 bg-gray-50 rounded-lg">
                                     <Navigation className="w-5 h-5 text-gray-400 mx-auto mb-1" />
                                     <div className="text-xs text-gray-500">Distance</div>
-                                    <div className="font-semibold text-gray-900">~3 km</div>
+                                    <div className="font-semibold text-gray-900">
+                                        {intervention.distance != null ? `${intervention.distance} km` : "—"}
+                                    </div>
                                 </div>
                                 <div className="text-center p-3 bg-gray-50 rounded-lg">
                                     <Timer className="w-5 h-5 text-gray-400 mx-auto mb-1" />

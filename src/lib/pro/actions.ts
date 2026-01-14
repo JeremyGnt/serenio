@@ -97,6 +97,8 @@ export async function updateArtisanAddress(data: {
   postalCode: string
   city: string
   availabilityRadius: number
+  latitude?: number | null
+  longitude?: number | null
 }): Promise<ActionResult> {
   const supabase = await createClient()
   const { data: userData } = await supabase.auth.getUser()
@@ -105,28 +107,42 @@ export async function updateArtisanAddress(data: {
     return { success: false, error: "Non connecté" }
   }
 
-  const { error } = await supabase.auth.updateUser({
+  // Mise à jour auth metadata
+  const { error: authError } = await supabase.auth.updateUser({
     data: {
       street: data.street,
       postal_code: data.postalCode,
       city: data.city,
       availability_radius_km: data.availabilityRadius,
+      base_latitude: data.latitude,
+      base_longitude: data.longitude,
     },
   })
 
-  if (error) {
-    return { success: false, error: error.message }
+  if (authError) {
+    return { success: false, error: authError.message }
   }
 
-  await supabase
+  // Utiliser le client admin pour bypasser RLS
+  const { createAdminClient } = await import("@/lib/supabase/admin")
+  const adminClient = createAdminClient()
+
+  const { error: dbError } = await adminClient
     .from("artisans")
     .update({
       street: data.street,
       postal_code: data.postalCode,
       city: data.city,
       availability_radius_km: data.availabilityRadius,
+      base_latitude: data.latitude,
+      base_longitude: data.longitude,
     })
     .eq("id", userData.user.id)
+
+  if (dbError) {
+    console.error("Erreur mise à jour artisan:", dbError)
+    return { success: false, error: dbError.message }
+  }
 
   revalidatePath("/pro/compte")
   return { success: true }

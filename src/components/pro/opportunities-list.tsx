@@ -154,6 +154,11 @@ export function OpportunitiesList({ opportunities, onAccept, onRefuse }: Opportu
                                             <MapPin className="w-4 h-4" />
                                             {opp.city} ({opp.postalCode})
                                         </span>
+                                        {opp.distance != null && (
+                                            <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
+                                                {opp.distance} km
+                                            </span>
+                                        )}
                                         {opp.scheduledDate && (
                                             <span className="flex items-center gap-1 text-purple-600 font-medium">
                                                 <Calendar className="w-4 h-4" />
