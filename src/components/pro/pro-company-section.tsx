@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { updateArtisanCompany } from "@/lib/pro/actions"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Loader2, CheckCircle2, Building2 } from "lucide-react"
 
 interface ProCompanySectionProps {
   user: SupabaseUser
@@ -32,6 +34,7 @@ export function ProCompanySection({ user }: ProCompanySectionProps) {
 
     if (result.success) {
       setSuccess(true)
+      setTimeout(() => setSuccess(false), 3000)
     } else {
       setError(result.error || "Une erreur est survenue")
     }
@@ -39,63 +42,81 @@ export function ProCompanySection({ user }: ProCompanySectionProps) {
   }
 
   return (
-    <div>
-      <h2 className="text-lg font-bold mb-1">Entreprise</h2>
-      <p className="text-sm text-muted-foreground mb-6">
-        Informations sur votre entreprise
-      </p>
+    <div className="space-y-6">
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="companyName">Nom de l'entreprise</Label>
-          <Input
-            id="companyName"
-            value={companyName}
-            onChange={(e) => setCompanyName(e.target.value)}
-            className="h-12"
-          />
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="siret">Numéro SIRET</Label>
-          <Input
-            id="siret"
-            value={siret}
-            onChange={(e) => setSiret(e.target.value)}
-            className="h-12 bg-gray-50"
-            disabled
-          />
-          <p className="text-xs text-muted-foreground">
-            Le SIRET ne peut pas être modifié. Contactez-nous si nécessaire.
-          </p>
-        </div>
+      <form onSubmit={handleSubmit}>
+        <Card className="border-0 shadow-none ring-0 p-0">
+          <CardContent className="p-0 space-y-6">
 
-        <div className="space-y-2">
-          <Label htmlFor="experience">Description / Expérience</Label>
-          <Textarea
-            id="experience"
-            value={experience}
-            onChange={(e) => setExperience(e.target.value)}
-            placeholder="Présentez votre entreprise, vos spécialités..."
-            rows={4}
-          />
-        </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="companyName">Nom commercial</Label>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="companyName"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    className="pl-9 h-11"
+                    placeholder="Ex: Serrurerie Durand"
+                  />
+                </div>
+              </div>
 
-        {success && (
-          <div className="p-3 rounded-lg bg-green-50 border border-green-100 text-sm text-green-700">
-            Informations mises à jour
-          </div>
-        )}
+              <div className="space-y-2">
+                <Label htmlFor="siret">Numéro SIRET</Label>
+                <Input
+                  id="siret"
+                  value={siret}
+                  onChange={(e) => setSiret(e.target.value)}
+                  className="h-11 bg-gray-50/50"
+                  disabled
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Contactez le support pour modifier le SIRET.
+                </p>
+              </div>
+            </div>
 
-        {error && (
-          <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+            <div className="space-y-2">
+              <Label htmlFor="experience">Description & Expertise</Label>
+              <Textarea
+                id="experience"
+                value={experience}
+                onChange={(e) => setExperience(e.target.value)}
+                placeholder="Décrivez votre activité, vos années d'expérience et vos spécialités pour rassurer vos clients..."
+                rows={5}
+                className="resize-none"
+              />
+            </div>
 
-        <Button type="submit" disabled={loading} className="h-12">
-          {loading ? "Enregistrement..." : "Enregistrer"}
-        </Button>
+            {success && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-700 text-sm animate-in fade-in slide-in-from-top-1">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Modifications enregistrées avec succès.</span>
+              </div>
+            )}
+
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="flex justify-end pt-4">
+              <Button type="submit" disabled={loading} size="lg" className="min-w-[150px] bg-blue-600 hover:bg-blue-700">
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Enregistrement...
+                  </>
+                ) : "Enregistrer"}
+              </Button>
+            </div>
+
+          </CardContent>
+        </Card>
       </form>
     </div>
   )

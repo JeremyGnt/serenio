@@ -9,6 +9,7 @@ import { updateArtisanAddress } from "@/lib/pro/actions"
 import { MapPin, Loader2, Check, Pencil } from "lucide-react"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import dynamic from "next/dynamic"
+import { Card, CardContent } from "@/components/ui/card"
 
 const InterventionRadiusMap = dynamic(
   () => import("./intervention-radius-map").then((mod) => mod.InterventionRadiusMap),
@@ -234,180 +235,177 @@ export function ProAddressSection({ user }: ProAddressSectionProps) {
 
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h2 className="text-lg font-bold">Zone d'intervention</h2>
-          <p className="text-sm text-muted-foreground">
-            Votre adresse et rayon d'action
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
 
-      <div className="space-y-6">
-        {/* Address Card / Edit Form */}
-        {!isEditingAddress ? (
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group transition-all hover:border-gray-300">
-            <div className="absolute top-4 right-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditingAddress(true)}
-                className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-              >
-                <Pencil className="w-3.5 h-3.5 mr-1.5" />
-                Modifier
-              </Button>
-            </div>
 
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                <MapPin className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900">{street || "Aucune adresse"}</p>
-                <p className="text-gray-600">{postalCode} {city}</p>
-                {(!street) && (
-                  <p className="text-sm text-amber-600 mt-1">Veuillez configurer votre adresse</p>
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-gray-50/50 p-4 rounded-xl border border-blue-100/50">
-            <form onSubmit={handleSaveAddress} className="space-y-4">
-              {/* Adresse avec autocomplétion intégrée */}
-              <div ref={searchRef} className="relative space-y-2">
-                <Label htmlFor="street">Adresse</Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <Input
-                    id="street"
-                    value={street}
-                    onChange={(e) => setStreet(e.target.value)}
-                    placeholder="Tapez votre adresse..."
-                    className="h-11 pl-10 pr-10 bg-white"
-                    autoComplete="off"
-                  />
-                  {searchLoading && (
-                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />
-                  )}
+      <Card className="border-0 shadow-none ring-0 p-0">
+        <CardContent className="p-0 space-y-6">
+          <div className="space-y-6">
+            {/* Address Card / Edit Form */}
+            {!isEditingAddress ? (
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group transition-all hover:border-gray-300">
+                <div className="absolute top-4 right-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsEditingAddress(true)}
+                    className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  >
+                    <Pencil className="w-3.5 h-3.5 mr-1.5" />
+                    Modifier
+                  </Button>
                 </div>
 
-                {/* Suggestions */}
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-white rounded-lg border border-gray-200 shadow-lg overflow-hidden">
-                    {suggestions.map((suggestion, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        onClick={() => selectSuggestion(suggestion)}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-all duration-200 ease-out"
-                      >
-                        <p className="font-medium text-gray-900 text-sm">{suggestion.label}</p>
-                        {suggestion.context && (
-                          <p className="text-xs text-muted-foreground">{suggestion.context}</p>
-                        )}
-                      </button>
-                    ))}
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                    <MapPin className="w-5 h-5 text-blue-600" />
                   </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="postalCode">Code postal</Label>
-                  <PostalCodeInput
-                    id="postalCode"
-                    value={postalCode}
-                    onChange={(value) => setPostalCode(value)}
-                    placeholder="69001"
-                    className="h-11 bg-white"
-                  />
-                </div>
-                <div className="col-span-2 space-y-2">
-                  <Label htmlFor="city">Ville</Label>
-                  <Input
-                    id="city"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="h-11 bg-white"
-                  />
+                  <div>
+                    <p className="font-semibold text-gray-900">{street || "Aucune adresse"}</p>
+                    <p className="text-gray-600">{postalCode} {city}</p>
+                    {(!street) && (
+                      <p className="text-sm text-amber-600 mt-1">Veuillez configurer votre adresse</p>
+                    )}
+                  </div>
                 </div>
               </div>
+            ) : (
+              <div className="bg-gray-50/50 p-4 rounded-xl border border-blue-100/50">
+                <form onSubmit={handleSaveAddress} className="space-y-4">
+                  {/* Adresse avec autocomplétion intégrée */}
+                  <div ref={searchRef} className="relative space-y-2">
+                    <Label htmlFor="street">Adresse</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <Input
+                        id="street"
+                        value={street}
+                        onChange={(e) => setStreet(e.target.value)}
+                        placeholder="Tapez votre adresse..."
+                        className="h-11 pl-10 pr-10 bg-white"
+                        autoComplete="off"
+                      />
+                      {searchLoading && (
+                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />
+                      )}
+                    </div>
 
-              {error && (
-                <div className="text-sm text-red-600 bg-red-50 p-2 rounded border border-red-100">
-                  {error}
+                    {/* Suggestions */}
+                    {showSuggestions && suggestions.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white rounded-lg border border-gray-200 shadow-lg overflow-hidden">
+                        {suggestions.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => selectSuggestion(suggestion)}
+                            className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-all duration-200 ease-out"
+                          >
+                            <p className="font-medium text-gray-900 text-sm">{suggestion.label}</p>
+                            {suggestion.context && (
+                              <p className="text-xs text-muted-foreground">{suggestion.context}</p>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="postalCode">Code postal</Label>
+                      <PostalCodeInput
+                        id="postalCode"
+                        value={postalCode}
+                        onChange={(value) => setPostalCode(value)}
+                        placeholder="69001"
+                        className="h-11 bg-white"
+                      />
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                      <Label htmlFor="city">Ville</Label>
+                      <Input
+                        id="city"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        className="h-11 bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div className="text-sm text-red-600 bg-red-50 p-2 rounded border border-red-100">
+                      {error}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-2">
+                    {(initialStreet) && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1 h-11"
+                        onClick={handleCancelEdit}
+                      >
+                        Annuler
+                      </Button>
+                    )}
+                    <Button type="submit" disabled={loading} className="flex-1 h-11 bg-blue-600 hover:bg-blue-700">
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                      {loading ? "Enregistrement..." : "Valider l'adresse"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* Radius & Map Section - Always Visible */}
+            <div className={`space-y-4 transition-opacity duration-300 ${!latitude || !longitude ? 'opacity-50 pointer-events-none' : ''}`}>
+
+              <div className="flex items-end justify-between px-1">
+                <div className="space-y-1">
+                  <Label htmlFor="radius" className="text-base font-bold text-gray-900">Rayon d'intervention</Label>
+                  <p className="text-xs text-muted-foreground">Ajustez la distance maximale d'intervention</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {radiusSaving && <span className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Sauvegarde...</span>}
+                  {radiusSaved && <span className="text-xs text-green-600 flex items-center gap-1"><Check className="w-3 h-3" /> Enregistré</span>}
+
+                  {/* Badge style from Map */}
+                  <div className="bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-200 text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse ring-4 ring-blue-500/20" />
+                    <span>Rayon : <span className="font-bold text-gray-900">{radius} km</span></span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-1 py-2">
+                <input
+                  type="range"
+                  id="radius"
+                  min="1"
+                  max="25"
+                  step="1"
+                  value={radius}
+                  onChange={(e) => handleRadiusChange(e.target.value)}
+                  className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600 hover:accent-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                />
+              </div>
+
+              {/* Carte Interactive */}
+              {latitude && longitude && (
+                <div className="h-[350px] w-full rounded-2xl overflow-hidden border border-gray-200 shadow-md transform transition-all duration-300 hover:shadow-lg">
+                  <InterventionRadiusMap
+                    center={[latitude, longitude]}
+                    radiusKm={parseInt(radius)}
+                    className="h-full w-full"
+                  />
                 </div>
               )}
-
-              <div className="flex gap-3 pt-2">
-                {(initialStreet) && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 h-11"
-                    onClick={handleCancelEdit}
-                  >
-                    Annuler
-                  </Button>
-                )}
-                <Button type="submit" disabled={loading} className="flex-1 h-11 bg-blue-600 hover:bg-blue-700">
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                  {loading ? "Enregistrement..." : "Valider l'adresse"}
-                </Button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* Radius & Map Section - Always Visible */}
-        <div className={`space-y-4 transition-opacity duration-300 ${!latitude || !longitude ? 'opacity-50 pointer-events-none' : ''}`}>
-
-          <div className="flex items-end justify-between px-1">
-            <div className="space-y-1">
-              <Label htmlFor="radius" className="text-base font-bold text-gray-900">Rayon d'intervention</Label>
-              <p className="text-xs text-muted-foreground">Ajustez la distance maximale d'intervention</p>
             </div>
-            <div className="flex items-center gap-3">
-              {radiusSaving && <span className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Sauvegarde...</span>}
-              {radiusSaved && <span className="text-xs text-green-600 flex items-center gap-1"><Check className="w-3 h-3" /> Enregistré</span>}
 
-              {/* Badge style from Map */}
-              <div className="bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-200 text-sm font-medium text-gray-600 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse ring-4 ring-blue-500/20" />
-                <span>Rayon : <span className="font-bold text-gray-900">{radius} km</span></span>
-              </div>
-            </div>
           </div>
-
-          <div className="px-1 py-2">
-            <input
-              type="range"
-              id="radius"
-              min="1"
-              max="25"
-              step="1"
-              value={radius}
-              onChange={(e) => handleRadiusChange(e.target.value)}
-              className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600 hover:accent-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-            />
-          </div>
-
-          {/* Carte Interactive */}
-          {latitude && longitude && (
-            <div className="h-[350px] w-full rounded-2xl overflow-hidden border border-gray-200 shadow-md transform transition-all duration-300 hover:shadow-lg">
-              <InterventionRadiusMap
-                center={[latitude, longitude]}
-                radiusKm={parseInt(radius)}
-                className="h-full w-full"
-              />
-            </div>
-          )}
-        </div>
-
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

@@ -6,6 +6,105 @@ import { createClient } from "@/lib/supabase/server"
 interface ActionResult {
   success: boolean
   error?: string
+  data?: any
+}
+
+/**
+ * Met à jour la photo de profil de l'artisan
+ */
+export async function updateArtisanAvatar(formData: FormData): Promise<ActionResult> {
+  const supabase = await createClient()
+  const { data: userData } = await supabase.auth.getUser()
+
+  if (!userData.user) {
+    return { success: false, error: "Non connecté" }
+  }
+
+  const file = formData.get("file") as File
+  if (!file) {
+    return { success: false, error: "Aucun fichier" }
+  }
+
+  // Validation taille
+  if (file.size > 5 * 1024 * 1024) {
+    return { success: false, error: "Fichier trop volumineux (max 5 Mo)" }
+  }
+
+  // Upload to Storage
+  const fileExt = file.name.split('.').pop()
+  const filePath = `${userData.user.id}/profile.${fileExt}`
+
+  // On écrase l'ancien fichier s'il existe
+  const { error: uploadError } = await supabase
+    .storage
+    .from('avatars')
+    .upload(filePath, file, { upsert: true })
+
+  if (uploadError) {
+    return { success: false, error: "Erreur lors de l'upload" }
+  }
+
+  // Get Public URL
+  const { data: { publicUrl } } = supabase
+    .storage
+    .from('avatars')
+    .getPublicUrl(filePath)
+
+  // Force cache bust
+  const publicUrlWithCacheBust = `${publicUrl}?t=${new Date().getTime()}`
+
+  // Update Auth Metadata
+  const { error: authError } = await supabase.auth.updateUser({
+    data: {
+      avatar_url: publicUrlWithCacheBust,
+      picture: publicUrlWithCacheBust // Sync picture for compatibility
+    }
+  })
+
+  if (authError) {
+    return { success: false, error: authError.message }
+  }
+
+  revalidatePath("/pro/compte")
+  return { success: true, data: { publicUrl: publicUrlWithCacheBust } }
+}
+
+/**
+ * Supprime la photo de profil
+ */
+export async function deleteArtisanAvatar(): Promise<ActionResult> {
+  const supabase = await createClient()
+  const { data: userData } = await supabase.auth.getUser()
+
+  if (!userData.user) {
+    return { success: false, error: "Non connecté" }
+  }
+
+  // On essaie de lister les fichiers pour trouver le bon nom/extension
+  const { data: files } = await supabase
+    .storage
+    .from('avatars')
+    .list(userData.user.id)
+
+  if (files && files.length > 0) {
+    const pathsToRemove = files.map(f => `${userData.user.id}/${f.name}`)
+    await supabase.storage.from('avatars').remove(pathsToRemove)
+  }
+
+  // Update Auth Metadata to null
+  const { error: authError } = await supabase.auth.updateUser({
+    data: {
+      avatar_url: null,
+      picture: null
+    }
+  })
+
+  if (authError) {
+    return { success: false, error: authError.message }
+  }
+
+  revalidatePath("/pro/compte")
+  return { success: true }
 }
 
 /**

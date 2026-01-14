@@ -1,29 +1,18 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { LogOut } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { logout } from "@/lib/auth/actions"
+import { Button } from "@/components/ui/button"
 
 export function ProLogoutButton() {
-  const router = useRouter()
-
-  const handleLogout = async () => {
-    await logout()
-    router.push("/")
-    router.refresh()
-  }
-
   return (
     <Button
+      onClick={() => logout()}
       variant="ghost"
-      size="sm"
-      onClick={handleLogout}
-      className="text-muted-foreground hover:text-red-600"
+      className="text-muted-foreground hover:text-red-600 hover:bg-red-50 gap-2 transition-colors"
     >
-      <LogOut className="w-4 h-4 mr-2" />
-      Déconnexion
+      <LogOut className="w-4 h-4" />
+      <span className="hidden sm:inline">Se déconnecter</span>
     </Button>
   )
 }
-
