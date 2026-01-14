@@ -423,7 +423,7 @@ export function ProSidebar({
                     <Link
                         href="/pro/urgences"
                         className={cn(
-                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-50 rounded-lg",
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-100 active:text-red-700 rounded-lg",
                             (pathname === "/pro/urgences") ? "text-red-600" : "text-gray-400"
                         )}
                     >
@@ -442,7 +442,7 @@ export function ProSidebar({
                     <Link
                         href="/pro/missions"
                         className={cn(
-                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-50 rounded-lg",
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-100 active:text-gray-900 rounded-lg",
                             (pathname.startsWith("/pro/missions")) ? "text-emerald-600" : "text-gray-400"
                         )}
                     >
@@ -459,7 +459,7 @@ export function ProSidebar({
                     <Link
                         href="/pro/rendez-vous"
                         className={cn(
-                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-50 rounded-lg",
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-100 active:text-gray-900 rounded-lg",
                             (pathname.startsWith("/pro/rendez-vous")) ? "text-emerald-600" : "text-gray-400"
                         )}
                     >
@@ -471,7 +471,7 @@ export function ProSidebar({
                     <button
                         onClick={() => setMobileOpen(true)}
                         className={cn(
-                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-50 rounded-lg text-gray-400 hover:text-gray-600"
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-100 active:text-gray-900 rounded-lg text-gray-400 hover:text-gray-600"
                         )}
                     >
                         <Menu className="w-6 h-6" />

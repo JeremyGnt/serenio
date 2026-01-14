@@ -114,7 +114,7 @@ export default async function MissionDetailPage({ params }: PageProps) {
             <div className="mb-6">
                 <Link
                     href="/pro/missions"
-                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground active:text-gray-900 active:scale-95 transition-all duration-200 touch-manipulation mb-4"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     Retour aux missions

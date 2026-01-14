@@ -15,7 +15,7 @@ export function ProSettingsHeader({ title, description, className }: ProSettings
         <div className={cn("mb-8", className)}>
             <Link
                 href="/pro/compte"
-                className="inline-flex items-center text-sm text-muted-foreground hover:text-blue-600 transition-colors mb-4 group"
+                className="inline-flex items-center text-sm text-muted-foreground hover:text-blue-600 active:text-blue-700 active:scale-95 transition-all duration-200 touch-manipulation mb-4 group"
             >
                 <ArrowLeft className="w-4 h-4 mr-1 transition-transform group-hover:-translate-x-1" />
                 Retour aux paramètres

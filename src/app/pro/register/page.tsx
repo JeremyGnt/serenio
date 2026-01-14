@@ -12,9 +12,9 @@ export default function ProRegisterPage() {
   return (
     <main className="min-h-screen flex flex-col px-4 py-6">
       {/* Retour */}
-      <Link 
-        href="/signup" 
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit p-2 -ml-2 rounded-lg hover:bg-gray-100"
+      <Link
+        href="/signup"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground active:text-gray-900 active:scale-95 transition-all duration-200 touch-manipulation w-fit p-2 -ml-2 rounded-lg hover:bg-gray-100 active:bg-gray-200"
       >
         <ArrowLeft className="w-5 h-5" />
         <span className="hidden sm:inline">Retour à l'inscription</span>
