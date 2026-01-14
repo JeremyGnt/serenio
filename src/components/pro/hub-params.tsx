@@ -74,7 +74,7 @@ export function HubParams({ user, missingItems }: HubParamsProps) {
         {
             href: "/pro/compte/gestion",
             title: "Gestion du compte",
-            description: "Suppression du compte (Zone danger).",
+            description: "Suppression du compte.",
             icon: Trash2,
             missing: false,
             color: "text-red-600",

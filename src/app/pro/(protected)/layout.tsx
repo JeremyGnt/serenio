@@ -60,6 +60,7 @@ export default async function ProLayout({
     const isAvailable = artisan?.is_available ?? true
 
     const firstName = user.user_metadata?.first_name || "Artisan"
+    const avatarUrl = user.user_metadata?.custom_avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -70,6 +71,7 @@ export default async function ProLayout({
                 userId={user.id}
                 totalUnreadMessages={totalUnreadMessages}
                 isAvailable={isAvailable}
+                avatarUrl={avatarUrl}
             />
 
             {/* Main content - offset for sidebar */}

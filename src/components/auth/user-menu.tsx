@@ -137,9 +137,17 @@ export function UserMenu({ user, pendingRequestsCount = 0, unreadMessagesCount =
         className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary active:bg-secondary/80 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:duration-75"
       >
         <div className="relative">
-          <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-700">
-            {initials}
-          </div>
+          {user.user_metadata?.custom_avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture ? (
+            <img
+              src={user.user_metadata?.custom_avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture}
+              alt={fullName}
+              className="w-8 h-8 rounded-full object-cover border border-gray-200"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-700">
+              {initials}
+            </div>
+          )}
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold ring-2 ring-white animate-in zoom-in duration-200">
               {unreadCount > 9 ? "9+" : unreadCount}

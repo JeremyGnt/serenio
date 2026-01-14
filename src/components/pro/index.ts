@@ -1,4 +1,4 @@
-export { ProAccountTabs } from "./pro-account-tabs"
+
 export { ProCompanySection } from "./pro-company-section"
 export { ProContactSection } from "./pro-contact-section"
 export { ProAddressSection } from "./pro-address-section"

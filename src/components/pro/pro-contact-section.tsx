@@ -53,7 +53,7 @@ export function ProContactSection({ user }: ProContactSectionProps) {
             {/* Avatar Upload */}
             <div className="pb-6 border-b border-gray-100">
               <AvatarUpload
-                currentAvatarUrl={metadata.avatar_url || metadata.picture || metadata.avatar}
+                currentAvatarUrl={metadata.custom_avatar_url || metadata.avatar_url || metadata.picture || metadata.avatar}
                 initials={`${metadata.first_name?.[0] || ""}${metadata.last_name?.[0] || ""}`.toUpperCase()}
               />
             </div>

@@ -41,7 +41,8 @@ export async function updateArtisanAvatar(formData: FormData): Promise<ActionRes
     .upload(filePath, file, { upsert: true })
 
   if (uploadError) {
-    return { success: false, error: "Erreur lors de l'upload" }
+    console.error("Supabase Storage Error:", uploadError) // Debug log
+    return { success: false, error: "Erreur lors de l'upload: " + uploadError.message }
   }
 
   // Get Public URL
@@ -57,7 +58,8 @@ export async function updateArtisanAvatar(formData: FormData): Promise<ActionRes
   const { error: authError } = await supabase.auth.updateUser({
     data: {
       avatar_url: publicUrlWithCacheBust,
-      picture: publicUrlWithCacheBust // Sync picture for compatibility
+      picture: publicUrlWithCacheBust, // Sync picture for compatibility
+      custom_avatar_url: publicUrlWithCacheBust, // Custom URL that persists over Google Auth
     }
   })
 
@@ -95,7 +97,8 @@ export async function deleteArtisanAvatar(): Promise<ActionResult> {
   const { error: authError } = await supabase.auth.updateUser({
     data: {
       avatar_url: null,
-      picture: null
+      picture: null,
+      custom_avatar_url: null
     }
   })
 

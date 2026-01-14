@@ -60,9 +60,10 @@ interface ProSidebarProps {
     userId?: string
     totalUnreadMessages?: number
     isAvailable?: boolean
+    avatarUrl?: string | null
 }
 
-export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName = "Artisan", userId, totalUnreadMessages = 0, isAvailable = true }: ProSidebarProps) {
+export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName = "Artisan", userId, totalUnreadMessages = 0, isAvailable = true, avatarUrl }: ProSidebarProps) {
     const pathname = usePathname()
     const router = useRouter()
     const [mobileOpen, setMobileOpen] = useState(false)
@@ -231,15 +232,23 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
                         className="w-full flex items-center gap-3 p-2 -m-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 group"
                     >
                         <div className={cn(
-                            "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+                            "w-10 h-10 rounded-full flex items-center justify-center transition-colors overflow-hidden border border-gray-100",
                             available ? "bg-emerald-100" : "bg-gray-100"
                         )}>
-                            <span className={cn(
-                                "font-bold text-sm",
-                                available ? "text-emerald-700" : "text-gray-500"
-                            )}>
-                                {firstName.charAt(0).toUpperCase()}
-                            </span>
+                            {avatarUrl ? (
+                                <img
+                                    src={avatarUrl}
+                                    alt={firstName}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <span className={cn(
+                                    "font-bold text-sm",
+                                    available ? "text-emerald-700" : "text-gray-500"
+                                )}>
+                                    {firstName.charAt(0).toUpperCase()}
+                                </span>
+                            )}
                         </div>
                         <div className="flex-1 text-left">
                             <div className="font-medium text-gray-900 text-sm">{firstName}</div>

@@ -9,7 +9,7 @@ export function ProLogoutButton() {
     <Button
       onClick={() => logout()}
       variant="ghost"
-      className="text-muted-foreground hover:text-red-600 hover:bg-red-50 gap-2 transition-colors"
+      className="text-red-600 hover:text-red-700 hover:bg-red-50 gap-2 transition-all active:scale-95 font-medium"
     >
       <LogOut className="w-4 h-4" />
       <span className="hidden sm:inline">Se déconnecter</span>

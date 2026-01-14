@@ -10,8 +10,8 @@ export interface ProfileCheck {
 export function calculateProfileCompletion(user: User) {
     const metadata = user.user_metadata || {}
 
-    // Avatar Logic: Check multiple keys
-    const avatarUrl = metadata.picture || metadata.avatar_url || metadata.avatar || user.user_metadata?.picture
+    // Avatar Logic: Check multiple keys, prioritizing custom_avatar_url
+    const avatarUrl = metadata.custom_avatar_url || metadata.picture || metadata.avatar_url || metadata.avatar || user.user_metadata?.picture
 
     const checks: ProfileCheck[] = [
         {

@@ -12,7 +12,7 @@ export default async function SecurityPage() {
     if (!user) redirect("/login")
 
     return (
-        <div className="max-w-3xl mx-auto p-4 md:p-6">
+        <div className="w-full p-4 md:p-6">
             <ProSettingsHeader
                 title="Sécurité & Connexion"
                 description="Gérez votre mot de passe pour sécuriser l'accès à votre espace pro."
