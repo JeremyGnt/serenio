@@ -115,6 +115,18 @@ export function UserMenu({ user, pendingRequestsCount = 0, unreadMessagesCount =
 
   const handleLogout = async () => {
     setLoading(true)
+
+    // Nettoyer les brouillons locaux
+    if (typeof window !== "undefined") {
+      // Urgence (localStorage)
+      localStorage.removeItem("serenio_draft_urgence_form")
+      localStorage.removeItem("serenio_pending_urgence_form")
+
+      // RDV (sessionStorage)
+      sessionStorage.removeItem("serenio_rdv_form")
+      sessionStorage.removeItem("serenio_rdv_step")
+    }
+
     await logout()
   }
 

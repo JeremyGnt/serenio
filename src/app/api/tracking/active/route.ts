@@ -10,12 +10,22 @@ const URGENCE_ACTIVE_STATUSES = ["pending", "searching"]
  * Retourne l'intervention URGENCE active de l'utilisateur connecté (si elle existe)
  * Ne retourne pas les RDV planifiés car ils ont déjà un artisan confirmé
  */
-export async function GET() {
+export async function GET(request: Request) {
     const supabase = await createClient()
     const adminClient = createAdminClient()
 
     // Vérifier si l'utilisateur est connecté
-    const { data: { user } } = await supabase.auth.getUser()
+    let { data: { user } } = await supabase.auth.getUser()
+
+    // Si pas de cookie, essayer avec le header Authorization
+    if (!user) {
+        const authHeader = request.headers.get('Authorization')
+        if (authHeader) {
+            const token = authHeader.replace('Bearer ', '')
+            const { data: { user: userFromToken } } = await supabase.auth.getUser(token)
+            user = userFromToken
+        }
+    }
 
     if (!user) {
         return NextResponse.json({

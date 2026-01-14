@@ -54,6 +54,7 @@ import { InterventionPhotos } from "@/components/ui/intervention-photos"
 interface TrackingViewProps {
     data: LiveTrackingData
     currentUserId?: string
+    isSnapshot?: boolean
 }
 
 const STATUS_CONFIG: Record<string, {
@@ -157,8 +158,10 @@ interface InterventionPayload {
     artisan_id: string | null
 }
 
-export function TrackingView({ data, currentUserId }: TrackingViewProps) {
+export function TrackingView({ data, currentUserId, isSnapshot = false }: TrackingViewProps) {
     const router = useRouter()
+    // Inject isSnapshot property into data for internal check if needed, though we use the prop
+    // (Note: LiveTrackingData doesn't have isSnapshot field, so we just use the prop) 
     const { intervention, artisan, quote, statusHistory } = data
     const [cancelling, setCancelling] = useState(false)
     const [showCancelDialog, setShowCancelDialog] = useState(false)
@@ -177,6 +180,8 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
 
     // Supabase Realtime subscription pour les mises à jour de l'intervention
     useEffect(() => {
+        if (isSnapshot) return // Ne pas se connecter si c'est un snapshot
+
         const channel = supabase
             .channel(`tracking:${intervention.id}`)
             .on(
@@ -223,7 +228,7 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                 supabase.removeChannel(channelRef.current)
             }
         }
-    }, [intervention.id, intervention.status, artisan?.id, handleRefresh])
+    }, [intervention.id, intervention.status, artisan?.id, handleRefresh, isSnapshot])
 
     // Nettoyer le tracking actif si l'intervention est terminée
     useEffect(() => {
@@ -333,7 +338,7 @@ export function TrackingView({ data, currentUserId }: TrackingViewProps) {
                 {/* Bouton retour - redirige vers l'accueil au lieu de l'historique */}
                 <Link
                     href="/"
-                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-all duration-200 touch-manipulation active:scale-[0.98] active:duration-75"
+                    className="inline-flex items-center gap-2 px-3 py-2 -ml-3 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 mb-2 sm:mb-4 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:duration-75"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     <span>Retour</span>

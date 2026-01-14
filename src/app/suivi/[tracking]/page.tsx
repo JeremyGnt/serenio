@@ -1,8 +1,10 @@
+import { Suspense } from "react"
 import { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
 import { getLiveTrackingData } from "@/lib/interventions"
 import { getUser } from "@/lib/supabase/server"
 import { TrackingView } from "@/components/tracking/tracking-view"
+import { TrackingSnapshotLoader } from "@/components/tracking/tracking-snapshot-loader"
 
 interface PageProps {
   params: Promise<{ tracking: string }>
@@ -24,6 +26,14 @@ export default async function TrackingPage({ params }: PageProps) {
     redirect(`/rdv/suivi/${tracking}`)
   }
 
+  return (
+    <Suspense fallback={<TrackingSnapshotLoader tracking={tracking} />}>
+      <AsyncTrackingContent tracking={tracking} />
+    </Suspense>
+  )
+}
+
+async function AsyncTrackingContent({ tracking }: { tracking: string }) {
   const [data, user] = await Promise.all([
     getLiveTrackingData(tracking),
     getUser()
@@ -54,3 +64,4 @@ export default async function TrackingPage({ params }: PageProps) {
     </div>
   )
 }
+

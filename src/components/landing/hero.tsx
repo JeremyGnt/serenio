@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Calendar, MapPin, Clock, Shield, CheckCircle, Loader2, ArrowRight, Truck } from "lucide-react"
 import { UrgenceButton } from "./urgence-button"
-import { getActiveTracking, clearActiveTracking } from "@/lib/active-tracking"
+import { getActiveTracking, clearActiveTracking, setActiveTracking } from "@/lib/active-tracking"
 import { getLiveTrackingData } from "@/lib/interventions/queries"
 import { supabase } from "@/lib/supabase/client"
 import type { LiveTrackingData } from "@/types/intervention"
@@ -17,6 +17,20 @@ interface HeroProps {
 export function Hero({ isLoggedIn }: HeroProps) {
   const [activeTrackingNumber, setActiveTrackingNumber] = useState<string | null>(null)
   const [trackingData, setTrackingData] = useState<LiveTrackingData | null>(null)
+  const [isUserConnected, setIsUserConnected] = useState(isLoggedIn)
+
+  // Synchroniser avec la prop (pour le SSR initial)
+  useEffect(() => {
+    setIsUserConnected(isLoggedIn)
+  }, [isLoggedIn])
+
+  // Écouter les changements d'auth côté client (pour le login sans refresh)
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsUserConnected(!!session)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
 
   // Charger les données initiales
   useEffect(() => {
@@ -24,13 +38,48 @@ export function Hero({ isLoggedIn }: HeroProps) {
     if (tracking) {
       setActiveTrackingNumber(tracking)
       fetchTrackingData(tracking)
+    } else if (isUserConnected) {
+      // Si connecté mais pas de tracking local, on vérifie côté serveur
+      checkServerSideTracking()
     }
-  }, [])
+  }, [isUserConnected])
+
+  const checkServerSideTracking = async () => {
+    try {
+      // Récupérer la session pour le token
+      const { data: { session } } = await supabase.auth.getSession()
+
+      const headers: HeadersInit = {}
+      if (session?.access_token) {
+        headers["Authorization"] = `Bearer ${session.access_token}`
+      }
+
+      const response = await fetch("/api/tracking/active", { headers })
+      if (response.ok) {
+        const data = await response.json()
+        if (data.hasActiveIntervention && data.trackingNumber) {
+          setActiveTracking(data.trackingNumber)
+          setActiveTrackingNumber(data.trackingNumber)
+          fetchTrackingData(data.trackingNumber)
+        }
+      }
+    } catch (error) {
+      console.error("Erreur check tracking serveur:", error)
+    }
+  }
 
   const fetchTrackingData = async (trackingNumber: string) => {
     try {
       const data = await getLiveTrackingData(trackingNumber)
       if (data) {
+        // Si l'intervention appartient à un utilisateur et qu'on n'est pas connecté, on nettoie
+        if (data.intervention.clientId && !isLoggedIn) {
+          clearActiveTracking()
+          setActiveTrackingNumber(null)
+          setTrackingData(null)
+          return
+        }
+
         setTrackingData(data)
 
         // Nettoyer si l'intervention est terminée ou annulée

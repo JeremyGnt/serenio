@@ -58,15 +58,7 @@ export function UploadPhotos({
   const dragCounterRef = useRef(0)
 
   // Nettoyer les URLs d'objets au démontage
-  useEffect(() => {
-    return () => {
-      photos.forEach((photo) => {
-        if (photo.previewUrl.startsWith("blob:")) {
-          URL.revokeObjectURL(photo.previewUrl)
-        }
-      })
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
 
   // ============================================
   // GESTION DES FICHIERS

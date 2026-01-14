@@ -404,6 +404,61 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
         // Nettoyer le brouillon local pour que si l'utilisateur revient, il reparte de l'étape 1
         clearDraft()
 
+        // Create a snapshot for instant loading
+        const snapshot = {
+            intervention: {
+                id: formState.interventionId,
+                trackingNumber: trackingNumber,
+
+                clientEmail: formState.clientEmail,
+                clientPhone: formState.clientPhone,
+                clientFirstName: formState.clientFirstName,
+                clientLastName: formState.clientLastName,
+
+                interventionType: "urgence",
+                status: "pending",
+
+                addressStreet: formState.addressStreet,
+                addressPostalCode: formState.addressPostalCode,
+                addressCity: formState.addressCity,
+                addressComplement: formState.addressComplement,
+                addressInstructions: formState.addressInstructions,
+                latitude: formState.latitude,
+                longitude: formState.longitude,
+
+                situationType: formState.situationType,
+                isUrgent: true,
+                urgencyLevel: 3,
+
+                diagnostic: {
+                    situationType: formState.situationType,
+                    situationDetails: formState.situationDetails,
+                    diagnosticAnswers: formState.diagnosticAnswers,
+                    doorType: formState.doorType,
+                    lockType: formState.lockType,
+                },
+
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+
+                photos: formState.photos.map(p => ({
+                    id: p.id,
+                    url: p.previewUrl
+                }))
+            },
+            statusHistory: [{
+                id: "initial",
+                newStatus: "pending",
+                createdAt: new Date().toISOString()
+            }]
+        }
+
+        try {
+            localStorage.setItem(`tracking_snapshot_${trackingNumber}`, JSON.stringify(snapshot))
+        } catch (e) {
+            console.error("Failed to save snapshot", e)
+        }
+
         // Rediriger vers la page de suivi avec le bon numéro
         router.push(`/suivi/${trackingNumber}`)
     }

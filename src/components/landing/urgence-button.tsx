@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Zap } from "lucide-react"
 import { getActiveTracking, setActiveTracking } from "@/lib/active-tracking"
+import { supabase } from "@/lib/supabase/client"
 
 interface UrgenceButtonProps {
     isLoggedIn: boolean
@@ -12,13 +13,33 @@ interface UrgenceButtonProps {
 export function UrgenceButton({ isLoggedIn }: UrgenceButtonProps) {
     const [targetUrl, setTargetUrl] = useState("/urgence")
     const [isChecking, setIsChecking] = useState(true)
+    const [isUserConnected, setIsUserConnected] = useState(isLoggedIn)
+
+    // Synchroniser avec la prop
+    useEffect(() => {
+        setIsUserConnected(isLoggedIn)
+    }, [isLoggedIn])
+
+    // Écouter les changements d'auth
+    useEffect(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setIsUserConnected(!!session)
+        })
+        return () => subscription.unsubscribe()
+    }, [])
 
     useEffect(() => {
         async function checkActiveTracking() {
             // Si l'utilisateur est connecté, vérifier son compte en priorité
-            if (isLoggedIn) {
+            if (isUserConnected) {
                 try {
-                    const response = await fetch("/api/tracking/active")
+                    const { data: { session } } = await supabase.auth.getSession()
+                    const headers: HeadersInit = {}
+                    if (session?.access_token) {
+                        headers["Authorization"] = `Bearer ${session.access_token}`
+                    }
+
+                    const response = await fetch("/api/tracking/active", { headers })
                     const data = await response.json()
 
                     if (data.hasActiveIntervention && data.trackingNumber) {
@@ -43,7 +64,7 @@ export function UrgenceButton({ isLoggedIn }: UrgenceButtonProps) {
         }
 
         checkActiveTracking()
-    }, [isLoggedIn])
+    }, [isUserConnected])
 
     return (
         <Link
