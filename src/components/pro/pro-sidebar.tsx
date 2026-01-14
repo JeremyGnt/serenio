@@ -13,15 +13,21 @@ import {
     LogOut,
     Menu,
     X,
-    ChevronDown,
-    Check
+    MapPin,
+    Building2,
+    Store,
 } from "lucide-react"
+
+// ... (existing code)
+
+
 import { LucideIcon } from "lucide-react"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase/client"
 import { getTotalUnreadCount } from "@/lib/chat/actions"
 import { updateArtisanAvailability } from "@/lib/pro/actions"
+import { logout } from "@/lib/auth/actions"
 
 // Type pour les items de navigation
 interface NavItem {
@@ -32,7 +38,7 @@ interface NavItem {
     isUrgent?: boolean
 }
 
-// Item Urgences séparé pour styling distinct
+// Item Urgences
 const URGENCE_ITEM: NavItem = {
     icon: Siren,
     label: "Urgences",
@@ -41,7 +47,7 @@ const URGENCE_ITEM: NavItem = {
     isUrgent: true
 }
 
-// Navigation principale (sans urgences)
+// Navigation principale
 const NAV_ITEMS: NavItem[] = [
     { icon: Inbox, label: "Opportunités", href: "/pro/propositions" },
     { icon: ListChecks, label: "Missions", href: "/pro/missions" },
@@ -49,9 +55,6 @@ const NAV_ITEMS: NavItem[] = [
     { icon: CreditCard, label: "Paiements", href: "/pro/paiements" },
     { icon: Settings, label: "Paramètres", href: "/pro/compte" },
 ]
-
-// Items pour la nav mobile (urgences + 3 premiers items principaux)
-const MOBILE_NAV_ITEMS: NavItem[] = [URGENCE_ITEM, ...NAV_ITEMS.slice(0, 3)]
 
 interface ProSidebarProps {
     urgentCount?: number
@@ -61,9 +64,23 @@ interface ProSidebarProps {
     totalUnreadMessages?: number
     isAvailable?: boolean
     avatarUrl?: string | null
+    companyName?: string
+    addressCity?: string
+    interventionRadius?: number
 }
 
-export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName = "Artisan", userId, totalUnreadMessages = 0, isAvailable = true, avatarUrl }: ProSidebarProps) {
+export function ProSidebar({
+    urgentCount = 0,
+    opportunitiesCount = 0,
+    firstName = "Artisan",
+    userId,
+    totalUnreadMessages = 0,
+    isAvailable = true,
+    avatarUrl,
+    companyName,
+    addressCity,
+    interventionRadius
+}: ProSidebarProps) {
     const pathname = usePathname()
     const router = useRouter()
     const [mobileOpen, setMobileOpen] = useState(false)
@@ -71,20 +88,7 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
     const [urgentCountState, setUrgentCountState] = useState(urgentCount)
     const [opportunitiesCountState, setOpportunitiesCountState] = useState(opportunitiesCount)
     const [available, setAvailable] = useState(isAvailable)
-    const [statusDropdownOpen, setStatusDropdownOpen] = useState(false)
     const [isUpdating, setIsUpdating] = useState(false)
-    const dropdownRef = useRef<HTMLDivElement>(null)
-
-    // Close dropdown on outside click
-    useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setStatusDropdownOpen(false)
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside)
-        return () => document.removeEventListener("mousedown", handleClickOutside)
-    }, [])
 
     // Sync with prop changes
     useEffect(() => {
@@ -92,17 +96,22 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
     }, [isAvailable])
 
     const handleStatusChange = async (newStatus: boolean) => {
-        if (newStatus === available) {
-            setStatusDropdownOpen(false)
-            return
-        }
+        if (newStatus === available) return
+
+        // Optimistic update
+        setAvailable(newStatus)
         setIsUpdating(true)
-        const result = await updateArtisanAvailability(newStatus)
-        if (result.success) {
-            setAvailable(newStatus)
+
+        try {
+            const result = await updateArtisanAvailability(newStatus)
+            if (!result.success) {
+                setAvailable(!newStatus) // Revert
+            }
+        } catch (error) {
+            setAvailable(!newStatus) // Revert
+        } finally {
+            setIsUpdating(false)
         }
-        setIsUpdating(false)
-        setStatusDropdownOpen(false)
     }
 
     useEffect(() => {
@@ -117,7 +126,7 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
         setOpportunitiesCountState(opportunitiesCount)
     }, [opportunitiesCount])
 
-    // Realtime subscription pour les messages
+    // Realtime subscriptions (chat & interventions)
     useEffect(() => {
         if (!userId) return
 
@@ -131,15 +140,11 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
             }, 1000)
         }
 
-        const channel = supabase
+        const channelChat = supabase
             .channel(`pro_global_messages:${userId}`)
             .on(
                 "postgres_changes",
-                {
-                    event: "*",
-                    schema: "public",
-                    table: "messages"
-                },
+                { event: "*", schema: "public", table: "messages" },
                 (payload: any) => {
                     if (payload.new && payload.new.sender_id !== userId) {
                         fetchCount()
@@ -148,282 +153,332 @@ export function ProSidebar({ urgentCount = 0, opportunitiesCount = 0, firstName 
             )
             .subscribe()
 
-        return () => {
-            supabase.removeChannel(channel)
-            clearTimeout(timeoutId)
-        }
-    }, [userId])
-
-    // Realtime subscription pour les nouvelles interventions (urgences et opportunités)
-    useEffect(() => {
-        const channel = supabase
+        const channelInterventions = supabase
             .channel("pro_interventions_sidebar")
             .on(
                 "postgres_changes",
-                {
-                    event: "*",
-                    schema: "public",
-                    table: "intervention_requests"
-                },
-                () => {
-                    // Rafraîchir la page pour obtenir les nouveaux compteurs
-                    router.refresh()
-                }
+                { event: "*", schema: "public", table: "intervention_requests" },
+                () => router.refresh()
             )
             .subscribe()
 
         return () => {
-            supabase.removeChannel(channel)
+            supabase.removeChannel(channelChat)
+            supabase.removeChannel(channelInterventions)
+            clearTimeout(timeoutId)
         }
-    }, [router])
+    }, [userId, router])
+
 
     return (
         <>
-            {/* Header Mobile */}
-            <header className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-50 flex items-center justify-between px-4">
-                <Link href="/pro" className="flex items-center gap-2 font-bold">
-                    <Image src="/logo.svg" alt="Serenio" width={28} height={28} />
-                    <span className="text-emerald-600">Pro</span>
+            {/* Header Mobile (Top Bar) */}
+            <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-gray-200/50 z-50 flex items-center justify-between px-4 transition-all duration-300">
+                <Link href="/pro" className="flex items-center gap-2.5 active:scale-95 transition-transform duration-200 touch-manipulation">
+                    <div className="relative w-8 h-8">
+                        <Image src="/logo.svg" alt="Serenio" fill className="object-contain" />
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="font-bold text-lg tracking-tight text-gray-900 leading-none">Serenio</span>
+                        <span className="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-[1px] rounded-full font-bold uppercase tracking-wider w-fit mt-0.5">Pro</span>
+                    </div>
                 </Link>
-
-                <button
-                    onClick={() => setMobileOpen(!mobileOpen)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-90 active:duration-75"
-                >
-                    {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                </button>
             </header>
 
-            {/* Overlay Mobile */}
+            {/* Mobile Sidebar Overlay */}
             {mobileOpen && (
                 <div
-                    className="md:hidden fixed inset-0 bg-black/50 z-40"
+                    className="md:hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 transition-opacity"
                     onClick={() => setMobileOpen(false)}
                 />
             )}
 
-            {/* Sidebar */}
+            {/* Main Sidebar (Drawer on Mobile, Fixed on Desktop) */}
             <aside
                 className={cn(
-                    "fixed top-0 left-0 h-dvh bg-white border-r border-gray-200 z-50 transition-transform duration-300 flex flex-col",
-                    "w-64",
-                    // Mobile: slide in/out
+                    "fixed top-0 left-0 h-full bg-white border-r border-gray-200 z-[60] transition-transform duration-300 flex flex-col shadow-xl md:shadow-none",
+                    "w-[85vw] max-w-[300px] md:w-72", // Mobile: 85% width, Desktop: 72 (18rem)
                     mobileOpen ? "translate-x-0" : "-translate-x-full",
-                    // Desktop: always visible
                     "md:translate-x-0"
                 )}
             >
-                {/* Logo */}
-                <div className="h-16 flex items-center px-5 border-b border-gray-100 flex-shrink-0">
-                    <Link href="/pro" className="flex items-center gap-2.5">
-                        <Image src="/logo.svg" alt="Serenio" width={32} height={32} />
-                        <div>
-                            <span className="font-bold text-gray-900">Serenio</span>
-                            <span className="ml-1 text-emerald-600 font-semibold">Pro</span>
+                {/* 1. Header Sidebar (Desktop Only) */}
+                <div className="hidden md:flex h-16 items-center px-5 flex-shrink-0">
+                    <Link
+                        href="/pro"
+                        className="flex items-center gap-2.5 group active:scale-95 transition-transform duration-200 touch-manipulation"
+                    >
+                        <div className="relative w-7 h-7 transition-transform duration-300 group-hover:scale-105">
+                            <Image src="/logo.svg" alt="Serenio" fill className="object-contain" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="font-bold text-lg tracking-tight text-gray-900 leading-none">Serenio</span>
+                            <span className="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-[1px] rounded-full font-bold uppercase tracking-wider w-fit mt-0.5">Pro</span>
                         </div>
                     </Link>
                 </div>
 
-                {/* User info with status dropdown */}
-                <div className="px-4 py-4 border-b border-gray-100 flex-shrink-0" ref={dropdownRef}>
+                {/* Mobile Drawer Header (Logo + Close) */}
+                <div className="md:hidden flex items-center justify-between p-5 pb-2">
+                    <span className="text-lg font-bold text-gray-900">Mon Compte</span>
                     <button
-                        onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
-                        disabled={isUpdating}
-                        className="w-full flex items-center gap-3 p-2 -m-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 group"
+                        onClick={() => setMobileOpen(false)}
+                        className="p-2 text-gray-400 hover:bg-gray-100 rounded-full active:scale-90 transition-transform duration-200 touch-manipulation"
                     >
+                        <X className="w-6 h-6" />
+                    </button>
+                </div>
+
+                {/* 2. Bloc Profil (Identité) */}
+                <div className="px-5 py-4 md:py-2 md:pt-6">
+                    <div className="p-3 bg-gray-50/80 rounded-2xl border border-gray-100 flex items-center gap-3">
                         <div className={cn(
-                            "w-10 h-10 rounded-full flex items-center justify-center transition-colors overflow-hidden border border-gray-100",
-                            available ? "bg-emerald-100" : "bg-gray-100"
+                            "w-10 h-10 rounded-full flex items-center justify-center overflow-hidden border-2 shrink-0",
+                            available ? "border-emerald-500" : "border-gray-300"
                         )}>
                             {avatarUrl ? (
-                                <img
-                                    src={avatarUrl}
-                                    alt={firstName}
-                                    className="w-full h-full object-cover"
-                                />
+                                <img src={avatarUrl} alt={firstName} className="w-full h-full object-cover" />
                             ) : (
-                                <span className={cn(
-                                    "font-bold text-sm",
-                                    available ? "text-emerald-700" : "text-gray-500"
-                                )}>
+                                <div className="w-full h-full bg-white flex items-center justify-center text-gray-500 font-bold">
                                     {firstName.charAt(0).toUpperCase()}
-                                </span>
+                                </div>
                             )}
                         </div>
-                        <div className="flex-1 text-left">
-                            <div className="font-medium text-gray-900 text-sm">{firstName}</div>
-                            <div className={cn(
-                                "text-xs flex items-center gap-1",
-                                available ? "text-emerald-600" : "text-gray-500"
-                            )}>
-                                <span className={cn(
-                                    "w-1.5 h-1.5 rounded-full",
-                                    available ? "bg-emerald-500" : "bg-gray-400"
-                                )} />
+                        <div className="min-w-0 flex-1">
+                            <div className="font-semibold text-gray-900 truncate text-sm">{firstName}</div>
+                            <div className={cn("text-xs font-medium truncate", available ? "text-emerald-600" : "text-gray-500")}>
                                 {available ? "Disponible" : "Indisponible"}
                             </div>
                         </div>
-                        <ChevronDown className={cn(
-                            "w-4 h-4 text-gray-400 transition-transform duration-200",
-                            statusDropdownOpen && "rotate-180"
-                        )} />
-                    </button>
 
-                    {/* Dropdown */}
-                    {statusDropdownOpen && (
-                        <div className="absolute left-4 right-4 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
-                            <button
-                                onClick={() => handleStatusChange(true)}
-                                disabled={isUpdating}
-                                className={cn(
-                                    "w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors",
-                                    available && "bg-emerald-50"
-                                )}
-                            >
-                                <span className="w-2 h-2 bg-emerald-500 rounded-full" />
-                                <span className="flex-1 text-sm font-medium text-gray-900">Disponible</span>
-                                {available && <Check className="w-4 h-4 text-emerald-600" />}
-                            </button>
-                            <button
-                                onClick={() => handleStatusChange(false)}
-                                disabled={isUpdating}
-                                className={cn(
-                                    "w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors",
-                                    !available && "bg-gray-100"
-                                )}
-                            >
-                                <span className="w-2 h-2 bg-gray-400 rounded-full" />
-                                <span className="flex-1 text-sm font-medium text-gray-900">Indisponible</span>
-                                {!available && <Check className="w-4 h-4 text-gray-600" />}
-                            </button>
-                        </div>
-                    )}
+                        {/* Status Toggle */}
+                        <button
+                            onClick={() => handleStatusChange(!available)}
+                            disabled={isUpdating}
+                            className={cn(
+                                "w-10 h-5 rounded-full relative transition-all duration-200 shrink-0 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 active:scale-90 touch-manipulation",
+                                available
+                                    ? "bg-emerald-500"
+                                    : "bg-gray-300"
+                            )}
+                            title={available ? "Passer indisponible" : "Passer disponible"}
+                        >
+                            <div className={cn(
+                                "absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300",
+                                available ? "translate-x-5" : "translate-x-0.5"
+                            )} />
+                        </button>
+                    </div>
                 </div>
 
-                {/* Navigation - scrollable if content overflows */}
-                <nav className="flex-1 py-4 px-3 overflow-y-auto">
-                    {/* Urgences - Section prioritaire avec style distinct */}
-                    <div className="mb-4">
-                        {(() => {
-                            const isActive = pathname === URGENCE_ITEM.href || pathname.startsWith(URGENCE_ITEM.href + "/")
-                            const Icon = URGENCE_ITEM.icon
-                            return (
-                                <Link
-                                    href={URGENCE_ITEM.href}
-                                    onClick={() => setMobileOpen(false)}
-                                    className={cn(
-                                        "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 text-sm font-semibold",
-                                        isActive
-                                            ? "bg-red-100 text-red-900 border border-red-200 shadow-sm"
-                                            : "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
-                                    )}
-                                >
-                                    <Icon className={cn("w-5 h-5", isActive ? "text-red-700" : "text-red-600")} />
-                                    <span className="flex-1">{URGENCE_ITEM.label}</span>
-                                    {available && urgentCountState > 0 && (
-                                        <span className={cn(
-                                            "px-2 py-0.5 text-xs font-bold rounded-full min-w-[20px] text-center",
-                                            isActive
-                                                ? "bg-red-600 text-white"
-                                                : "bg-red-500 text-white"
-                                        )}>
-                                            {urgentCountState}
-                                        </span>
-                                    )}
-                                </Link>
-                            )
-                        })()}
+                {/* 2b. Summary Cards (Mobile Only) */}
+                <div className="md:hidden px-5 mb-4 grid grid-cols-2 gap-2.5">
+                    {/* Zone d'intervention */}
+                    <Link href="/pro/compte/zone" onClick={() => setMobileOpen(false)} className="bg-gray-50 p-3 rounded-xl border border-gray-100 active:scale-95 transition-transform touch-manipulation">
+                        <div className="flex items-center gap-2 mb-1.5 text-gray-500">
+                            <div className="bg-emerald-100 p-1 rounded-md text-emerald-600">
+                                <MapPin className="w-3 h-3" />
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Zone</span>
+                        </div>
+                        <div className="font-semibold text-sm text-gray-900 truncate">
+                            {addressCity || "Non définie"}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate">
+                            {interventionRadius ? `${interventionRadius} km autour` : "Rayon non défini"}
+                        </div>
+                    </Link>
+
+                    {/* Entreprise */}
+                    <Link href="/pro/compte/entreprise" onClick={() => setMobileOpen(false)} className="bg-gray-50 p-3 rounded-xl border border-gray-100 active:scale-95 transition-transform touch-manipulation">
+                        <div className="flex items-center gap-2 mb-1.5 text-gray-500">
+                            <div className="bg-blue-100 p-1 rounded-md text-blue-600">
+                                <Building2 className="w-3 h-3" />
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Infos</span>
+                        </div>
+                        <div className="font-semibold text-sm text-gray-900 truncate">
+                            {companyName || "Non renseignée"}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate">
+                            Voir les détails
+                        </div>
+                    </Link>
+                </div>
+
+                {/* Scrollable Content */}
+                <nav className="flex-1 px-4 overflow-y-auto space-y-2 md:space-y-3">
+
+                    {/* 3. Section PRIORITÉ (Urgences) - Desktop Only */}
+                    <div className="hidden md:block">
+                        <Link
+                            href={URGENCE_ITEM.href}
+                            onClick={() => setMobileOpen(false)}
+                            className={cn(
+                                "group flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 border active:scale-[0.98] touch-manipulation",
+                                (pathname === URGENCE_ITEM.href || pathname.startsWith(URGENCE_ITEM.href + "/"))
+                                    ? "bg-red-50 border-red-100 text-red-700 shadow-sm"
+                                    : "bg-white border-transparent hover:bg-red-50 hover:text-red-700 hover:border-red-100 active:bg-red-50"
+                            )}
+                        >
+                            <div className={cn(
+                                "p-1.5 rounded-lg transition-colors bg-red-100 text-red-600"
+                            )}>
+                                <Siren className="w-5 h-5" />
+                            </div>
+                            <span className="flex-1 font-semibold">{URGENCE_ITEM.label}</span>
+                            {available && urgentCountState > 0 && (
+                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
+                                    {urgentCountState}
+                                </span>
+                            )}
+                        </Link>
                     </div>
 
-                    {/* Séparateur */}
-                    <div className="border-t border-gray-100 mb-4" />
+                    {/* 4. Section MENU (Compte) */}
+                    <div>
+                        {/* Mobile Label "Compte" */}
+                        <div className="md:hidden px-4 mt-6 mb-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                            Compte
+                        </div>
 
-                    {/* Navigation principale */}
-                    <ul className="space-y-1">
-                        {NAV_ITEMS.map((item) => {
-                            const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
-                            const Icon = item.icon
-                            const isMissions = item.href === "/pro/missions"
-                            const isOpportunities = item.href === "/pro/propositions"
+                        <ul className="space-y-1">
+                            {NAV_ITEMS.map((item) => {
+                                const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+                                const Icon = item.icon
+                                const isMissions = item.href === "/pro/missions"
+                                const isOpportunities = item.href === "/pro/propositions"
+                                const isPlanning = item.href === "/pro/rendez-vous"
 
-                            return (
-                                <li key={item.href}>
-                                    <Link
-                                        href={item.href}
-                                        onClick={() => setMobileOpen(false)}
-                                        className={cn(
-                                            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75 text-sm font-medium",
-                                            isActive
-                                                ? "bg-emerald-50 text-emerald-700"
-                                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                                        )}
-                                    >
-                                        <Icon className={cn("w-5 h-5", isActive ? "text-emerald-600" : "text-gray-400")} />
-                                        <span className="flex-1">{item.label}</span>
-                                        {isMissions && unreadCount > 0 && (
-                                            <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
-                                                {unreadCount > 9 ? "9+" : unreadCount}
-                                            </span>
-                                        )}
-                                        {isOpportunities && opportunitiesCountState > 0 && (
-                                            <span className="bg-purple-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
-                                                {opportunitiesCountState > 9 ? "9+" : opportunitiesCountState}
-                                            </span>
-                                        )}
-                                    </Link>
-                                </li>
-                            )
-                        })}
-                    </ul>
+                                // Items to hide on mobile drawer
+                                const isHiddenOnMobile = isMissions || isPlanning
+
+                                return (
+                                    <li key={item.href} className={cn(isHiddenOnMobile && "hidden md:block")}>
+                                        <Link
+                                            href={item.href}
+                                            onClick={() => setMobileOpen(false)}
+                                            className={cn(
+                                                "flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 group relative active:scale-[0.98] touch-manipulation",
+                                                isActive
+                                                    ? "bg-gray-100 text-gray-900 font-semibold"
+                                                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 active:bg-gray-100 font-medium"
+                                            )}
+                                        >
+                                            <div className="w-8 flex justify-center shrink-0">
+                                                <Icon className={cn(
+                                                    "w-5 h-5 transition-colors",
+                                                    isActive ? "text-gray-900" : "text-gray-400 group-hover:text-gray-600"
+                                                )} />
+                                            </div>
+                                            <span className="flex-1 text-sm">{item.label}</span>
+
+                                            {isMissions && unreadCount > 0 && (
+                                                <span className="bg-red-500 text-white px-1.5 py-0.5 rounded-full text-[10px] font-bold min-w-[1.25rem] text-center">
+                                                    {unreadCount > 9 ? "9+" : unreadCount}
+                                                </span>
+                                            )}
+                                            {isOpportunities && opportunitiesCountState > 0 && (
+                                                <span className="bg-indigo-500 text-white px-1.5 py-0.5 rounded-full text-[10px] font-bold min-w-[1.25rem] text-center">
+                                                    {opportunitiesCountState > 9 ? "9+" : opportunitiesCountState}
+                                                </span>
+                                            )}
+                                        </Link>
+                                    </li>
+                                )
+                            })}
+                        </ul>
+                    </div>
                 </nav>
 
-                {/* Footer - always visible at bottom */}
-                <div className="p-4 border-t border-gray-100 flex-shrink-0">
+                {/* 5. Footer Sidebar (Actions secondaires) */}
+                <div className="p-4 md:border-t md:border-gray-100 flex flex-col gap-1 mt-auto md:mt-0">
+                    {/* Mobile Label "Actions" */}
+                    <div className="md:hidden px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                        Autres
+                    </div>
+
                     <Link
                         href="/"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:duration-75"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 active:bg-gray-100 transition-all duration-200 active:scale-[0.98] touch-manipulation text-sm font-medium"
                     >
-                        <LogOut className="w-5 h-5" />
+                        <Store className="w-4 h-4" />
                         <span>Retour au site</span>
                     </Link>
+                    {/* Logout visible only on mobile drawer */}
+                    <button
+                        onClick={() => logout()}
+                        className="flex md:hidden items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-600 active:bg-red-50 transition-all duration-200 active:scale-[0.98] touch-manipulation text-sm font-medium w-full text-left"
+                    >
+                        <LogOut className="w-4 h-4" />
+                        <span>Se déconnecter</span>
+                    </button>
                 </div>
             </aside>
 
-            {/* Bottom Nav Mobile (Quick access) */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+            {/* 6. Mobile Bottom Navigation */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 pb-[env(safe-area-inset-bottom)]">
                 <div className="flex justify-around items-center h-16 px-2">
-                    {MOBILE_NAV_ITEMS.map((item) => {
-                        const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
-                        const Icon = item.icon
-                        const isUrgent = item.isUrgent === true
+                    {/* Urgences */}
+                    <Link
+                        href="/pro/urgences"
+                        className={cn(
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-50 rounded-lg",
+                            (pathname === "/pro/urgences") ? "text-red-600" : "text-gray-400"
+                        )}
+                    >
+                        <div className="relative">
+                            <Siren className={cn("w-6 h-6", (pathname === "/pro/urgences") && "fill-current/10")} />
+                            {available && urgentCountState > 0 && (
+                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+                                    {urgentCountState}
+                                </span>
+                            )}
+                        </div>
+                        <span className="text-[10px] font-medium">Urgences</span>
+                    </Link>
 
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={cn(
-                                    "flex flex-col items-center justify-center gap-1 px-3 py-2 relative transition-all duration-200 ease-out touch-manipulation active:scale-[0.92] active:duration-75 rounded-xl",
-                                    isUrgent
-                                        ? isActive
-                                            ? "text-red-600 bg-red-50"
-                                            : "text-red-500 active:bg-red-50"
-                                        : isActive
-                                            ? "text-emerald-600 bg-emerald-50"
-                                            : "text-gray-400 active:bg-gray-100"
-                                )}
-                            >
-                                <Icon className="w-5 h-5" />
-                                <span className="text-[10px] font-medium">{item.label.split(" ")[0]}</span>
-                                {isUrgent && available && urgentCountState > 0 && (
-                                    <span className="absolute top-1 right-2 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
-                                        {urgentCountState > 9 ? "9+" : String(urgentCountState)}
-                                    </span>
-                                )}
-                            </Link>
-                        )
-                    })}
+                    {/* Missions */}
+                    <Link
+                        href="/pro/missions"
+                        className={cn(
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-50 rounded-lg",
+                            (pathname.startsWith("/pro/missions")) ? "text-emerald-600" : "text-gray-400"
+                        )}
+                    >
+                        <div className="relative">
+                            <ListChecks className={cn("w-6 h-6", (pathname.startsWith("/pro/missions")) && "stroke-2")} />
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500 ring-2 ring-white" />
+                            )}
+                        </div>
+                        <span className="text-[10px] font-medium">Missions</span>
+                    </Link>
+
+                    {/* Planning */}
+                    <Link
+                        href="/pro/rendez-vous"
+                        className={cn(
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-50 rounded-lg",
+                            (pathname.startsWith("/pro/rendez-vous")) ? "text-emerald-600" : "text-gray-400"
+                        )}
+                    >
+                        <CalendarDays className={cn("w-6 h-6", (pathname.startsWith("/pro/rendez-vous")) && "stroke-2")} />
+                        <span className="text-[10px] font-medium">Planning</span>
+                    </Link>
+
+                    {/* Plus (Open Drawer) */}
+                    <button
+                        onClick={() => setMobileOpen(true)}
+                        className={cn(
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-50 rounded-lg text-gray-400 hover:text-gray-600"
+                        )}
+                    >
+                        <Menu className="w-6 h-6" />
+                        <span className="text-[10px] font-medium">Plus</span>
+                    </button>
                 </div>
-            </nav >
+            </nav>
         </>
     )
 }

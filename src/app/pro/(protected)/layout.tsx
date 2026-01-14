@@ -54,7 +54,7 @@ export default async function ProLayout({
     const supabase = await createClient()
     const { data: artisan } = await supabase
         .from("artisans")
-        .select("is_available")
+        .select("is_available, company_name, city, postal_code, availability_radius_km")
         .eq("id", user.id)
         .single()
     const isAvailable = artisan?.is_available ?? true
@@ -72,10 +72,13 @@ export default async function ProLayout({
                 totalUnreadMessages={totalUnreadMessages}
                 isAvailable={isAvailable}
                 avatarUrl={avatarUrl}
+                companyName={artisan?.company_name}
+                addressCity={artisan?.city}
+                interventionRadius={artisan?.availability_radius_km}
             />
 
             {/* Main content - offset for sidebar */}
-            <main className="md:ml-64 pt-14 md:pt-0 pb-20 md:pb-0 min-h-screen">
+            <main className="md:ml-72 pt-16 md:pt-0 pb-20 md:pb-0 min-h-screen">
                 {children}
             </main>
         </div>

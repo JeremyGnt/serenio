@@ -10,6 +10,8 @@ import { MapPin, Loader2, Check, Pencil } from "lucide-react"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import dynamic from "next/dynamic"
 import { Card, CardContent } from "@/components/ui/card"
+import { Slider } from "@/components/ui/slider"
+
 
 const InterventionRadiusMap = dynamic(
   () => import("./intervention-radius-map").then((mod) => mod.InterventionRadiusMap),
@@ -45,8 +47,8 @@ export function ProAddressSection({ user }: ProAddressSectionProps) {
     // Clamped between 1 and 25
     return Math.min(Math.max(val, 1), 25).toString()
   }
-  const initialLat = metadata.base_latitude || null
-  const initialLon = metadata.base_longitude || null
+  const initialLat = metadata.base_latitude ? parseFloat(metadata.base_latitude.toString()) : null
+  const initialLon = metadata.base_longitude ? parseFloat(metadata.base_longitude.toString()) : null
 
   // Address State (for editing)
   const [street, setStreet] = useState(initialStreet)
@@ -361,34 +363,36 @@ export function ProAddressSection({ user }: ProAddressSectionProps) {
             {/* Radius & Map Section - Always Visible */}
             <div className={`space-y-4 transition-opacity duration-300 ${!latitude || !longitude ? 'opacity-50 pointer-events-none' : ''}`}>
 
-              <div className="flex items-end justify-between px-1">
-                <div className="space-y-1">
-                  <Label htmlFor="radius" className="text-base font-bold text-gray-900">Rayon d'intervention</Label>
-                  <p className="text-xs text-muted-foreground">Ajustez la distance maximale d'intervention</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  {radiusSaving && <span className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Sauvegarde...</span>}
-                  {radiusSaved && <span className="text-xs text-green-600 flex items-center gap-1"><Check className="w-3 h-3" /> Enregistré</span>}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm font-semibold text-gray-900">Zone d'intervention</Label>
+                    <p className="text-xs text-gray-500">Distance max. de déplacement</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {/* Saving Status */}
+                    {radiusSaving && <Loader2 className="w-3 h-3 animate-spin text-blue-600" />}
+                    {radiusSaved && <Check className="w-3 h-3 text-emerald-600" />}
 
-                  {/* Badge style from Map */}
-                  <div className="bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-200 text-sm font-medium text-gray-600 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse ring-4 ring-blue-500/20" />
-                    <span>Rayon : <span className="font-bold text-gray-900">{radius} km</span></span>
+                    {/* Value Badge - Minimalist */}
+                    <div className="flex items-center gap-1.5 text-sm font-medium text-gray-900">
+                      <span className="text-gray-500">Rayon :</span>
+                      <span className="font-bold">{radius} km</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="px-1 py-2">
-                <input
-                  type="range"
-                  id="radius"
-                  min="1"
-                  max="25"
-                  step="1"
-                  value={radius}
-                  onChange={(e) => handleRadiusChange(e.target.value)}
-                  className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600 hover:accent-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                />
+                <div className="px-1 py-1">
+                  <Slider
+                    defaultValue={[parseInt(radius)]}
+                    max={25}
+                    min={1}
+                    step={1}
+                    value={[parseInt(radius)]}
+                    onValueChange={(vals) => handleRadiusChange(vals[0].toString())}
+                    className="cursor-pointer py-3"
+                  />
+                </div>
               </div>
 
               {/* Carte Interactive */}

@@ -167,7 +167,7 @@ export function MissionsTabs({ activeMissions, completedMissions, cancelledMissi
                             <span className="truncate max-w-full">{tab.label}</span>
                             {count > 0 && (
                                 <span className={cn(
-                                    "px-1.5 py-0.5 text-[10px] sm:text-xs rounded-full ml-0 sm:ml-auto",
+                                    "hidden sm:inline-flex px-1.5 py-0.5 text-[10px] sm:text-xs rounded-full ml-0 sm:ml-auto",
                                     isActive && tab.id === "active" && "bg-amber-100 text-amber-700",
                                     isActive && tab.id === "completed" && "bg-emerald-100 text-emerald-700",
                                     isActive && tab.id === "cancelled" && "bg-red-100 text-red-700",
