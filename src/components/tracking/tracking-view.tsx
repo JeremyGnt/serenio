@@ -26,7 +26,8 @@ import {
     Wifi,
     WifiOff,
     Camera,
-    MessageCircle
+    MessageCircle,
+    Contact
 } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
 import type { RealtimePostgresChangesPayload, RealtimeChannel } from "@supabase/supabase-js"
@@ -41,6 +42,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import type { LiveTrackingData } from "@/types/intervention"
 import { STATUS_LABELS } from "@/lib/interventions/config"
@@ -165,9 +172,11 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
     const { intervention, artisan, quote, statusHistory } = data
     const [cancelling, setCancelling] = useState(false)
     const [showCancelDialog, setShowCancelDialog] = useState(false)
+    const [showHistoryDialog, setShowHistoryDialog] = useState(false)
     const [copied, setCopied] = useState(false)
     const [refreshing, setRefreshing] = useState(false)
     const [isConnected, setIsConnected] = useState(false)
+    const [isChatOpen, setIsChatOpen] = useState(false)
     const channelRef = useRef<RealtimeChannel | null>(null)
 
     // Fonction de rafraîchissement
@@ -334,7 +343,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                 </div>
             </header>
 
-            <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+            <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
                 {/* Bouton retour - redirige vers l'accueil au lieu de l'historique */}
                 <Link
                     href="/"
@@ -344,25 +353,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                     <span>Retour</span>
                 </Link>
 
-                {/* Header de page avec statut - caché pour pending/searching/cancelled car redondant */}
-                {!["pending", "searching", "cancelled"].includes(intervention.status) && (
-                    <div className="flex items-center gap-3 mb-6 sm:mb-8">
-                        <div className={cn(
-                            "w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center flex-shrink-0",
-                            statusConfig.bgColor
-                        )}>
-                            <StatusIcon className={cn("w-6 h-6 sm:w-7 sm:h-7", statusConfig.color)} />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                                {statusInfo.label}
-                            </h1>
-                            <p className="text-sm sm:text-base text-muted-foreground">
-                                {statusInfo.description}
-                            </p>
-                        </div>
-                    </div>
-                )}
+
 
                 {/* Contenu principal */}
                 <div className="space-y-6">
@@ -376,21 +367,33 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                                     Votre serrurier
                                 </h2>
                                 <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center text-xl font-bold text-emerald-600">
-                                        {artisan.firstName.charAt(0).toUpperCase()}
+                                    <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-emerald-200">
+                                        {artisan.avatarUrl ? (
+                                            <Image
+                                                src={artisan.avatarUrl}
+                                                alt={artisan.firstName}
+                                                width={56}
+                                                height={56}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <span className="text-xl font-bold text-emerald-600">
+                                                {artisan.firstName.charAt(0).toUpperCase()}
+                                            </span>
+                                        )}
                                     </div>
                                     <div className="flex-1">
                                         <p className="font-semibold text-gray-900">{artisan.companyName}</p>
                                         <p className="text-sm text-gray-500">{artisan.firstName}</p>
-                                        {artisan.rating && artisan.rating > 0 && (
+                                        {(artisan.rating ?? 0) > 0 && (
                                             <div className="flex items-center gap-1 mt-1">
                                                 <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                                                <span className="text-sm font-medium">{artisan.rating.toFixed(1)}</span>
+                                                <span className="text-sm font-medium">{artisan.rating?.toFixed(1)}</span>
                                             </div>
                                         )}
                                     </div>
-                                    <div className="flex flex-col sm:flex-row gap-2">
-                                        <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                                    <div className="flex flex-col gap-2">
+                                        <Button asChild className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto">
                                             <a href={`tel:${artisan.phone}`}>
                                                 <Phone className="w-4 h-4 mr-2" />
                                                 Appeler
@@ -398,13 +401,8 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                                         </Button>
                                         <Button
                                             variant="outline"
-                                            className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-                                            onClick={() => {
-                                                const chatSection = document.getElementById('chat-section')
-                                                if (chatSection) {
-                                                    chatSection.scrollIntoView({ behavior: 'smooth' })
-                                                }
-                                            }}
+                                            className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 w-full sm:w-auto"
+                                            onClick={() => setIsChatOpen(true)}
                                         >
                                             <MessageCircle className="w-4 h-4 mr-2" />
                                             Message
@@ -447,12 +445,20 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
 
                         {/* Timeline - Caché pour annulé */}
                         {!isCancelled && (
-                            <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                                <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Clock className="w-5 h-5 text-gray-400" />
-                                    Historique
-                                </h2>
-                                <TrackingTimeline history={statusHistory} />
+                            <div
+                                className="bg-white rounded-2xl border border-gray-200 p-5 cursor-pointer hover:bg-gray-50 transition-colors group"
+                                onClick={() => setShowHistoryDialog(true)}
+                            >
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                                        <Clock className="w-5 h-5 text-gray-400" />
+                                        Historique
+                                    </h2>
+                                    <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                        Voir complet
+                                    </span>
+                                </div>
+                                <TrackingTimeline history={statusHistory} compact={true} />
                             </div>
                         )}
                     </div>
@@ -466,6 +472,8 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                             <ClientChatWrapper
                                 interventionId={intervention.id}
                                 currentUserId={currentUserId}
+                                isOpen={isChatOpen}
+                                onOpenChange={setIsChatOpen}
                             />
                         </div>
                     )}
@@ -496,7 +504,10 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
 
                             {/* Contact */}
                             <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                                <h2 className="font-semibold text-gray-900 mb-4">Vos coordonnées</h2>
+                                <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                    <Contact className="w-5 h-5 text-gray-400" />
+                                    Vos coordonnées
+                                </h2>
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-3">
                                         <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -525,6 +536,13 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                             <InterventionPhotos
                                 interventionId={intervention.id}
                                 thumbnailMode={false}
+                                gridClassName="grid-cols-4 sm:grid-cols-5 md:grid-cols-6"
+                                initialPhotos={intervention.photos?.map(p => ({
+                                    ...p,
+                                    originalFilename: p.originalFilename || "",
+                                    mimeType: p.mimeType || "application/octet-stream",
+                                    fileSizeBytes: p.fileSizeBytes || 0
+                                }))}
                             />
                         </div>
                     )}
@@ -643,6 +661,21 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* History Dialog */}
+            <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
+                <DialogContent className="max-w-md w-[90vw] sm:w-full bg-white rounded-2xl max-h-[85vh] overflow-y-auto p-0 gap-0">
+                    <DialogHeader className="p-6 pb-2">
+                        <DialogTitle className="flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-gray-500" />
+                            Historique complet
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="p-6 pt-2">
+                        <TrackingTimeline history={statusHistory} />
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

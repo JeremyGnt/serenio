@@ -17,7 +17,7 @@ import type {
 
 export async function getIntervention(id: string): Promise<InterventionRequest | null> {
   const adminClient = createAdminClient()
-  
+
   const { data, error } = await adminClient
     .from("intervention_requests")
     .select(`
@@ -28,11 +28,11 @@ export async function getIntervention(id: string): Promise<InterventionRequest |
     `)
     .eq("id", id)
     .single()
-  
+
   if (error || !data) {
     return null
   }
-  
+
   return mapInterventionFromDb(data)
 }
 
@@ -44,7 +44,7 @@ export async function getInterventionByTracking(
   trackingNumber: string
 ): Promise<InterventionRequest | null> {
   const adminClient = createAdminClient()
-  
+
   const { data, error } = await adminClient
     .from("intervention_requests")
     .select(`
@@ -61,11 +61,11 @@ export async function getInterventionByTracking(
     `)
     .eq("tracking_number", trackingNumber)
     .single()
-  
+
   if (error || !data) {
     return null
   }
-  
+
   return mapInterventionFromDb(data)
 }
 
@@ -77,7 +77,7 @@ export async function getLiveTrackingData(
   trackingNumber: string
 ): Promise<LiveTrackingData | null> {
   const adminClient = createAdminClient()
-  
+
   const { data, error } = await adminClient
     .from("intervention_requests")
     .select(`
@@ -93,24 +93,39 @@ export async function getLiveTrackingData(
     `)
     .eq("tracking_number", trackingNumber)
     .single()
-  
+
   if (error || !data) {
     return null
   }
-  
+
   const intervention = mapInterventionFromDb(data)
-  
+
   // Trouver l'artisan assigné (accepté)
   const acceptedAssignment = data.artisan_assignments?.find(
     (a: { status: string }) => a.status === "accepted"
   )
-  
+
+  let artisanAvatarUrl: string | undefined | null = undefined
+
+  if (acceptedAssignment?.artisans?.id) {
+    try {
+      const { data: userData } = await adminClient.auth.admin.getUserById(acceptedAssignment.artisans.id)
+      if (userData?.user?.user_metadata) {
+        artisanAvatarUrl = userData.user.user_metadata.custom_avatar_url ||
+          userData.user.user_metadata.avatar_url ||
+          userData.user.user_metadata.picture
+      }
+    } catch (e) {
+      console.error("Error fetching artisan avatar:", e)
+    }
+  }
+
   // Dernier devis
   const latestQuote = data.intervention_quotes?.sort(
-    (a: { created_at: string }, b: { created_at: string }) => 
+    (a: { created_at: string }, b: { created_at: string }) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   )[0]
-  
+
   return {
     intervention,
     artisan: acceptedAssignment?.artisans ? {
@@ -120,6 +135,7 @@ export async function getLiveTrackingData(
       phone: acceptedAssignment.artisans.phone,
       rating: acceptedAssignment.artisans.rating,
       estimatedArrivalMinutes: acceptedAssignment.estimated_arrival_minutes,
+      avatarUrl: artisanAvatarUrl,
     } : undefined,
     quote: latestQuote ? mapQuoteFromDb(latestQuote) : undefined,
     statusHistory: (data.intervention_status_history || []).map(mapStatusHistoryFromDb),
@@ -135,30 +151,30 @@ export async function getClientInterventions(
 ): Promise<InterventionRequest[]> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   if (!user && !clientEmail) {
     return []
   }
-  
+
   const adminClient = createAdminClient()
-  
+
   let query = adminClient
     .from("intervention_requests")
     .select("*, price_scenarios(*)")
     .order("created_at", { ascending: false })
-  
+
   if (user) {
     query = query.or(`client_id.eq.${user.id},client_email.eq.${user.email}`)
   } else if (clientEmail) {
     query = query.eq("client_email", clientEmail)
   }
-  
+
   const { data, error } = await query
-  
+
   if (error || !data) {
     return []
   }
-  
+
   return data.map(mapInterventionFromDb)
 }
 
@@ -170,23 +186,23 @@ export async function getPriceScenarios(
   category?: "urgence" | "rdv" | "remplacement"
 ): Promise<PriceScenarioDisplay[]> {
   const adminClient = createAdminClient()
-  
+
   let query = adminClient
     .from("price_scenarios")
     .select("*")
     .eq("is_active", true)
     .order("display_order")
-  
+
   if (category) {
     query = query.eq("category", category)
   }
-  
+
   const { data, error } = await query
-  
+
   if (error || !data) {
     return []
   }
-  
+
   return data.map((s) => ({
     id: s.id,
     code: s.code,
@@ -227,17 +243,17 @@ export async function getPriceScenarioByCode(
 
 export async function getServiceZones(): Promise<ServiceZone[]> {
   const adminClient = createAdminClient()
-  
+
   const { data, error } = await adminClient
     .from("service_zones")
     .select("*")
     .eq("is_active", true)
     .order("display_order")
-  
+
   if (error || !data) {
     return []
   }
-  
+
   return data.map((z) => ({
     id: z.id,
     name: z.name,
@@ -291,12 +307,12 @@ function mapInterventionFromDb(data: Record<string, unknown>): InterventionReque
     createdAt: data.created_at as string,
     updatedAt: data.updated_at as string,
     diagnostic: data.intervention_diagnostics ? mapDiagnosticFromDb(
-      Array.isArray(data.intervention_diagnostics) 
-        ? data.intervention_diagnostics[0] 
+      Array.isArray(data.intervention_diagnostics)
+        ? data.intervention_diagnostics[0]
         : data.intervention_diagnostics
     ) : undefined,
-    photos: Array.isArray(data.intervention_photos) 
-      ? data.intervention_photos.map(mapPhotoFromDb) 
+    photos: Array.isArray(data.intervention_photos)
+      ? data.intervention_photos.map(mapPhotoFromDb)
       : undefined,
     statusHistory: Array.isArray(data.intervention_status_history)
       ? data.intervention_status_history.map(mapStatusHistoryFromDb)

@@ -11,15 +11,16 @@ interface ChatDrawerProps {
     conversationData: ConversationWithMessages
     currentUserId: string
     unreadCount?: number
+    isOpen: boolean
+    onOpenChange: (open: boolean) => void
 }
 
-export function ChatDrawer({ conversationData, currentUserId, unreadCount = 0 }: ChatDrawerProps) {
-    const [isOpen, setIsOpen] = useState(false)
+export function ChatDrawer({ conversationData, currentUserId, unreadCount = 0, isOpen, onOpenChange }: ChatDrawerProps) {
     const [localUnreadCount, setLocalUnreadCount] = useState(unreadCount)
 
     // Reset compteur à l'ouverture
     const handleOpen = () => {
-        setIsOpen(true)
+        onOpenChange(true)
         setLocalUnreadCount(0)
         // TODO: appeler server action markAsRead ici si besoin
     }
@@ -55,7 +56,7 @@ export function ChatDrawer({ conversationData, currentUserId, unreadCount = 0 }:
             {isOpen && (
                 <div
                     className="fixed inset-0 bg-black/20 z-40 lg:hidden"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => onOpenChange(false)}
                 />
             )}
 
@@ -82,7 +83,7 @@ export function ChatDrawer({ conversationData, currentUserId, unreadCount = 0 }:
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => onOpenChange(false)}
                         className="h-8 w-8 p-0 hover:bg-gray-100 rounded-full"
                     >
                         <X className="w-5 h-5 text-gray-500" />

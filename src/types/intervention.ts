@@ -70,21 +70,21 @@ export interface PriceScenario {
   name: string
   description?: string
   category: "urgence" | "rdv" | "remplacement"
-  
+
   // Prix en centimes
   priceMinCents: number
   priceMaxCents: number
   priceAverageCents?: number
-  
+
   // Frais détaillés
   displacementFeeCents: number
   laborFeeMinCents: number
   laborFeeMaxCents: number
-  
+
   // Durée estimée
   durationMinMinutes?: number
   durationMaxMinutes?: number
-  
+
   icon?: string
   isActive: boolean
   displayOrder: number
@@ -107,22 +107,22 @@ export interface PriceScenarioDisplay extends PriceScenario {
 export interface InterventionRequest {
   id: string
   trackingNumber: string
-  
+
   // Client
   clientId?: string
   clientEmail: string
   clientPhone: string
   clientFirstName?: string
   clientLastName?: string
-  
+
   // Type et statut
   interventionType: InterventionType
   status: InterventionStatus
-  
+
   // Scénario
   priceScenarioId?: string
   priceScenario?: PriceScenario
-  
+
   // Localisation
   addressStreet: string
   addressPostalCode: string
@@ -133,29 +133,29 @@ export interface InterventionRequest {
   longitude?: number
   zoneId?: string
   zone?: ServiceZone
-  
+
   // Urgence
   isUrgent: boolean
   urgencyLevel: 1 | 2 | 3
-  
+
   // RDV
   scheduledDate?: string
   scheduledTimeStart?: string
   scheduledTimeEnd?: string
-  
+
   // Timestamps
   submittedAt?: string
   acceptedAt?: string
   startedAt?: string
   completedAt?: string
   cancelledAt?: string
-  
+
   cancellationReason?: string
   cancelledBy?: "client" | "artisan" | "system" | "admin"
-  
+
   createdAt: string
   updatedAt: string
-  
+
   // Relations
   diagnostic?: InterventionDiagnostic
   photos?: InterventionPhoto[]
@@ -175,21 +175,21 @@ export interface DiagnosticAnswers {
 export interface InterventionDiagnostic {
   id: string
   interventionId: string
-  
+
   situationType: SituationType
   situationDetails?: string
-  
+
   diagnosticAnswers: DiagnosticAnswers
-  
+
   doorType?: DoorType
   lockType?: LockType
   lockBrand?: string
-  
+
   hasInsurance?: boolean
   insuranceRef?: string
-  
+
   estimatedComplexity: 1 | 2 | 3 | 4 | 5
-  
+
   createdAt: string
   updatedAt: string
 }
@@ -201,20 +201,20 @@ export interface InterventionDiagnostic {
 export interface InterventionPhoto {
   id: string
   interventionId: string
-  
+
   storagePath: string
   originalFilename?: string
   mimeType?: string
   fileSizeBytes?: number
-  
+
   photoType: "diagnostic" | "before" | "after" | "invoice"
   description?: string
-  
+
   uploadedBy?: string
   uploadedByRole?: "client" | "artisan"
-  
+
   createdAt: string
-  
+
   // URL signée (calculée)
   url?: string
 }
@@ -227,18 +227,18 @@ export interface ArtisanAssignment {
   id: string
   interventionId: string
   artisanId: string
-  
+
   status: AssignmentStatus
   proposalOrder: number
-  
+
   proposedAt: string
   respondedAt?: string
   expiresAt?: string
-  
+
   refusalReason?: string
   estimatedArrivalMinutes?: number
   distanceKm?: number
-  
+
   // Relation
   artisan?: {
     id: string
@@ -266,33 +266,33 @@ export interface InterventionQuote {
   interventionId: string
   artisanId: string
   quoteNumber: string
-  
+
   status: QuoteStatus
-  
+
   // Montants en centimes
   displacementFeeCents: number
   laborFeeCents: number
   partsFeeCents: number
   otherFeesCents: number
-  
+
   subtotalCents: number
   vatRate: number
   vatAmountCents: number
   totalCents: number
-  
+
   description?: string
   partsDetails: QuotePart[]
-  
+
   validUntil?: string
-  
+
   clientSignatureUrl?: string
   acceptedAt?: string
   refusedAt?: string
   refusalReason?: string
-  
+
   createdAt: string
   updatedAt: string
-  
+
   // Formaté
   total?: number // en euros
 }
@@ -304,16 +304,16 @@ export interface InterventionQuote {
 export interface StatusHistoryEntry {
   id: string
   interventionId: string
-  
+
   previousStatus?: InterventionStatus
   newStatus: InterventionStatus
-  
+
   changedBy?: string
   changedByRole?: "client" | "artisan" | "system" | "admin"
-  
+
   metadata?: Record<string, unknown>
   note?: string
-  
+
   createdAt: string
 }
 
@@ -323,13 +323,13 @@ export interface StatusHistoryEntry {
 
 export interface CreateInterventionPayload {
   interventionType: InterventionType
-  
+
   // Contact
   clientEmail: string
   clientPhone: string
   clientFirstName?: string
   clientLastName?: string
-  
+
   // Localisation
   addressStreet: string
   addressPostalCode: string
@@ -338,10 +338,10 @@ export interface CreateInterventionPayload {
   addressInstructions?: string
   latitude?: number
   longitude?: number
-  
+
   // Scénario
   situationType: SituationType
-  
+
   // RDV (optionnel)
   scheduledDate?: string
   scheduledTimeStart?: string
@@ -405,6 +405,7 @@ export interface LiveTrackingData {
       updatedAt: string
     }
     estimatedArrivalMinutes?: number
+    avatarUrl?: string | null
   }
   quote?: InterventionQuote
   statusHistory: StatusHistoryEntry[]

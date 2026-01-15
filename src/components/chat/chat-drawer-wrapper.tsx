@@ -8,9 +8,11 @@ import type { ConversationWithMessages } from "@/lib/chat/types"
 interface ChatDrawerWrapperProps {
     interventionId: string
     currentUserId: string
+    isOpen?: boolean
+    onOpenChange?: (open: boolean) => void
 }
 
-export function ChatDrawerWrapper({ interventionId, currentUserId }: ChatDrawerWrapperProps) {
+export function ChatDrawerWrapper({ interventionId, currentUserId, isOpen, onOpenChange }: ChatDrawerWrapperProps) {
     const [conversationData, setConversationData] = useState<ConversationWithMessages | null>(null)
     const [unreadCount, setUnreadCount] = useState(0)
     const [loading, setLoading] = useState(true)
@@ -46,6 +48,8 @@ export function ChatDrawerWrapper({ interventionId, currentUserId }: ChatDrawerW
             conversationData={conversationData}
             currentUserId={currentUserId}
             unreadCount={unreadCount}
+            isOpen={isOpen ?? false}
+            onOpenChange={onOpenChange ?? (() => { })}
         />
     )
 }

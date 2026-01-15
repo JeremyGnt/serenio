@@ -16,6 +16,7 @@ interface PhotoGalleryProps {
   photos: UploadedPhoto[]
   loading?: boolean
   className?: string
+  gridClassName?: string
   /** Si true, affiche une seule photo en thumbnail avec badge compteur */
   thumbnailMode?: boolean
   /** Taille du thumbnail en mode thumbnail */
@@ -30,6 +31,7 @@ export function PhotoGallery({
   photos,
   loading = false,
   className,
+  gridClassName,
   thumbnailMode = false,
   thumbnailSize = "md",
 }: PhotoGalleryProps) {
@@ -72,6 +74,24 @@ export function PhotoGallery({
 
   // État de chargement
   if (loading) {
+    if (thumbnailMode) {
+      const sizeClasses = {
+        sm: "w-12 h-12",
+        md: "w-16 h-16",
+        lg: "w-20 h-20",
+      }
+
+      return (
+        <div className={cn(
+          "rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 animate-pulse",
+          sizeClasses[thumbnailSize],
+          className
+        )}>
+          <Loader2 className="w-5 h-5 animate-spin text-gray-300" />
+        </div>
+      )
+    }
+
     return (
       <div className={cn("flex items-center justify-center p-8", className)}>
         <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
@@ -150,7 +170,7 @@ export function PhotoGallery({
     <>
       <div className={cn("space-y-3", className)}>
         {/* Grid de photos */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+        <div className={cn("grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2", gridClassName)}>
           {photos.map((photo, index) => (
             <button
               key={photo.id}

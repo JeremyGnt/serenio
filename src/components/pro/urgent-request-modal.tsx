@@ -130,12 +130,9 @@ export function UrgentRequestModal({
         setLoading(false)
 
         if (result.success) {
-            setSuccessState("accepted")
-            // Attendre 2 secondes pour montrer le message puis fermer et rediriger
-            setTimeout(() => {
-                onAccept()
-                router.push(`/pro/mission/${intervention.trackingNumber}`)
-            }, 2000)
+            // Redirection immédiate
+            onAccept()
+            router.push(`/pro/mission/${intervention.trackingNumber}`)
         } else {
             setError(result.error || "Erreur lors de l'acceptation")
         }
@@ -344,46 +341,29 @@ export function UrgentRequestModal({
     )
 
     // Affichage du message de succès
-    if (successState) {
+    if (successState === "refused") {
         return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+            <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50">
                 <div className="bg-white rounded-2xl w-full max-w-md p-8 text-center shadow-2xl">
-                    {successState === "accepted" ? (
-                        <>
-                            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Check className="w-8 h-8 text-emerald-600" />
-                            </div>
-                            <h2 className="text-xl font-bold text-gray-900 mb-2">Mission acceptée !</h2>
-                            <p className="text-gray-600 mb-4">
-                                Vous allez être redirigé vers les détails de la mission...
-                            </p>
-                            <div className="flex items-center justify-center gap-2 text-emerald-600">
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                <span className="text-sm">Redirection en cours</span>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <XCircle className="w-8 h-8 text-gray-500" />
-                            </div>
-                            <h2 className="text-xl font-bold text-gray-900 mb-2">Mission refusée</h2>
-                            <p className="text-gray-600">
-                                L'annonce ne vous sera plus proposée.
-                            </p>
-                        </>
-                    )}
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <XCircle className="w-8 h-8 text-gray-500" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">Mission refusée</h2>
+                    <p className="text-gray-600">
+                        L'annonce ne vous sera plus proposée.
+                    </p>
                 </div>
             </div>
         )
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50">
             {/* Modal - très large sur grands écrans */}
-            <div className="bg-white rounded-2xl w-full max-w-md md:max-w-xl lg:max-w-3xl xl:max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
+            {/* Modal - très large sur grands écrans */}
+            <div className="bg-white rounded-2xl w-full max-w-md md:max-w-xl lg:max-w-3xl xl:max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
                 {/* Header épuré - fond blanc */}
-                <div className="relative border-b border-gray-100 p-4 lg:p-5">
+                <div className="relative border-b border-gray-100 p-4 lg:p-5 flex-none">
                     <button
                         onClick={onClose}
                         className="absolute top-3 right-3 p-2 hover:bg-gray-100 rounded-full transition-all duration-200 ease-out touch-manipulation active:scale-90 active:duration-75 text-gray-400 hover:text-gray-600"
@@ -419,7 +399,7 @@ export function UrgentRequestModal({
                 </div>
 
                 {/* Contenu - Layout 2 colonnes sur desktop */}
-                <div className="overflow-y-auto" style={{ maxHeight: "calc(90vh - 180px)" }}>
+                <div className="overflow-y-auto flex-1">
                     <div className="lg:grid lg:grid-cols-2 lg:gap-6 p-4 lg:p-6">
                         {/* Colonne gauche - Infos principales */}
                         <div>
@@ -530,7 +510,7 @@ export function UrgentRequestModal({
                 )}
 
                 {/* Footer minimaliste */}
-                <div className="p-4 lg:p-6 border-t border-gray-100">
+                <div className="p-5 md:p-6 border-t border-gray-100 flex-none bg-white">
                     <div className="flex flex-col sm:flex-row gap-3">
                         <Button
                             className="flex-1 h-11 text-sm font-medium bg-gray-900 hover:bg-gray-800"

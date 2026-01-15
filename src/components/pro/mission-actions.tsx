@@ -178,12 +178,7 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                     )}
                 </div>
 
-                {/* Guide des étapes */}
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                    <p className="text-xs text-muted-foreground">
-                        <strong>Étapes :</strong> Signaler votre arrivée → Démarrer l'intervention → Terminer la mission
-                    </p>
-                </div>
+
             </div>
 
             {/* Dialog de confirmation pour terminer */}

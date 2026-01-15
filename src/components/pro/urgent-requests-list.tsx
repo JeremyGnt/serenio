@@ -2,10 +2,10 @@
 
 import { useState, useCallback, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { RefreshCw, Loader2, Wifi, WifiOff, Bell } from "lucide-react"
+import { RefreshCw, Wifi, WifiOff, Bell, Activity, Radar, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { UrgentRequestCard } from "./urgent-request-card"
-import { AvailabilityLock } from "./availability-lock"
+import { AvailabilityControl } from "./availability-control"
 import { getPendingInterventions } from "@/lib/interventions/pro-queries"
 import { supabase } from "@/lib/supabase/client"
 import { calculateDistance } from "@/lib/utils/distance"
@@ -60,8 +60,12 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
         }
     }, [router])
 
+    // Update local state when prop changes (hydration sync)
+    useEffect(() => {
+        setLocalIsAvailable(isAvailable)
+    }, [isAvailable])
+
     // Realtime subscription pour les changements de disponibilité
-    // Permet de synchroniser l'état quand l'artisan toggle depuis la sidebar
     useEffect(() => {
         const channel = supabase
             .channel(`artisan-availability-${userId}`)
@@ -95,10 +99,8 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
     }, [userId, handleRefresh])
 
     // Supabase Realtime subscription pour les nouvelles urgences
-    // Ne pas s'abonner si l'artisan est indisponible
     useEffect(() => {
         if (!localIsAvailable) {
-            // Nettoyer le channel existant si on passe en indisponible
             if (channelRef.current) {
                 supabase.removeChannel(channelRef.current)
                 channelRef.current = null
@@ -107,7 +109,6 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
             return
         }
 
-        // S'abonner aux changements sur intervention_requests
         const channel = supabase
             .channel("urgences-realtime")
             .on(
@@ -121,7 +122,6 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                 async (payload: RealtimePostgresChangesPayload<InterventionPayload>) => {
                     const newIntervention = payload.new as InterventionPayload
 
-                    // Vérifier que c'est bien une urgence en attente
                     if (
                         newIntervention.intervention_type === "urgence" &&
                         ["pending", "searching"].includes(newIntervention.status)
@@ -129,7 +129,6 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                         const lat = newIntervention.latitude
                         const lon = newIntervention.longitude
 
-                        // Vérifier si l'intervention est dans le rayon de l'artisan
                         if (artisanSettings && lat != null && lon != null) {
                             const distance = calculateDistance(
                                 artisanSettings.baseLatitude,
@@ -139,12 +138,10 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                             )
 
                             if (distance != null && distance > artisanSettings.availabilityRadius) {
-                                return // Hors zone, on ignore
+                                return
                             }
                         }
 
-                        // Rafraîchir les données pour récupérer toutes les infos
-                        // (incluant le diagnostic qui est dans une autre table)
                         setNewUrgenceAlert(true)
                         await handleRefresh()
                     }
@@ -160,13 +157,11 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                 async (payload: RealtimePostgresChangesPayload<InterventionPayload>) => {
                     const updatedIntervention = payload.new as InterventionPayload
 
-                    // Si une intervention passe en pending/searching, on actualise
                     if (["pending", "searching"].includes(updatedIntervention.status)) {
                         if (updatedIntervention.intervention_type === "urgence") {
                             const lat = updatedIntervention.latitude
                             const lon = updatedIntervention.longitude
 
-                            // Vérifier si l'intervention est dans le rayon de l'artisan
                             if (artisanSettings && lat != null && lon != null) {
                                 const distance = calculateDistance(
                                     artisanSettings.baseLatitude,
@@ -176,7 +171,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                                 )
 
                                 if (distance != null && distance > artisanSettings.availabilityRadius) {
-                                    return // Hors zone, on ignore
+                                    return
                                 }
                             }
 
@@ -184,7 +179,6 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                             await handleRefresh()
                         }
                     } else {
-                        // Si une intervention n'est plus pending/searching, on la retire de la liste
                         setInterventions(prev =>
                             prev.filter(i => i.id !== updatedIntervention.id)
                         )
@@ -200,7 +194,6 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                 },
                 (payload: RealtimePostgresChangesPayload<InterventionPayload>) => {
                     const deletedIntervention = payload.old as InterventionPayload
-                    // Retirer l'intervention supprimée de la liste
                     setInterventions(prev =>
                         prev.filter(i => i.id !== deletedIntervention.id)
                     )
@@ -217,14 +210,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                 supabase.removeChannel(channelRef.current)
             }
         }
-    }, [handleRefresh, localIsAvailable])
-
-    // Callback quand l'artisan repasse disponible
-    const handleAvailabilityChange = useCallback(() => {
-        setLocalIsAvailable(true)
-        handleRefresh()
-        router.refresh()
-    }, [handleRefresh, router])
+    }, [handleRefresh, localIsAvailable, artisanSettings])
 
     const handleAccept = (interventionId: string) => {
         setInterventions(prev => prev.filter(i => i.id !== interventionId))
@@ -236,121 +222,123 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
         handleRefresh()
     }
 
-    if (interventions.length === 0) {
-        return (
-            <div className="relative bg-white rounded-xl border border-gray-200 p-6">
-                {/* Overlay indisponible */}
-                {!localIsAvailable && <AvailabilityLock onAvailabilityChange={handleAvailabilityChange} />}
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="font-bold text-base md:text-lg flex items-center gap-2">
-                        <Bell className="w-5 h-5 text-red-500" />
-                        Demandes urgentes
-                    </h2>
-                    <div className="flex items-center gap-2">
-                        {/* Indicateur de connexion temps réel */}
-                        <div className="flex items-center gap-1" title={isConnected ? "Connecté en temps réel" : "Connexion en cours..."}>
-                            {isConnected ? (
-                                <Wifi className="w-4 h-4 text-emerald-500" />
-                            ) : (
-                                <WifiOff className="w-4 h-4 text-gray-400 animate-pulse" />
-                            )}
-                            <span className="text-xs text-muted-foreground hidden sm:inline">
-                                {isConnected ? "Live" : "..."}
-                            </span>
-                        </div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleRefresh}
-                            disabled={refreshing}
-                            title="Rafraîchir"
-                        >
-                            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-                        </Button>
-                    </div>
-                </div>
-                <div className="text-center py-8 md:py-12 text-muted-foreground">
-                    <p className="text-sm md:text-base">Aucune demande urgente pour le moment</p>
-                    <p className="text-xs md:text-sm mt-2">
-                        {isConnected
-                            ? "Les nouvelles urgences apparaîtront automatiquement"
-                            : "Cliquez sur le bouton de rafraîchissement pour vérifier les nouvelles demandes"
-                        }
-                    </p>
-                    {refreshing && (
-                        <div className="flex justify-center mt-4">
-                            <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
-                        </div>
-                    )}
-                </div>
-            </div>
-        )
+    const handleAvailabilityToggle = (newStatus: boolean) => {
+        setLocalIsAvailable(newStatus)
+        if (newStatus) {
+            handleRefresh()
+        }
     }
 
     return (
-        <div className="relative bg-white rounded-xl border border-gray-200 p-4 md:p-6">
-            {/* Overlay indisponible */}
-            {!localIsAvailable && <AvailabilityLock onAvailabilityChange={handleAvailabilityChange} />}
-            {/* Alerte nouvelle urgence */}
-            {newUrgenceAlert && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 animate-pulse">
-                    <Bell className="w-5 h-5 text-red-500" />
-                    <span className="text-sm font-medium text-red-700">
-                        Nouvelle urgence reçue !
-                    </span>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="ml-auto text-red-600 hover:text-red-700 hover:bg-red-100"
-                        onClick={() => setNewUrgenceAlert(false)}
-                    >
-                        Fermer
-                    </Button>
+        <div className="space-y-6 animate-in fade-in duration-500">
+            {/* Header + Controls */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
+                        <Bell className="w-8 h-8 text-red-500" />
+                        Urgences
+                    </h1>
+                    <p className="text-muted-foreground mt-1">
+                        Gestion des demandes en temps réel
+                    </p>
                 </div>
-            )}
 
-            <div className="flex items-center justify-between mb-4">
-                <h2 className="font-bold text-base md:text-lg flex items-center gap-2">
-                    <Bell className="w-5 h-5 text-red-500" />
-                    Demandes urgentes
-                    <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
-                        {interventions.length}
-                    </span>
-                </h2>
-                <div className="flex items-center gap-2">
-                    {/* Indicateur de connexion temps réel */}
-                    <div className="flex items-center gap-1" title={isConnected ? "Connecté en temps réel" : "Connexion en cours..."}>
-                        {isConnected ? (
-                            <Wifi className="w-4 h-4 text-emerald-500" />
-                        ) : (
-                            <WifiOff className="w-4 h-4 text-gray-400 animate-pulse" />
-                        )}
-                        <span className="text-xs text-muted-foreground hidden sm:inline">
-                            {isConnected ? "Live" : "..."}
-                        </span>
-                    </div>
-                    {refreshing && <span className="text-xs text-muted-foreground">Mise à jour...</span>}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleRefresh}
-                        disabled={refreshing}
-                        title="Rafraîchir"
-                    >
-                        <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-                    </Button>
+                <div className="flex items-center gap-3 self-end md:self-auto">
+                    {localIsAvailable && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleRefresh}
+                            disabled={refreshing}
+                            className="rounded-full hover:bg-gray-100 text-gray-500"
+                            title="Actualiser la liste"
+                        >
+                            <RefreshCw className={`w-5 h-5 ${refreshing ? "animate-spin" : ""}`} />
+                        </Button>
+                    )}
                 </div>
             </div>
 
-            <div className="space-y-3">
-                {interventions.map((intervention) => (
-                    <UrgentRequestCard
-                        key={intervention.id}
-                        intervention={intervention}
-                        onAccept={() => handleAccept(intervention.id)}
-                        onRefuse={() => handleRefuse(intervention.id)}
-                    />
-                ))}
+            {/* Main Content Area */}
+            <div className="relative min-h-[400px]">
+                {/* Alert Banner */}
+                {newUrgenceAlert && (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 shadow-sm animate-bounce-short">
+                        <div className="p-2 bg-red-100 rounded-lg">
+                            <Bell className="w-5 h-5 text-red-600" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-semibold text-red-900">Nouvelle urgence détectée !</h3>
+                            <p className="text-sm text-red-700">Une nouvelle demande vient d'arriver dans votre secteur.</p>
+                        </div>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            className="bg-white text-red-600 hover:bg-red-50 border border-red-200"
+                            onClick={() => setNewUrgenceAlert(false)}
+                        >
+                            Voir
+                        </Button>
+                    </div>
+                )}
+
+                {!localIsAvailable ? (
+                    /* Offline State */
+                    <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-gray-50/50 rounded-3xl border border-dashed border-gray-200">
+                        <div className="relative mb-6">
+                            <div className="absolute inset-0 bg-gray-200 rounded-full blur-xl opacity-50" />
+                            <div className="relative bg-white p-6 rounded-full shadow-sm border border-gray-100">
+                                <WifiOff className="w-10 h-10 text-gray-400" />
+                            </div>
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            Vous êtes actuellement en pause
+                        </h3>
+                        <p className="text-gray-500 max-w-md mx-auto mb-8">
+                            Votre statut est défini sur "Indisponible". Vous ne recevrez aucune notification de nouvelle urgence tant que vous n'aurez pas repris l'activité.
+                        </p>
+                        <Button
+                            onClick={() => handleAvailabilityToggle(true)}
+                            className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-8 h-12 shadow-lg hover:shadow-xl transition-all"
+                        >
+                            <Zap className="w-4 h-4 mr-2 fill-current" />
+                            Reprendre le service
+                        </Button>
+                    </div>
+                ) : interventions.length === 0 ? (
+                    /* Empty State - Scanning */
+                    <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-gradient-to-b from-white to-gray-50/50 rounded-3xl border border-gray-100 shadow-sm">
+                        <div className="relative mb-8">
+                            {/* Scanning Animation */}
+                            <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping opacity-75" />
+                            <div className="absolute inset-[-12px] bg-emerald-500/10 rounded-full animate-pulse" />
+                            <div className="relative bg-white p-6 rounded-full shadow-lg border border-emerald-100 z-10">
+                                <Radar className="w-12 h-12 text-emerald-500" />
+                            </div>
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            En attente de demandes...
+                        </h3>
+                        <p className="text-gray-500 max-w-md mx-auto">
+                            Nous analysons les demandes dans votre secteur ({artisanSettings?.availabilityRadius || 30}km). Restez à l'écoute, les nouvelles urgences apparaîtront ici automatiquement.
+                        </p>
+
+
+                    </div>
+                ) : (
+                    /* Intervention Cards Grid */
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {interventions.map((intervention) => (
+                            <div key={intervention.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <UrgentRequestCard
+                                    intervention={intervention}
+                                    onAccept={() => handleAccept(intervention.id)}
+                                    onRefuse={() => handleRefuse(intervention.id)}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     )

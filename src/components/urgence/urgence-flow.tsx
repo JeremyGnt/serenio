@@ -11,6 +11,7 @@ import { createIntervention, updateDiagnostic, submitIntervention } from "@/lib/
 import { setActiveTracking } from "@/lib/active-tracking"
 import { useFormAutoSave } from "@/hooks/useFormAutoSave"
 import { usePhotoUpload } from "@/hooks/usePhotoUpload"
+import { useInterventionSubmission } from "@/components/providers/intervention-submission-provider"
 import { FlowHeader, type FlowStep } from "@/components/flow"
 import type { PhotoPreview } from "@/components/ui/upload-photos"
 
@@ -96,6 +97,7 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
     // const [currentStep, setCurrentStep] = useState(0) // Removed in favor of formState
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
+    const { submitInBackground } = useInterventionSubmission()
 
     // Hook de sauvegarde automatique
     const {
@@ -404,36 +406,11 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
             return
         }
 
-        setLoading(true)
-
-        // 1. Upload des photos si présentes
-        if (formState.photos.length > 0) {
-            const photosSuccess = await uploadPhotos(formState.interventionId)
-            if (!photosSuccess) {
-                // Continue quand même, les photos échouées seront marquées
-                console.warn("Certaines photos n'ont pas pu être uploadées")
-            }
-        }
-
-        // 2. Soumettre l'intervention
-        const result = await submitIntervention(formState.interventionId)
-        setLoading(false)
-
-        if (!result.success) {
-            showError(result.error || "Erreur lors de l'envoi")
+        const trackingNumber = formState.trackingNumber
+        if (!trackingNumber) {
+            showError("Erreur: numéro de suivi manquant")
             return
         }
-
-        // Mémoriser le tracking car clearDraft va réinitialiser formState
-        const trackingNumber = formState.trackingNumber
-
-        // Stocker le tracking pour redirection future (bannière landing, bouton SOS)
-        if (trackingNumber) {
-            setActiveTracking(trackingNumber)
-        }
-
-        // Nettoyer le brouillon local pour que si l'utilisateur revient, il reparte de l'étape 1
-        clearDraft()
 
         // Create a snapshot for instant loading
         const snapshot = {
@@ -446,8 +423,8 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
                 clientFirstName: formState.clientFirstName,
                 clientLastName: formState.clientLastName,
 
-                interventionType: "urgence",
-                status: "pending",
+                interventionType: "urgence" as const,
+                status: "pending" as const, // Optimistic status
 
                 addressStreet: formState.addressStreet,
                 addressPostalCode: formState.addressPostalCode,
@@ -459,7 +436,7 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
 
                 situationType: formState.situationType,
                 isUrgent: true,
-                urgencyLevel: 3,
+                urgencyLevel: 3 as const,
 
                 diagnostic: {
                     situationType: formState.situationType,
@@ -479,7 +456,7 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
             },
             statusHistory: [{
                 id: "initial",
-                newStatus: "pending",
+                newStatus: "pending" as const,
                 createdAt: new Date().toISOString()
             }]
         }
@@ -490,7 +467,21 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
             console.error("Failed to save snapshot", e)
         }
 
-        // Rediriger vers la page de suivi avec le bon numéro
+        // Trigger background submission (don't await)
+        submitInBackground({
+            interventionId: formState.interventionId,
+            trackingNumber: trackingNumber,
+            photos: formState.photos,
+            rgpdConsent: formState.rgpdConsent
+        })
+
+        // Stocker le tracking pour redirection future (bannière landing, bouton SOS)
+        setActiveTracking(trackingNumber)
+
+        // Nettoyer le brouillon local
+        clearDraft()
+
+        // Rediriger immédiatement vers la page de suivi
         router.push(`/suivi/${trackingNumber}`)
     }
 

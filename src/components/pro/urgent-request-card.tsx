@@ -76,8 +76,14 @@ export function UrgentRequestCard({ intervention, onAccept, onRefuse }: UrgentRe
 
     return (
         <>
-            <div className={`bg-white rounded-xl border p-4 hover:shadow-md transition-all ${viewed ? "border-gray-200" : "border-gray-300 shadow-sm"}`}>
-                <div className="flex items-start gap-4">
+            <div className={`relative bg-white rounded-xl border p-4 hover:shadow-md transition-all ${viewed ? "border-gray-200" : "border-gray-300 shadow-sm"}`}>
+                {viewed && (
+                    <span className="absolute top-2 right-4 flex items-center gap-1.5 px-2.5 py-0.5 bg-white shadow-sm border border-gray-200 text-gray-600 text-[11px] font-medium rounded-full z-10">
+                        <CheckCircle className="w-3 h-3 text-emerald-500" />
+                        Vu
+                    </span>
+                )}
+                <div className="flex items-center gap-4">
                     {/* Photo thumbnail ou icône situation */}
                     <div className="flex-shrink-0">
                         <InterventionPhotos
@@ -89,38 +95,34 @@ export function UrgentRequestCard({ intervention, onAccept, onRefuse }: UrgentRe
                     </div>
 
                     {/* Contenu */}
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
+                    <div className="flex-1 min-w-0 py-1">
+                        <div className="flex items-center gap-2 mb-1.5 pr-12">
                             <h3 className="font-semibold text-gray-900 truncate">
                                 {SITUATION_LABELS[intervention.situationType] || "Urgence"}
                             </h3>
                             {intervention.urgencyLevel === 3 && (
-                                <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
-                                    URGENT
-                                </span>
-                            )}
-                            {viewed && (
-                                <span className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">
-                                    <CheckCircle className="w-3 h-3" />
-                                    Vu
+                                <span className="px-2 py-0.5 bg-red-500 text-white text-[10px] uppercase font-bold tracking-wider rounded-full">
+                                    Urgent
                                 </span>
                             )}
                         </div>
 
                         {/* Localisation approximative + distance */}
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                            <MapPin className="w-4 h-4" />
-                            <span>{intervention.postalCode} {intervention.city}</span>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1.5 line-clamp-1">
+                            <div className="flex items-center gap-1 min-w-0">
+                                <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                                <span className="truncate">{intervention.postalCode} {intervention.city}</span>
+                            </div>
                             {intervention.distance != null && (
-                                <span className="ml-2 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
+                                <span className="flex-shrink-0 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full whitespace-nowrap">
                                     {intervention.distance} km
                                 </span>
                             )}
                         </div>
 
                         {/* Temps */}
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Clock className="w-3 h-3" />
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Clock className="w-3.5 h-3.5" />
                             <span>{timeAgo}</span>
                         </div>
                     </div>
@@ -128,11 +130,11 @@ export function UrgentRequestCard({ intervention, onAccept, onRefuse }: UrgentRe
                     {/* Action */}
                     <Button
                         size="sm"
-                        variant={viewed ? "outline" : "default"}
+                        variant={viewed ? "secondary" : "default"}
                         onClick={handleOpenModal}
-                        className={`flex-shrink-0 ${!viewed ? "bg-gray-900 hover:bg-gray-800" : ""}`}
+                        className={`flex-shrink-0 h-9 transition-all ${!viewed ? "bg-gray-900 hover:bg-gray-800 shadow-sm" : "bg-gray-100 hover:bg-gray-200 text-gray-900"}`}
                     >
-                        <Eye className="w-4 h-4 mr-1" />
+                        <Eye className="w-4 h-4 mr-2" />
                         Voir
                     </Button>
                 </div>

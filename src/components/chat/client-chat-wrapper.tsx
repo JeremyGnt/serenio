@@ -8,9 +8,11 @@ import type { ConversationWithMessages } from "@/lib/chat/types"
 interface ClientChatWrapperProps {
     interventionId: string
     currentUserId: string
+    isOpen: boolean
+    onOpenChange: (open: boolean) => void
 }
 
-export function ClientChatWrapper({ interventionId, currentUserId }: ClientChatWrapperProps) {
+export function ClientChatWrapper({ interventionId, currentUserId, isOpen, onOpenChange }: ClientChatWrapperProps) {
     const [conversationData, setConversationData] = useState<ConversationWithMessages | null>(null)
     const [unreadCount, setUnreadCount] = useState(0)
     const [loading, setLoading] = useState(true)
@@ -50,6 +52,8 @@ export function ClientChatWrapper({ interventionId, currentUserId }: ClientChatW
             conversationData={conversationData}
             currentUserId={currentUserId}
             unreadCount={unreadCount}
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
         />
     )
 }

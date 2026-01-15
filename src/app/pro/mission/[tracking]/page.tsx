@@ -28,7 +28,7 @@ import { getUser } from "@/lib/supabase/server"
 import { getMissionDetailsByTracking } from "@/lib/interventions"
 import { Button } from "@/components/ui/button"
 import { MissionActions } from "@/components/pro/mission-actions"
-import { ChatDrawerWrapper } from "@/components/chat"
+import { MissionContactActions } from "@/components/pro/mission-contact-actions"
 import type { SituationType } from "@/types/intervention"
 
 export const metadata = {
@@ -153,291 +153,288 @@ export default async function MissionDetailPage({ params }: PageProps) {
                 </div>
             </div>
 
-            <div className="grid gap-6">
-                {/* Planning RDV */}
-                {isRdv && mission.scheduledDate && (
-                    <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-5 text-white">
-                        <div className="flex items-center gap-3 mb-3">
-                            <Calendar className="w-5 h-5" />
-                            <h2 className="font-semibold">Rendez-vous planifié</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                <div className="space-y-6">
+                    {/* Planning RDV */}
+                    {isRdv && mission.scheduledDate && (
+                        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-5 text-white">
+                            <div className="flex items-center gap-3 mb-3">
+                                <Calendar className="w-5 h-5" />
+                                <h2 className="font-semibold">Rendez-vous planifié</h2>
+                            </div>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 opacity-80" />
+                                    <span className="font-medium capitalize">
+                                        {formatDate(mission.scheduledDate)}
+                                    </span>
+                                </div>
+                                {mission.scheduledTimeStart && (
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="w-4 h-4 opacity-80" />
+                                        <span className="font-medium">
+                                            {formatTime(mission.scheduledTimeStart, mission.scheduledTimeEnd)}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 opacity-80" />
-                                <span className="font-medium capitalize">
-                                    {formatDate(mission.scheduledDate)}
+                    )}
+
+                    {/* Client */}
+                    <div className="bg-white rounded-xl border border-gray-200 p-5">
+                        <div className="flex items-center gap-2 mb-4">
+                            <User className="w-5 h-5 text-gray-400" />
+                            <h2 className="font-semibold text-gray-900">Client</h2>
+                        </div>
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">Nom</span>
+                                <span className="font-medium">
+                                    {mission.clientFirstName} {mission.clientLastName}
                                 </span>
                             </div>
-                            {mission.scheduledTimeStart && (
-                                <div className="flex items-center gap-2">
-                                    <Clock className="w-4 h-4 opacity-80" />
+                            <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">Téléphone</span>
+                                <a
+                                    href={`tel:${mission.clientPhone}`}
+                                    className="flex items-center gap-2 font-medium text-emerald-600 hover:text-emerald-700"
+                                >
+                                    <Phone className="w-4 h-4" />
+                                    {mission.clientPhone}
+                                </a>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">Email</span>
+                                <a
+                                    href={`mailto:${mission.clientEmail}`}
+                                    className="flex items-center gap-2 font-medium text-gray-900 hover:text-emerald-600"
+                                >
+                                    <Mail className="w-4 h-4" />
+                                    {mission.clientEmail}
+                                </a>
+                            </div>
+                        </div>
+                        <MissionContactActions
+                            clientPhone={mission.clientPhone}
+                            interventionId={mission.id}
+                            currentUserId={user.id}
+                            isChatEnabled={["assigned", "accepted", "en_route", "arrived", "diagnosing", "quote_sent", "quote_accepted", "in_progress"].includes(mission.status)}
+                        />
+                    </div>
+
+                    {/* Adresse */}
+                    <div className="bg-white rounded-xl border border-gray-200 p-5">
+                        <div className="flex items-center gap-2 mb-4">
+                            <MapPin className="w-5 h-5 text-gray-400" />
+                            <h2 className="font-semibold text-gray-900">Adresse d'intervention</h2>
+                        </div>
+                        <div className="space-y-2">
+                            <p className="font-medium text-gray-900">{mission.addressStreet}</p>
+                            {mission.addressComplement && (
+                                <p className="text-muted-foreground">{mission.addressComplement}</p>
+                            )}
+                            <p className="text-gray-900">
+                                {mission.addressPostalCode} {mission.addressCity}
+                            </p>
+                        </div>
+                        {mission.addressInstructions && (
+                            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                <div className="flex items-start gap-2">
+                                    <MessageSquare className="w-4 h-4 text-amber-600 mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-medium text-amber-900">Instructions d'accès</p>
+                                        <p className="text-sm text-amber-800 mt-1">{mission.addressInstructions}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                            <Button variant="outline" asChild className="w-full">
+                                <a
+                                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+                                        `${mission.addressStreet}, ${mission.addressPostalCode} ${mission.addressCity}`
+                                    )}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <Navigation className="w-4 h-4 mr-2" />
+                                    Ouvrir dans Google Maps
+                                </a>
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Actions */}
+                    <MissionActions
+                        interventionId={mission.id}
+                        trackingNumber={mission.trackingNumber}
+                        status={mission.status}
+                    />
+                </div>
+
+                <div className="space-y-6">
+                    {/* Diagnostic */}
+                    <div className="bg-white rounded-xl border border-gray-200 p-5">
+                        <div className="flex items-center gap-2 mb-4">
+                            <FileText className="w-5 h-5 text-gray-400" />
+                            <h2 className="font-semibold text-gray-900">Détails de l'intervention</h2>
+                        </div>
+                        <div className="grid gap-3">
+                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                <span className="flex items-center gap-2 text-muted-foreground">
+                                    <SituationIcon className="w-4 h-4" />
+                                    Type
+                                </span>
+                                <span className={`px-2 py-1 text-sm font-medium rounded ${situationColor}`}>
+                                    {situationLabel}
+                                </span>
+                            </div>
+
+                            {mission.doorType && (
+                                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                    <span className="flex items-center gap-2 text-muted-foreground">
+                                        <DoorClosed className="w-4 h-4" />
+                                        Type de porte
+                                    </span>
+                                    <span className="font-medium capitalize">{mission.doorType.replace(/_/g, " ")}</span>
+                                </div>
+                            )}
+
+                            {mission.lockType && (
+                                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                    <span className="flex items-center gap-2 text-muted-foreground">
+                                        <Lock className="w-4 h-4" />
+                                        Type de serrure
+                                    </span>
+                                    <span className="font-medium capitalize">{mission.lockType.replace(/_/g, " ")}</span>
+                                </div>
+                            )}
+
+                            {mission.propertyType && (
+                                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                    <span className="flex items-center gap-2 text-muted-foreground">
+                                        <Building2 className="w-4 h-4" />
+                                        Type de bien
+                                    </span>
+                                    <span className="font-medium capitalize">{mission.propertyType.replace(/_/g, " ")}</span>
+                                </div>
+                            )}
+
+                            {mission.floorNumber !== undefined && (
+                                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                    <span className="flex items-center gap-2 text-muted-foreground">
+                                        <Layers className="w-4 h-4" />
+                                        Étage
+                                    </span>
                                     <span className="font-medium">
-                                        {formatTime(mission.scheduledTimeStart, mission.scheduledTimeEnd)}
+                                        {mission.floorNumber === 0 ? "RDC" : `${mission.floorNumber}ème`}
+                                        {mission.hasElevator !== undefined && (
+                                            <span className="text-muted-foreground ml-2">
+                                                {mission.hasElevator ? "(avec ascenseur)" : "(sans ascenseur)"}
+                                            </span>
+                                        )}
                                     </span>
                                 </div>
                             )}
-                        </div>
-                    </div>
-                )}
 
-                {/* Client */}
-                <div className="bg-white rounded-xl border border-gray-200 p-5">
-                    <div className="flex items-center gap-2 mb-4">
-                        <User className="w-5 h-5 text-gray-400" />
-                        <h2 className="font-semibold text-gray-900">Client</h2>
-                    </div>
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Nom</span>
-                            <span className="font-medium">
-                                {mission.clientFirstName} {mission.clientLastName}
-                            </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Téléphone</span>
-                            <a
-                                href={`tel:${mission.clientPhone}`}
-                                className="flex items-center gap-2 font-medium text-emerald-600 hover:text-emerald-700"
-                            >
-                                <Phone className="w-4 h-4" />
-                                {mission.clientPhone}
-                            </a>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Email</span>
-                            <a
-                                href={`mailto:${mission.clientEmail}`}
-                                className="flex items-center gap-2 font-medium text-gray-900 hover:text-emerald-600"
-                            >
-                                <Mail className="w-4 h-4" />
-                                {mission.clientEmail}
-                            </a>
-                        </div>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-gray-100">
-                        <Button asChild className="w-full bg-emerald-600 hover:bg-emerald-700">
-                            <a href={`tel:${mission.clientPhone}`}>
-                                <Phone className="w-4 h-4 mr-2" />
-                                Appeler le client
-                            </a>
-                        </Button>
-                    </div>
-                </div>
+                            {mission.accessDifficulty && (
+                                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                    <span className="flex items-center gap-2 text-muted-foreground">
+                                        <AlertTriangle className="w-4 h-4" />
+                                        Difficulté d'accès
+                                    </span>
+                                    <span className="font-medium capitalize">{mission.accessDifficulty}</span>
+                                </div>
+                            )}
 
-                {/* Adresse */}
-                <div className="bg-white rounded-xl border border-gray-200 p-5">
-                    <div className="flex items-center gap-2 mb-4">
-                        <MapPin className="w-5 h-5 text-gray-400" />
-                        <h2 className="font-semibold text-gray-900">Adresse d'intervention</h2>
-                    </div>
-                    <div className="space-y-2">
-                        <p className="font-medium text-gray-900">{mission.addressStreet}</p>
-                        {mission.addressComplement && (
-                            <p className="text-muted-foreground">{mission.addressComplement}</p>
+                            {mission.situationDetails && (
+                                <div className="py-2">
+                                    <span className="text-muted-foreground block mb-2">Description du problème</span>
+                                    <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
+                                        {mission.situationDetails}
+                                    </p>
+                                </div>
+                            )}
+
+                            {mission.additionalNotes && (
+                                <div className="py-2">
+                                    <span className="text-muted-foreground block mb-2">Notes supplémentaires</span>
+                                    <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
+                                        {mission.additionalNotes}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        {mission.assignedAt && (
+                            <div className="mt-4 pt-4 border-t border-gray-100 text-center text-sm text-muted-foreground">
+                                <p>Mission acceptée le {new Date(mission.assignedAt).toLocaleDateString("fr-FR", {
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                })}</p>
+                            </div>
                         )}
-                        <p className="text-gray-900">
-                            {mission.addressPostalCode} {mission.addressCity}
-                        </p>
                     </div>
-                    {mission.addressInstructions && (
-                        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                            <div className="flex items-start gap-2">
-                                <MessageSquare className="w-4 h-4 text-amber-600 mt-0.5" />
-                                <div>
-                                    <p className="text-sm font-medium text-amber-900">Instructions d'accès</p>
-                                    <p className="text-sm text-amber-800 mt-1">{mission.addressInstructions}</p>
+
+                    {/* Prix estimé (pour RDV) */}
+                    {isRdv && (mission.estimatedPriceMin || mission.estimatedPriceMax) && (
+                        <div className="bg-white rounded-xl border border-gray-200 p-5">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Euro className="w-5 h-5 text-gray-400" />
+                                <h2 className="font-semibold text-gray-900">Estimation tarifaire</h2>
+                            </div>
+                            <div className="flex items-center justify-center py-4">
+                                <div className="text-center">
+                                    <p className="text-3xl font-bold text-gray-900">
+                                        {mission.estimatedPriceMin === mission.estimatedPriceMax
+                                            ? `${mission.estimatedPriceMin}€`
+                                            : `${mission.estimatedPriceMin}€ - ${mission.estimatedPriceMax}€`
+                                        }
+                                    </p>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        Estimation communiquée au client
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     )}
-                    <div className="mt-4 pt-4 border-t border-gray-100">
-                        <Button variant="outline" asChild className="w-full">
-                            <a
-                                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-                                    `${mission.addressStreet}, ${mission.addressPostalCode} ${mission.addressCity}`
-                                )}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <Navigation className="w-4 h-4 mr-2" />
-                                Ouvrir dans Google Maps
-                            </a>
-                        </Button>
-                    </div>
+
+                    {/* Photos */}
+                    {mission.photos.length > 0 && (
+                        <div className="bg-white rounded-xl border border-gray-200 p-5">
+                            <div className="flex items-center gap-2 mb-4">
+                                <ImageIcon className="w-5 h-5 text-gray-400" />
+                                <h2 className="font-semibold text-gray-900">Photos ({mission.photos.length})</h2>
+                            </div>
+                            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                {mission.photos.map((photo) => (
+                                    <a
+                                        key={photo.id}
+                                        href={photo.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity"
+                                    >
+                                        <img
+                                            src={photo.url}
+                                            alt={photo.description || "Photo intervention"}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+
                 </div>
-
-                {/* Diagnostic */}
-                <div className="bg-white rounded-xl border border-gray-200 p-5">
-                    <div className="flex items-center gap-2 mb-4">
-                        <FileText className="w-5 h-5 text-gray-400" />
-                        <h2 className="font-semibold text-gray-900">Détails de l'intervention</h2>
-                    </div>
-                    <div className="grid gap-3">
-                        <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                            <span className="flex items-center gap-2 text-muted-foreground">
-                                <SituationIcon className="w-4 h-4" />
-                                Type
-                            </span>
-                            <span className={`px-2 py-1 text-sm font-medium rounded ${situationColor}`}>
-                                {situationLabel}
-                            </span>
-                        </div>
-
-                        {mission.doorType && (
-                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                <span className="flex items-center gap-2 text-muted-foreground">
-                                    <DoorClosed className="w-4 h-4" />
-                                    Type de porte
-                                </span>
-                                <span className="font-medium capitalize">{mission.doorType.replace(/_/g, " ")}</span>
-                            </div>
-                        )}
-
-                        {mission.lockType && (
-                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                <span className="flex items-center gap-2 text-muted-foreground">
-                                    <Lock className="w-4 h-4" />
-                                    Type de serrure
-                                </span>
-                                <span className="font-medium capitalize">{mission.lockType.replace(/_/g, " ")}</span>
-                            </div>
-                        )}
-
-                        {mission.propertyType && (
-                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                <span className="flex items-center gap-2 text-muted-foreground">
-                                    <Building2 className="w-4 h-4" />
-                                    Type de bien
-                                </span>
-                                <span className="font-medium capitalize">{mission.propertyType.replace(/_/g, " ")}</span>
-                            </div>
-                        )}
-
-                        {mission.floorNumber !== undefined && (
-                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                <span className="flex items-center gap-2 text-muted-foreground">
-                                    <Layers className="w-4 h-4" />
-                                    Étage
-                                </span>
-                                <span className="font-medium">
-                                    {mission.floorNumber === 0 ? "RDC" : `${mission.floorNumber}ème`}
-                                    {mission.hasElevator !== undefined && (
-                                        <span className="text-muted-foreground ml-2">
-                                            {mission.hasElevator ? "(avec ascenseur)" : "(sans ascenseur)"}
-                                        </span>
-                                    )}
-                                </span>
-                            </div>
-                        )}
-
-                        {mission.accessDifficulty && (
-                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                <span className="flex items-center gap-2 text-muted-foreground">
-                                    <AlertTriangle className="w-4 h-4" />
-                                    Difficulté d'accès
-                                </span>
-                                <span className="font-medium capitalize">{mission.accessDifficulty}</span>
-                            </div>
-                        )}
-
-                        {mission.situationDetails && (
-                            <div className="py-2">
-                                <span className="text-muted-foreground block mb-2">Description du problème</span>
-                                <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
-                                    {mission.situationDetails}
-                                </p>
-                            </div>
-                        )}
-
-                        {mission.additionalNotes && (
-                            <div className="py-2">
-                                <span className="text-muted-foreground block mb-2">Notes supplémentaires</span>
-                                <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
-                                    {mission.additionalNotes}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Prix estimé (pour RDV) */}
-                {isRdv && (mission.estimatedPriceMin || mission.estimatedPriceMax) && (
-                    <div className="bg-white rounded-xl border border-gray-200 p-5">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Euro className="w-5 h-5 text-gray-400" />
-                            <h2 className="font-semibold text-gray-900">Estimation tarifaire</h2>
-                        </div>
-                        <div className="flex items-center justify-center py-4">
-                            <div className="text-center">
-                                <p className="text-3xl font-bold text-gray-900">
-                                    {mission.estimatedPriceMin === mission.estimatedPriceMax
-                                        ? `${mission.estimatedPriceMin}€`
-                                        : `${mission.estimatedPriceMin}€ - ${mission.estimatedPriceMax}€`
-                                    }
-                                </p>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                    Estimation communiquée au client
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Photos */}
-                {mission.photos.length > 0 && (
-                    <div className="bg-white rounded-xl border border-gray-200 p-5">
-                        <div className="flex items-center gap-2 mb-4">
-                            <ImageIcon className="w-5 h-5 text-gray-400" />
-                            <h2 className="font-semibold text-gray-900">Photos ({mission.photos.length})</h2>
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            {mission.photos.map((photo) => (
-                                <a
-                                    key={photo.id}
-                                    href={photo.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity"
-                                >
-                                    <img
-                                        src={photo.url}
-                                        alt={photo.description || "Photo intervention"}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </a>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Actions */}
-                <MissionActions
-                    interventionId={mission.id}
-                    trackingNumber={mission.trackingNumber}
-                    status={mission.status}
-                />
-
-                {/* Informations */}
-                {mission.assignedAt && (
-                    <div className="text-center text-sm text-muted-foreground">
-                        <p>Mission acceptée le {new Date(mission.assignedAt).toLocaleDateString("fr-FR", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        })}</p>
-                    </div>
-                )}
             </div>
 
-            {/* Chat Drawer flottant - visible pour toutes les missions acceptées */}
-            {["assigned", "accepted", "en_route", "arrived", "diagnosing", "quote_sent", "quote_accepted", "in_progress"].includes(mission.status) && (
-                <ChatDrawerWrapper
-                    interventionId={mission.id}
-                    currentUserId={user.id}
-                />
-            )}
+
         </div>
     )
 }
