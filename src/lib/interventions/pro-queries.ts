@@ -441,6 +441,7 @@ export interface ActiveMission {
     status: string
     acceptedAt: string
     completedAt?: string
+    firstPhotoUrl?: string
 }
 
 /**
@@ -475,6 +476,9 @@ export async function getActiveArtisanMissions(): Promise<ActiveMission[]> {
                     status,
                     intervention_diagnostics (
                         situation_type
+                    ),
+                    intervention_photos (
+                        storage_path
                     )
                 )
             `)
@@ -488,9 +492,41 @@ export async function getActiveArtisanMissions(): Promise<ActiveMission[]> {
             return []
         }
 
+        // Récupérer les URLs signées pour toutes les photos trouvées
+        const photosToSign: { index: number, path: string }[] = []
+
+        const missionsWithPhotos = assignments
+            .filter((a) => a.intervention_requests)
+            .map((assignment, index) => {
+                const intervention = assignment.intervention_requests as any
+                const photos = intervention.intervention_photos as { storage_path: string }[]
+
+                if (photos && photos.length > 0) {
+                    photosToSign.push({ index, path: photos[0].storage_path })
+                }
+
+                return { ...assignment, originalIndex: index }
+            })
+
+        let signedUrlsMap: Record<number, string> = {}
+
+        if (photosToSign.length > 0) {
+            const { data: signedUrls } = await adminClient.storage
+                .from(STORAGE_CONFIG.bucket)
+                .createSignedUrls(photosToSign.map(p => p.path), STORAGE_CONFIG.signedUrlExpiry)
+
+            if (signedUrls) {
+                photosToSign.forEach((item, i) => {
+                    if (signedUrls[i]?.signedUrl) {
+                        signedUrlsMap[item.index] = signedUrls[i].signedUrl
+                    }
+                })
+            }
+        }
+
         return assignments
             .filter((a) => a.intervention_requests)
-            .map((assignment) => {
+            .map((assignment, index) => {
                 const intervention = assignment.intervention_requests as unknown as {
                     id: string
                     tracking_number: string
@@ -519,6 +555,7 @@ export async function getActiveArtisanMissions(): Promise<ActiveMission[]> {
                     situationType: diagnostic?.situation_type || "other",
                     status: intervention.status,
                     acceptedAt: assignment.responded_at,
+                    firstPhotoUrl: signedUrlsMap[index]
                 }
             })
     } catch (error) {
@@ -566,6 +603,9 @@ export async function getAllArtisanMissions(filter: MissionFilter = "all"): Prom
                     completed_at,
                     intervention_diagnostics (
                         situation_type
+                    ),
+                    intervention_photos (
+                        storage_path
                     )
                 )
             `)
@@ -586,9 +626,39 @@ export async function getAllArtisanMissions(filter: MissionFilter = "all"): Prom
         // Statuts annulés
         const cancelledStatuses = ["cancelled"]
 
-        return assignments
-            .filter((a) => a.intervention_requests)
-            .map((assignment) => {
+        // Filtrer d'abord pour avoir un index cohérent
+        const validAssignments = assignments.filter((a) => a.intervention_requests)
+
+        // Récupérer les URLs signées pour toutes les photos trouvées
+        const photosToSign: { index: number, path: string }[] = []
+
+        validAssignments.forEach((assignment, index) => {
+            const intervention = assignment.intervention_requests as any
+            const photos = intervention.intervention_photos as { storage_path: string }[]
+
+            if (photos && photos.length > 0) {
+                photosToSign.push({ index, path: photos[0].storage_path })
+            }
+        })
+
+        let signedUrlsMap: Record<number, string> = {}
+
+        if (photosToSign.length > 0) {
+            const { data: signedUrls } = await adminClient.storage
+                .from(STORAGE_CONFIG.bucket)
+                .createSignedUrls(photosToSign.map(p => p.path), STORAGE_CONFIG.signedUrlExpiry)
+
+            if (signedUrls) {
+                photosToSign.forEach((item, i) => {
+                    if (signedUrls[i]?.signedUrl) {
+                        signedUrlsMap[item.index] = signedUrls[i].signedUrl
+                    }
+                })
+            }
+        }
+
+        return validAssignments
+            .map((assignment, index) => {
                 const intervention = assignment.intervention_requests as unknown as {
                     id: string
                     tracking_number: string
@@ -619,6 +689,7 @@ export async function getAllArtisanMissions(filter: MissionFilter = "all"): Prom
                     status: intervention.status,
                     acceptedAt: assignment.responded_at,
                     completedAt: intervention.completed_at,
+                    firstPhotoUrl: signedUrlsMap[index]
                 }
             })
             .filter((mission) => {

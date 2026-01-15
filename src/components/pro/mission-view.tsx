@@ -102,7 +102,7 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
         <div className="min-h-screen bg-secondary/30 pb-20">
             {/* Header Sticky */}
             <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+                <div className="w-full px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         {/* Pro Logo */}
                         <Link
@@ -144,23 +144,13 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        {canChat && (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setIsChatOpen(true)}
-                                className="hidden sm:flex rounded-full px-4 h-9 active:scale-95 transition-all"
-                            >
-                                <MessageSquare className="w-4 h-4 mr-2" />
-                                Message client
-                            </Button>
-                        )}
+
                         <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${statusInfo.bgColor} ${statusInfo.color} sm:hidden`}>
                             {statusInfo.label}
                         </span>
                     </div>
                 </div>
-            </header>
+            </header >
 
             <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
@@ -523,15 +513,17 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
             </main>
 
             {/* Chat Modal */}
-            {canChat && (
-                <ClientChatWrapper
-                    interventionId={mission.id}
-                    currentUserId={currentUserId}
-                    isOpen={isChatOpen}
-                    onOpenChange={setIsChatOpen}
-                />
-            )}
-        </div>
+            {
+                canChat && (
+                    <ClientChatWrapper
+                        interventionId={mission.id}
+                        currentUserId={currentUserId}
+                        isOpen={isChatOpen}
+                        onOpenChange={setIsChatOpen}
+                    />
+                )
+            }
+        </div >
     )
 }
 

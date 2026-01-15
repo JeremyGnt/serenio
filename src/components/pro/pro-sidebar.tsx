@@ -245,7 +245,7 @@ export function ProSidebar({
                             available ? "border-emerald-500" : "border-gray-300"
                         )}>
                             {avatarUrl ? (
-                                <img src={avatarUrl} alt={firstName} className="w-full h-full object-cover" />
+                                <img src={avatarUrl} alt={firstName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                             ) : (
                                 <div className="w-full h-full bg-white flex items-center justify-center text-gray-500 font-bold">
                                     {firstName.charAt(0).toUpperCase()}

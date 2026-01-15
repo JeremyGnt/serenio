@@ -115,6 +115,7 @@ export function AvatarUpload({ currentAvatarUrl, initials }: AvatarUploadProps) 
                                 className="h-full w-full object-cover"
                                 // Add a timestamp or something to force reload if needed, though URL usually changes
                                 key={currentAvatarUrl}
+                                referrerPolicy="no-referrer"
                             />
                         ) : (
                             <span>{initials}</span>

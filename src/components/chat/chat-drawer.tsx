@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { MessageCircle, X } from "lucide-react"
+import { MessageSquare, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ChatBox } from "./chat-box"
 import { cn } from "@/lib/utils"
@@ -40,11 +40,11 @@ export function ChatDrawer({ conversationData, currentUserId, unreadCount = 0, i
                     "bottom-20 right-4",
                     // Desktop: position standard
                     "lg:bottom-6 lg:right-6",
-                    "bg-emerald-600 hover:bg-emerald-700",
+                    "bg-indigo-500 hover:bg-indigo-600",
                     isOpen && "hidden"
                 )}
             >
-                <MessageCircle className="w-10 h-10" />
+                <MessageSquare className="w-10 h-10" />
                 {localUnreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold ring-2 ring-white">
                         {localUnreadCount > 9 ? "9+" : localUnreadCount}
@@ -72,8 +72,8 @@ export function ChatDrawer({ conversationData, currentUserId, unreadCount = 0, i
                 {/* Header du drawer */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
                     <div className="flex items-center gap-2">
-                        <div className="bg-emerald-100 p-2 rounded-full">
-                            <MessageCircle className="w-5 h-5 text-emerald-600" />
+                        <div className="bg-indigo-100 p-2 rounded-full">
+                            <MessageSquare className="w-5 h-5 text-indigo-600" />
                         </div>
                         <div>
                             <span className="font-semibold text-gray-900 block">Messagerie</span>

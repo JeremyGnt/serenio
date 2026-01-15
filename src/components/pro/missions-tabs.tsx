@@ -268,19 +268,29 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
             <div className="flex flex-col sm:flex-row gap-4">
                 {/* Header (Icon + Title) - Mobile First: Top row */}
                 <div className="flex items-start gap-4 flex-1 min-w-0">
-                    {/* Icône */}
+                    {/* Icône ou Photo */}
                     <div className={cn(
-                        "w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0",
-                        isCancelled && "bg-red-100",
-                        isCompleted && "bg-emerald-100",
-                        !isCancelled && !isCompleted && "bg-gray-100"
+                        "w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative",
+                        isCancelled && !mission.firstPhotoUrl && "bg-red-100",
+                        isCompleted && !mission.firstPhotoUrl && "bg-emerald-100",
+                        !isCancelled && !isCompleted && !mission.firstPhotoUrl && "bg-gray-100",
+                        mission.firstPhotoUrl && "bg-gray-100 border border-gray-100"
                     )}>
-                        <SituationIcon className={cn(
-                            "w-6 h-6",
-                            isCancelled && "text-red-500",
-                            isCompleted && "text-emerald-500",
-                            !isCancelled && !isCompleted && "text-gray-600"
-                        )} />
+                        {mission.firstPhotoUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                                src={mission.firstPhotoUrl}
+                                alt="Mission"
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <SituationIcon className={cn(
+                                "w-6 h-6",
+                                isCancelled && "text-red-500",
+                                isCompleted && "text-emerald-500",
+                                !isCancelled && !isCompleted && "text-gray-600"
+                            )} />
+                        )}
                     </div>
 
                     {/* Contenu principal */}
@@ -336,12 +346,7 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
                                 <span className="sm:hidden lg:inline">ANNULÉE</span>
                             </div>
                         )}
-                        {isCompleted && (
-                            <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-500 text-white text-xs font-bold rounded-full shadow-sm">
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                <span className="sm:hidden lg:inline">TERMINÉE</span>
-                            </div>
-                        )}
+
 
                         {/* Badge nouveaux messages */}
                         {!isCancelled && !isCompleted && unreadCount > 0 && (

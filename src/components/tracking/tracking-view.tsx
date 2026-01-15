@@ -26,7 +26,7 @@ import {
     Wifi,
     WifiOff,
     Camera,
-    MessageCircle,
+    MessageSquare,
     Contact
 } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
@@ -402,10 +402,10 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                                             </a>
                                         </Button>
                                         <Button
-                                            className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto"
+                                            className="bg-indigo-500 hover:bg-indigo-600 w-full sm:w-auto"
                                             onClick={() => setIsChatOpen(true)}
                                         >
-                                            <MessageCircle className="w-4 h-4 mr-2" />
+                                            <MessageSquare className="w-4 h-4 mr-2" />
                                             Message
                                         </Button>
                                     </div>

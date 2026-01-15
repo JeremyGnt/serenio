@@ -208,16 +208,7 @@ export function StepDiagnostic({
         </div>
       ))}
 
-      {/* Champ optionnel pour détails supplémentaires */}
-      <div className="space-y-2">
-        <Label htmlFor="details">Informations complémentaires (optionnel)</Label>
-        <Input
-          id="details"
-          value={situationDetails}
-          onChange={(e) => onUpdate({ situationDetails: e.target.value })}
-          placeholder="Ex: Digicode, étage, accès..."
-        />
-      </div>
+      {/* Champ optionnel pour détails supplémentaires - REMOVED */}
     </div>
   )
 }

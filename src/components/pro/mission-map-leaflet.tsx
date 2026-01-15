@@ -54,7 +54,6 @@ export function MissionMapLeaflet({ latitude, longitude, className }: MissionMap
     return (
         <div className={className}>
             <MapContainer
-                key={`leaflet-${latitude.toFixed(4)}-${longitude.toFixed(4)}`}
                 center={center}
                 zoom={14}
                 scrollWheelZoom={false}

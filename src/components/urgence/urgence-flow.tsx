@@ -652,11 +652,12 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
                     )}
 
                     {/* Micro-texte d'aide quand désactivé */}
-                    {!isStepValid() && currentStepId === "situation" && (
+                    {/* Micro-texte d'aide quand désactivé - REMOVED */}
+                    {/* {!isStepValid() && currentStepId === "situation" && (
                         <p className="text-[11px] text-gray-400 font-medium animate-in fade-in slide-in-from-bottom-1">
                             Sélectionnez votre situation pour continuer
                         </p>
-                    )}
+                    )} */}
                 </div>
             </footer>
             <ScrollToTop />
