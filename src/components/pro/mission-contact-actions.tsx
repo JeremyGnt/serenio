@@ -18,7 +18,7 @@ export function MissionContactActions({ clientPhone, interventionId, currentUser
     return (
         <>
             <div className={`mt-4 pt-4 border-t border-gray-100 grid ${isChatEnabled ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
-                <Button className="w-full bg-emerald-600 hover:bg-emerald-700" asChild>
+                <Button className="w-full border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700" variant="outline" asChild>
                     <a href={`tel:${clientPhone}`}>
                         <Phone className="w-4 h-4 mr-2" />
                         Appeler
@@ -27,8 +27,7 @@ export function MissionContactActions({ clientPhone, interventionId, currentUser
 
                 {isChatEnabled && (
                     <Button
-                        variant="outline"
-                        className="w-full border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                        className="w-full bg-emerald-600 hover:bg-emerald-700"
                         onClick={() => setIsChatOpen(true)}
                     >
                         <MessageCircle className="w-4 h-4 mr-2" />

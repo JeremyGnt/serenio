@@ -191,6 +191,11 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
     useEffect(() => {
         if (isSnapshot) return // Ne pas se connecter si c'est un snapshot
 
+        // Fallback: Polling toutes les 10 secondes pour garantir la mise à jour
+        const pollInterval = setInterval(() => {
+            router.refresh()
+        }, 10000)
+
         const channel = supabase
             .channel(`tracking:${intervention.id}`)
             .on(
@@ -204,13 +209,9 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                 (payload: RealtimePostgresChangesPayload<InterventionPayload>) => {
                     const updated = payload.new as InterventionPayload
 
-                    // Si le statut ou l'artisan change, on rafraîchit
-                    if (
-                        updated.status !== intervention.status ||
-                        updated.artisan_id !== (artisan?.id || null)
-                    ) {
-                        handleRefresh()
-                    }
+                    // On rafraîchit quoi qu'il arrive si le statut change
+                    // On compare avec la ref actuelle ou on trigger juste le refresh
+                    handleRefresh()
                 }
             )
             .on(
@@ -233,11 +234,12 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
         channelRef.current = channel
 
         return () => {
+            clearInterval(pollInterval)
             if (channelRef.current) {
                 supabase.removeChannel(channelRef.current)
             }
         }
-    }, [intervention.id, intervention.status, artisan?.id, handleRefresh, isSnapshot])
+    }, [intervention.id, handleRefresh, isSnapshot])
 
     // Nettoyer le tracking actif si l'intervention est terminée
     useEffect(() => {
@@ -393,15 +395,14 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                                         )}
                                     </div>
                                     <div className="flex flex-col gap-2">
-                                        <Button asChild className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto">
+                                        <Button asChild variant="outline" className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 w-full sm:w-auto">
                                             <a href={`tel:${artisan.phone}`}>
                                                 <Phone className="w-4 h-4 mr-2" />
                                                 Appeler
                                             </a>
                                         </Button>
                                         <Button
-                                            variant="outline"
-                                            className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 w-full sm:w-auto"
+                                            className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto"
                                             onClick={() => setIsChatOpen(true)}
                                         >
                                             <MessageCircle className="w-4 h-4 mr-2" />

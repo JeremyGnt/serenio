@@ -75,6 +75,7 @@ export default async function ProLayout({
                 companyName={artisan?.company_name}
                 addressCity={artisan?.city}
                 interventionRadius={artisan?.availability_radius_km}
+                activeMissionsCount={stats.activeMissionsCount}
             />
 
             {/* Main content - offset for sidebar */}

@@ -118,6 +118,7 @@ export function UserRequestsList({ requests, userId }: UserRequestsListProps) {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
     const [deleteError, setDeleteError] = useState<string | null>(null)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [isChatOpen, setIsChatOpen] = useState(false)
 
     const filteredRequests = requests.filter(req => {
         if (filter === "active") {
@@ -393,14 +394,21 @@ export function UserRequestsList({ requests, userId }: UserRequestsListProps) {
             </AlertDialog>
 
             {/* Chat Drawer pour l'intervention active la plus récente */}
-            {
-                requests.find(r => !["completed", "cancelled", "draft", "quote_refused"].includes(r.status)) && (
+            {/* Chat Drawer pour l'intervention active la plus récente */}
+            {(() => {
+                const activeRequest = requests.find(r => !["completed", "cancelled", "draft", "quote_refused"].includes(r.status))
+
+                if (!activeRequest) return null
+
+                return (
                     <ClientChatWrapper
-                        interventionId={requests.find(r => !["completed", "cancelled", "draft", "quote_refused"].includes(r.status))!.id}
+                        interventionId={activeRequest.id}
                         currentUserId={userId}
+                        isOpen={isChatOpen}
+                        onOpenChange={setIsChatOpen}
                     />
                 )
-            }
+            })()}
         </>
     )
 }

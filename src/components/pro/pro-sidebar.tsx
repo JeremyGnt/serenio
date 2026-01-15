@@ -16,6 +16,7 @@ import {
     MapPin,
     Building2,
     Store,
+    Activity,
 } from "lucide-react"
 
 // ... (existing code)
@@ -67,6 +68,7 @@ interface ProSidebarProps {
     companyName?: string
     addressCity?: string
     interventionRadius?: number
+    activeMissionsCount?: number
 }
 
 export function ProSidebar({
@@ -79,7 +81,8 @@ export function ProSidebar({
     avatarUrl,
     companyName,
     addressCity,
-    interventionRadius
+    interventionRadius,
+    activeMissionsCount = 0,
 }: ProSidebarProps) {
     const pathname = usePathname()
     const router = useRouter()
@@ -87,6 +90,7 @@ export function ProSidebar({
     const [unreadCount, setUnreadCount] = useState(totalUnreadMessages)
     const [urgentCountState, setUrgentCountState] = useState(urgentCount)
     const [opportunitiesCountState, setOpportunitiesCountState] = useState(opportunitiesCount)
+    const [activeMissionsCountState, setActiveMissionsCountState] = useState(activeMissionsCount)
     const [available, setAvailable] = useState(isAvailable)
     const [isUpdating, setIsUpdating] = useState(false)
 
@@ -125,6 +129,10 @@ export function ProSidebar({
     useEffect(() => {
         setOpportunitiesCountState(opportunitiesCount)
     }, [opportunitiesCount])
+
+    useEffect(() => {
+        setActiveMissionsCountState(activeMissionsCount)
+    }, [activeMissionsCount])
 
     // Realtime subscriptions (chat & interventions)
     useEffect(() => {
@@ -365,11 +373,17 @@ export function ProSidebar({
                                                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 active:bg-gray-100 font-medium"
                                             )}
                                         >
-                                            <div className="w-8 flex justify-center shrink-0">
+                                            <div className="w-8 flex justify-center shrink-0 relative">
                                                 <Icon className={cn(
                                                     "w-5 h-5 transition-colors",
                                                     isActive ? "text-gray-900" : "text-gray-400 group-hover:text-gray-600"
                                                 )} />
+                                                {isMissions && activeMissionsCountState > 0 && (
+                                                    <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                                                    </span>
+                                                )}
                                             </div>
                                             <span className="flex-1 text-sm">{item.label}</span>
 
@@ -453,6 +467,12 @@ export function ProSidebar({
                             )}
                         </div>
                         <span className="text-[10px] font-medium">Missions</span>
+                        {activeMissionsCountState > 0 && (
+                            <span className="absolute top-2 right-1/4 flex h-1.5 w-1.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-yellow-500"></span>
+                            </span>
+                        )}
                     </Link>
 
                     {/* Planning */}

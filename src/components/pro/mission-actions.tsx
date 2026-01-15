@@ -123,62 +123,56 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
     }
 
     return (
-        <>
-            <div className="bg-white rounded-xl border border-gray-200 p-5">
-                <h2 className="font-semibold text-gray-900 mb-4">Actions</h2>
+        <div className="space-y-4">
+            {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                    {error}
+                </div>
+            )}
 
-                {error && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                        {error}
-                    </div>
+            {/* Current Status Indicator */}
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100/50">
+                <div className="flex items-center justify-between gap-2 text-sm">
+                    <span className="font-medium text-gray-500">Statut actuel</span>
+                    <StatusBadge status={status} />
+                </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+                {/* Démarrer Button */}
+                {!["in_progress", "completed", "cancelled"].includes(status) && (
+                    <Button
+                        size="lg"
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-base h-14 rounded-2xl shadow-lg shadow-emerald-100 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-emerald-800 active:duration-75 group"
+                        onClick={handleStartIntervention}
+                        disabled={isPending}
+                    >
+                        {isPending ? (
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        ) : (
+                            <Play className="w-5 h-5 mr-3 fill-white group-hover:scale-110 transition-transform" />
+                        )}
+                        <span className="font-bold">Démarrer l'intervention</span>
+                    </Button>
                 )}
 
-                {/* Indicateur de statut actuel */}
-                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-2 text-sm">
-                        <span className="text-muted-foreground">Statut actuel:</span>
-                        <StatusBadge status={status} />
-                    </div>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                    {/* Bouton Démarrer (Visible tant que pas terminé/annulé et pas en cours) */}
-                    {!["in_progress", "completed", "cancelled"].includes(status) && (
-                        <Button
-                            size="lg"
-                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-lg h-14 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-emerald-800 active:duration-75"
-                            onClick={handleStartIntervention}
-                            disabled={isPending}
-                        >
-                            {isPending ? (
-                                <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                            ) : (
-                                <Play className="w-5 h-5 mr-3" />
-                            )}
-                            Démarrer l'intervention
-                        </Button>
-                    )}
-
-                    {/* Bouton Terminer (Visible si en cours, ou plus avancé type valider devis etc, mais simplifié ici pour "en cours") */}
-                    {["in_progress", "diagnosing", "quote_sent", "quote_accepted"].includes(status) && (
-                        <Button
-                            size="lg"
-                            variant="outline"
-                            className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 text-lg h-14 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-emerald-100 active:duration-75"
-                            onClick={() => setShowCompleteDialog(true)}
-                            disabled={isPending}
-                        >
-                            {isPending ? (
-                                <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                            ) : (
-                                <CheckCircle2 className="w-5 h-5 mr-3" />
-                            )}
-                            Terminer la mission
-                        </Button>
-                    )}
-                </div>
-
-
+                {/* Terminer Button */}
+                {["in_progress", "diagnosing", "quote_sent", "quote_accepted"].includes(status) && (
+                    <Button
+                        size="lg"
+                        variant="outline"
+                        className="w-full border-2 border-emerald-600/20 text-emerald-600 hover:bg-emerald-50 text-base h-14 rounded-2xl transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-emerald-100 active:duration-75"
+                        onClick={() => setShowCompleteDialog(true)}
+                        disabled={isPending}
+                    >
+                        {isPending ? (
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        ) : (
+                            <CheckCircle2 className="w-5 h-5 mr-2" />
+                        )}
+                        <span className="font-bold">Terminer la mission</span>
+                    </Button>
+                )}
             </div>
 
             {/* Dialog de confirmation pour terminer */}
@@ -207,7 +201,7 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-        </>
+        </div>
     )
 }
 

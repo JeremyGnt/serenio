@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Calendar, MapPin, Clock, Shield, CheckCircle, Loader2, ArrowRight, Truck } from "lucide-react"
+import { Calendar, MapPin, Clock, Shield, CheckCircle, Loader2, ArrowRight, Truck, Wrench, FileText } from "lucide-react"
 import { UrgenceButton } from "./urgence-button"
 import { getActiveTracking, clearActiveTracking, setActiveTracking } from "@/lib/active-tracking"
 import { getLiveTrackingData } from "@/lib/interventions/queries"
@@ -155,55 +155,117 @@ export function Hero({ isLoggedIn }: HeroProps) {
       )}>
         <div className="max-w-4xl mx-auto">
           {/* Active Tracking Banner - Affiché si une demande est en cours */}
-          {activeTrackingNumber && (
-            <div className={cn(
-              "mb-6 p-4 bg-white rounded-2xl border shadow-lg animate-in fade-in slide-in-from-top-4 duration-500",
-              hasArtisan
-                ? "border-emerald-200 shadow-emerald-100/50"
-                : "border-amber-200 shadow-amber-100/50"
-            )}>
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <div className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 relative transition-colors duration-500",
-                    hasArtisan ? "bg-emerald-100" : "bg-amber-100"
-                  )}>
-                    {hasArtisan ? (
-                      <Truck className="w-5 h-5 text-emerald-600 animate-bounce" style={{ animationDuration: '3s' }} />
-                    ) : (
-                      <Loader2 className="w-5 h-5 text-amber-600 animate-spin" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className={cn(
-                      "font-semibold transition-colors duration-500",
-                      hasArtisan ? "text-emerald-900" : "text-gray-900"
+          {activeTrackingNumber && (() => {
+            const statusFn = (status: string = "") => {
+              const base = {
+                title: "Recherche en cours",
+                icon: Loader2,
+                iconBg: "bg-amber-100",
+                textColor: "text-amber-900",
+                borderColor: "border-amber-200",
+                shadowColor: "shadow-amber-100/50",
+                btnBg: "bg-amber-500",
+                btnHoverBg: "hover:bg-amber-600",
+                iconColor: "text-amber-600",
+                animateIcon: true
+              }
+
+              switch (status) {
+                case "assigned":
+                case "accepted":
+                case "en_route":
+                case "arrived":
+                case "diagnosing":
+                case "quote_sent":
+                case "quote_accepted":
+                  return {
+                    ...base,
+                    title: "Serrurier trouvé !",
+                    icon: CheckCircle,
+                    iconBg: "bg-emerald-100",
+                    textColor: "text-emerald-900",
+                    borderColor: "border-emerald-200",
+                    shadowColor: "shadow-emerald-100/50",
+                    btnBg: "bg-emerald-600",
+                    btnHoverBg: "hover:bg-emerald-700",
+                    iconColor: "text-emerald-600",
+                    animateIcon: false
+                  }
+                case "in_progress":
+                  return {
+                    ...base,
+                    title: "Intervention en cours",
+                    icon: Wrench,
+                    iconBg: "bg-blue-100",
+                    textColor: "text-blue-900",
+                    borderColor: "border-blue-200",
+                    shadowColor: "shadow-blue-100/50",
+                    btnBg: "bg-blue-600",
+                    btnHoverBg: "hover:bg-blue-700",
+                    iconColor: "text-blue-600",
+                    animateIcon: true
+                  }
+                case "completed":
+                  return {
+                    ...base,
+                    title: "Intervention terminée",
+                    icon: CheckCircle,
+                    iconBg: "bg-emerald-100",
+                    textColor: "text-emerald-900",
+                    borderColor: "border-emerald-200",
+                    shadowColor: "shadow-emerald-100/50",
+                    btnBg: "bg-emerald-600",
+                    btnHoverBg: "hover:bg-emerald-700",
+                    iconColor: "text-emerald-600",
+                    animateIcon: false
+                  }
+                default:
+                  return base
+              }
+            }
+
+            const config = statusFn(intervention?.status)
+            const StatusIcon = config.icon
+
+            return (
+              <div className={cn(
+                "mb-6 p-4 bg-white rounded-2xl border shadow-lg animate-in fade-in slide-in-from-top-4 duration-500",
+                config.borderColor, config.shadowColor
+              )}>
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 relative transition-colors duration-500",
+                      config.iconBg
                     )}>
-                      {hasArtisan ? "Serrurier trouvé !" : "Recherche en cours"}
-                    </h3>
-                    <p className="text-sm text-gray-600">Demande #{activeTrackingNumber}</p>
+                      <StatusIcon className={cn("w-5 h-5", config.iconColor, config.animateIcon ? "animate-pulse" : "")} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className={cn("font-semibold transition-colors duration-500", config.textColor)}>
+                        {config.title}
+                      </h3>
+                      <p className="text-sm text-gray-600">Demande #{activeTrackingNumber}</p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex-1 hidden sm:block h-px bg-gray-100 mx-4" />
+                  <div className="flex-1 hidden sm:block h-px bg-gray-100 mx-4" />
 
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <Link
-                    href={`/suivi/${activeTrackingNumber}`}
-                    className={cn(
-                      "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 font-bold rounded-xl transition-all active:scale-[0.98] text-sm whitespace-nowrap shadow-sm",
-                      hasArtisan
-                        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                        : "bg-amber-500 hover:bg-amber-600 text-white"
-                    )}
-                  >
-                    Voir mon suivi
-                    <ArrowRight className="w-4 h-4 ml-1" />
-                  </Link>
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <Link
+                      href={`/suivi/${activeTrackingNumber}`}
+                      className={cn(
+                        "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 font-bold rounded-xl transition-all active:scale-[0.98] text-sm whitespace-nowrap shadow-sm text-white",
+                        config.btnBg, config.btnHoverBg
+                      )}
+                    >
+                      Voir mon suivi
+                      <ArrowRight className="w-4 h-4 ml-1" />
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
 
           {/* Titre principal */}
           <h1 className="text-center text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-4">

@@ -283,6 +283,7 @@ export interface ArtisanStats {
     opportunitiesCount: number
     monthlyInterventions: number
     monthlyRevenue: number
+    activeMissionsCount: number
 }
 
 export async function getArtisanStats(): Promise<ArtisanStats> {
@@ -292,7 +293,7 @@ export async function getArtisanStats(): Promise<ArtisanStats> {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-        return { pendingCount: 0, opportunitiesCount: 0, monthlyInterventions: 0, monthlyRevenue: 0 }
+        return { pendingCount: 0, opportunitiesCount: 0, monthlyInterventions: 0, monthlyRevenue: 0, activeMissionsCount: 0 }
     }
 
     try {
@@ -388,15 +389,38 @@ export async function getArtisanStats(): Promise<ArtisanStats> {
             .eq("status", "accepted")
             .gte("responded_at", startOfMonth.toISOString())
 
+        // Count active missions
+        const activeStatuses = ["assigned", "en_route", "arrived", "diagnosing", "in_progress"]
+        const { count: activeCount } = await adminClient
+            .from("artisan_assignments")
+            .select("id", { count: "exact", head: true })
+            .eq("artisan_id", user.id)
+            .eq("status", "accepted")
+            .in("intervention_requests.status", activeStatuses) // This might need a join or careful filtering if possible on joined column in count, but supabase count on joined tables is tricky with simple syntax.
+        // Better approach: fetch assignments and filter or rely on the previous logic.
+        // However, to keep it simple and correct without complex joins in count (which Supabase JS client supports but can be verbose), let's replicate the logic or use a known working query.
+        // Actually, we can use the `getActiveArtisanMissions` Logic or just query intervention_requests joined via assignments.
+
+        // Let's use a robust query for active missions count
+        const { data: activeAssignments } = await adminClient
+            .from("artisan_assignments")
+            .select(`
+                intervention_requests!inner(status)
+             `)
+            .eq("artisan_id", user.id)
+            .eq("status", "accepted")
+            .in("intervention_requests.status", activeStatuses)
+
         return {
             pendingCount: filteredCount,
             opportunitiesCount,
             monthlyInterventions: monthlyCount || 0,
             monthlyRevenue: 0, // TODO: calculer à partir des devis acceptés
+            activeMissionsCount: activeAssignments?.length || 0
         }
     } catch (error) {
         console.error("Erreur getArtisanStats:", error)
-        return { pendingCount: 0, opportunitiesCount: 0, monthlyInterventions: 0, monthlyRevenue: 0 }
+        return { pendingCount: 0, opportunitiesCount: 0, monthlyInterventions: 0, monthlyRevenue: 0, activeMissionsCount: 0 }
     }
 }
 

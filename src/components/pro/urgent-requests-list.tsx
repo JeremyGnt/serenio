@@ -284,35 +284,28 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
 
                 {!localIsAvailable ? (
                     /* Offline State */
-                    <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-gray-50/50 rounded-3xl border border-dashed border-gray-200">
+                    <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-gray-50/50 rounded-3xl border border-gray-100">
                         <div className="relative mb-6">
-                            <div className="absolute inset-0 bg-gray-200 rounded-full blur-xl opacity-50" />
-                            <div className="relative bg-white p-6 rounded-full shadow-sm border border-gray-100">
-                                <WifiOff className="w-10 h-10 text-gray-400" />
+                            <div className="absolute inset-0 bg-gray-300/30 rounded-full blur-xl" />
+                            <div className="relative bg-white p-6 rounded-full shadow-sm border border-gray-200">
+                                <WifiOff className="w-12 h-12 text-gray-400" />
                             </div>
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-2">
                             Vous êtes actuellement en pause
                         </h3>
-                        <p className="text-gray-500 max-w-md mx-auto mb-8">
+                        <p className="text-gray-500 max-w-md mx-auto">
                             Votre statut est défini sur "Indisponible". Vous ne recevrez aucune notification de nouvelle urgence tant que vous n'aurez pas repris l'activité.
                         </p>
-                        <Button
-                            onClick={() => handleAvailabilityToggle(true)}
-                            className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-8 h-12 shadow-lg hover:shadow-xl transition-all"
-                        >
-                            <Zap className="w-4 h-4 mr-2 fill-current" />
-                            Reprendre le service
-                        </Button>
                     </div>
                 ) : interventions.length === 0 ? (
                     /* Empty State - Scanning */
-                    <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-gradient-to-b from-white to-gray-50/50 rounded-3xl border border-gray-100 shadow-sm">
-                        <div className="relative mb-8">
+                    <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-gray-50/50 rounded-3xl border border-gray-100">
+                        <div className="relative mb-6">
                             {/* Scanning Animation */}
                             <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping opacity-75" />
-                            <div className="absolute inset-[-12px] bg-emerald-500/10 rounded-full animate-pulse" />
-                            <div className="relative bg-white p-6 rounded-full shadow-lg border border-emerald-100 z-10">
+                            <div className="absolute inset-[-8px] bg-emerald-500/10 rounded-full animate-pulse" />
+                            <div className="relative bg-white p-6 rounded-full shadow-sm border border-emerald-100 z-10">
                                 <Radar className="w-12 h-12 text-emerald-500" />
                             </div>
                         </div>
@@ -322,8 +315,6 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                         <p className="text-gray-500 max-w-md mx-auto">
                             Nous analysons les demandes dans votre secteur ({artisanSettings?.availabilityRadius || 30}km). Restez à l'écoute, les nouvelles urgences apparaîtront ici automatiquement.
                         </p>
-
-
                     </div>
                 ) : (
                     /* Intervention Cards Grid */
