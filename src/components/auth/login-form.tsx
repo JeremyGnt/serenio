@@ -13,10 +13,14 @@ import { login } from "@/lib/auth/actions"
 export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get("redirect") || "/"
+  const redirectParam = searchParams.get("redirect") || "/"
+  // Validate redirect is a safe relative path (prevents open redirect attacks)
+  const redirectTo = redirectParam.startsWith("/") && !redirectParam.startsWith("//")
+    ? redirectParam
+    : "/"
   const message = searchParams.get("message")
   const errorParam = searchParams.get("error")
-  
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState(errorParam === "callback" ? "Erreur lors de la connexion. Veuillez réessayer." : "")
@@ -29,7 +33,7 @@ export function LoginForm() {
 
     try {
       const result = await login({ email, password })
-      
+
       if (!result.success) {
         setError(result.error || "Une erreur est survenue")
         setLoading(false)

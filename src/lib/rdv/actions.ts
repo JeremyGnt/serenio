@@ -4,12 +4,12 @@ import { cookies } from "next/headers"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { createServerClient } from "@supabase/ssr"
-import type { 
-  RdvServiceTypeDisplay, 
-  AvailableSlotDisplay, 
+import type {
+  RdvServiceTypeDisplay,
+  AvailableSlotDisplay,
   DayAvailability,
   ArtisanForSelection,
-  RdvFormState 
+  RdvFormState
 } from "@/types/rdv"
 
 // ============================================
@@ -18,18 +18,18 @@ import type {
 
 export async function getRdvServiceTypes(): Promise<RdvServiceTypeDisplay[]> {
   const supabase = await createClient()
-  
+
   const { data, error } = await supabase
     .from("rdv_service_types")
     .select("*")
     .eq("is_active", true)
     .order("display_order", { ascending: true })
-  
+
   if (error) {
     console.error("Erreur getRdvServiceTypes:", error)
     return []
   }
-  
+
   return (data || []).map(row => ({
     id: row.id,
     code: row.code,
@@ -56,7 +56,7 @@ export async function getRdvServiceTypes(): Promise<RdvServiceTypeDisplay[]> {
 
 export async function getAvailableSlots(date: string): Promise<AvailableSlotDisplay[]> {
   const supabase = await createClient()
-  
+
   const { data, error } = await supabase
     .from("artisan_availability_slots")
     .select(`
@@ -70,15 +70,15 @@ export async function getAvailableSlots(date: string): Promise<AvailableSlotDisp
     .eq("is_available", true)
     .eq("is_booked", false)
     .order("start_time", { ascending: true })
-  
+
   if (error) {
     console.error("Erreur getAvailableSlots:", error)
     return []
   }
-  
+
   const totalSlots = data?.length || 0
   const isHighDemand = totalSlots < 5
-  
+
   return (data || []).map(row => {
     const artisan = row.artisans as unknown as { company_name: string } | null
     return {
@@ -98,7 +98,7 @@ export async function getAvailableSlots(date: string): Promise<AvailableSlotDisp
 
 export async function getAvailableArtisans(date?: string): Promise<ArtisanForSelection[]> {
   const supabase = await createClient()
-  
+
   const { data, error } = await supabase
     .from("artisans")
     .select("*")
@@ -106,12 +106,12 @@ export async function getAvailableArtisans(date?: string): Promise<ArtisanForSel
     .eq("is_verified", true)
     .order("rating", { ascending: false })
     .limit(10)
-  
+
   if (error) {
     console.error("Erreur getAvailableArtisans:", error)
     return []
   }
-  
+
   return (data || []).map(row => ({
     id: row.id,
     companyName: row.company_name,
@@ -134,7 +134,7 @@ export async function getAvailableArtisans(date?: string): Promise<ArtisanForSel
 function generateTrackingNumber(): string {
   const prefix = "RDV"
   const timestamp = Date.now().toString(36).toUpperCase()
-  const random = Math.random().toString(36).substring(2, 6).toUpperCase()
+  const random = crypto.randomUUID().substring(0, 4).toUpperCase()
   return `${prefix}-${timestamp}-${random}`
 }
 
@@ -146,9 +146,9 @@ export async function createRdvIntervention(formState: RdvFormState): Promise<{
 }> {
   // Utiliser le client admin pour bypasser les RLS
   const adminClient = createAdminClient()
-  
+
   const trackingNumber = generateTrackingNumber()
-  
+
   // Créer l'intervention
   const { data: intervention, error: interventionError } = await adminClient
     .from("intervention_requests")
@@ -156,13 +156,13 @@ export async function createRdvIntervention(formState: RdvFormState): Promise<{
       tracking_number: trackingNumber,
       intervention_type: "rdv",
       status: "pending",
-      
+
       // Client
       client_email: formState.clientEmail,
       client_phone: formState.clientPhone,
       client_first_name: formState.clientFirstName,
       client_last_name: formState.clientLastName,
-      
+
       // Adresse
       address_street: formState.addressStreet,
       address_postal_code: formState.addressPostalCode,
@@ -171,30 +171,30 @@ export async function createRdvIntervention(formState: RdvFormState): Promise<{
       address_instructions: formState.addressInstructions,
       latitude: formState.latitude,
       longitude: formState.longitude,
-      
+
       // RDV spécifique
       is_urgent: false,
       urgency_level: 1,
       scheduled_date: formState.selectedDate,
       scheduled_time_start: formState.selectedTimeStart,
       scheduled_time_end: formState.selectedTimeEnd,
-      
+
       rdv_service_type_id: formState.serviceTypeId,
       rdv_selected_artisan_id: formState.autoAssign ? null : formState.selectedArtisanId,
       rdv_auto_assign: formState.autoAssign,
       rdv_price_estimate_min_cents: formState.estimatedPriceMin ? formState.estimatedPriceMin * 100 : null,
       rdv_price_estimate_max_cents: formState.estimatedPriceMax ? formState.estimatedPriceMax * 100 : null,
-      
+
       submitted_at: new Date().toISOString(),
     })
     .select("id")
     .single()
-  
+
   if (interventionError || !intervention) {
     console.error("Erreur création intervention RDV:", interventionError)
     return { success: false, error: interventionError?.message || "Erreur lors de la création" }
   }
-  
+
   // Créer le diagnostic
   const { error: diagnosticError } = await adminClient
     .from("intervention_diagnostics")
@@ -213,11 +213,11 @@ export async function createRdvIntervention(formState: RdvFormState): Promise<{
       additional_notes: formState.diagnostic.additionalNotes,
       estimated_complexity: 2,
     })
-  
+
   if (diagnosticError) {
     console.error("Erreur création diagnostic RDV:", diagnosticError)
   }
-  
+
   // Si un créneau est sélectionné, le marquer comme réservé
   if (formState.selectedSlotId) {
     await adminClient
@@ -228,7 +228,7 @@ export async function createRdvIntervention(formState: RdvFormState): Promise<{
       })
       .eq("id", formState.selectedSlotId)
   }
-  
+
   return {
     success: true,
     interventionId: intervention.id,
@@ -242,7 +242,7 @@ export async function createRdvIntervention(formState: RdvFormState): Promise<{
 
 export async function getRdvByTracking(trackingNumber: string) {
   const adminClient = createAdminClient()
-  
+
   const { data, error } = await adminClient
     .from("intervention_requests")
     .select(`
@@ -273,26 +273,26 @@ export async function getRdvByTracking(trackingNumber: string) {
     .eq("tracking_number", trackingNumber)
     .eq("intervention_type", "rdv")
     .single()
-  
+
   if (error || !data) {
     console.error("Erreur getRdvByTracking:", error)
     return null
   }
-  
+
   // Récupérer l'artisan soit via rdv_selected_artisan_id, soit via artisan_assignments
   let assignedArtisan = data.artisans
-  
+
   if (!assignedArtisan && data.artisan_assignments?.length > 0) {
     // Trouver l'artisan qui a accepté ou le premier assigné
     const acceptedAssignment = data.artisan_assignments.find(
       (a: { status: string }) => a.status === "accepted"
     ) || data.artisan_assignments[0]
-    
+
     if (acceptedAssignment?.artisans) {
       assignedArtisan = acceptedAssignment.artisans
     }
   }
-  
+
   return {
     ...data,
     artisans: assignedArtisan
@@ -316,12 +316,12 @@ export async function createAccountAndSignIn(userData: {
 }): Promise<{ success: boolean; error?: string }> {
   const adminClient = createAdminClient()
   const cookieStore = await cookies()
-  
+
   try {
     // Vérifier si l'utilisateur existe déjà
     const { data: existingUsers } = await adminClient.auth.admin.listUsers()
     const existingUser = existingUsers?.users?.find(u => u.email === userData.email)
-    
+
     if (existingUser) {
       // L'utilisateur existe déjà, on le connecte directement avec un magic link token
       // Créer une session pour cet utilisateur
@@ -332,13 +332,13 @@ export async function createAccountAndSignIn(userData: {
           redirectTo: "/",
         }
       })
-      
+
       if (sessionError || !sessionData) {
         console.error("Erreur génération session:", sessionError)
         // Pas grave, l'utilisateur peut se connecter manuellement
         return { success: true }
       }
-      
+
       // Utiliser le token pour créer une session
       const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -360,22 +360,22 @@ export async function createAccountAndSignIn(userData: {
           },
         }
       )
-      
+
       // Vérifier le token OTP
       if (sessionData.properties?.hashed_token) {
         const { error: verifyError } = await supabase.auth.verifyOtp({
           token_hash: sessionData.properties.hashed_token,
           type: "magiclink",
         })
-        
+
         if (verifyError) {
           console.error("Erreur vérification OTP:", verifyError)
         }
       }
-      
+
       return { success: true }
     }
-    
+
     // Créer un nouvel utilisateur avec email confirmé directement
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email: userData.email,
@@ -388,12 +388,12 @@ export async function createAccountAndSignIn(userData: {
         phone: userData.phone,
       },
     })
-    
+
     if (createError || !newUser.user) {
       console.error("Erreur création utilisateur:", createError)
       return { success: false, error: createError?.message || "Erreur lors de la création du compte" }
     }
-    
+
     // Créer le profil
     await adminClient.from("profiles").upsert({
       id: newUser.user.id,
@@ -404,19 +404,19 @@ export async function createAccountAndSignIn(userData: {
       role: "client",
       created_at: new Date().toISOString(),
     })
-    
+
     // Connecter l'utilisateur immédiatement
     // Générer un magic link et le vérifier automatiquement
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
       type: "magiclink",
       email: userData.email,
     })
-    
+
     if (linkError || !linkData) {
       console.error("Erreur génération magic link:", linkError)
       return { success: true } // Compte créé mais pas connecté
     }
-    
+
     // Créer un client avec les cookies pour établir la session
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -438,19 +438,19 @@ export async function createAccountAndSignIn(userData: {
         },
       }
     )
-    
+
     // Vérifier le token pour créer la session
     if (linkData.properties?.hashed_token) {
       const { error: verifyError } = await supabase.auth.verifyOtp({
         token_hash: linkData.properties.hashed_token,
         type: "magiclink",
       })
-      
+
       if (verifyError) {
         console.error("Erreur vérification OTP nouveau compte:", verifyError)
       }
     }
-    
+
     return { success: true }
   } catch (error) {
     console.error("Erreur createAccountAndSignIn:", error)
@@ -464,7 +464,7 @@ export async function createAccountAndSignIn(userData: {
 
 export async function cancelRdv(interventionId: string, reason?: string): Promise<{ success: boolean; error?: string }> {
   const adminClient = createAdminClient()
-  
+
   try {
     // Mettre à jour le statut
     const { error } = await adminClient
@@ -475,12 +475,12 @@ export async function cancelRdv(interventionId: string, reason?: string): Promis
         cancellation_reason: reason || "Annulé par le client"
       })
       .eq("id", interventionId)
-    
+
     if (error) {
       console.error("Erreur cancelRdv:", error)
       return { success: false, error: "Erreur lors de l'annulation" }
     }
-    
+
     // Ajouter à l'historique des statuts
     await adminClient
       .from("intervention_status_history")
@@ -490,7 +490,7 @@ export async function cancelRdv(interventionId: string, reason?: string): Promis
         notes: reason || "Annulé par le client",
         changed_by: "client"
       })
-    
+
     return { success: true }
   } catch (error) {
     console.error("Erreur cancelRdv:", error)
@@ -503,13 +503,13 @@ export async function cancelRdv(interventionId: string, reason?: string): Promis
 // ============================================
 
 export async function proposeReschedule(
-  interventionId: string, 
-  newDate: string, 
-  newTimeStart: string, 
+  interventionId: string,
+  newDate: string,
+  newTimeStart: string,
   newTimeEnd: string
 ): Promise<{ success: boolean; error?: string }> {
   const adminClient = createAdminClient()
-  
+
   try {
     // Créer une proposition de modification (à valider par l'artisan)
     const { error } = await adminClient
@@ -522,14 +522,14 @@ export async function proposeReschedule(
         proposed_by: "client",
         status: "pending"
       })
-    
+
     if (error) {
       console.error("Erreur proposeReschedule:", error)
       return { success: false, error: "Erreur lors de la proposition" }
     }
-    
+
     // TODO: Notifier l'artisan par email/SMS
-    
+
     return { success: true }
   } catch (error) {
     console.error("Erreur proposeReschedule:", error)

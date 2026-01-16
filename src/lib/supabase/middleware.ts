@@ -55,7 +55,11 @@ export async function updateSession(request: NextRequest) {
   const isAuthRoute = authRoutes.includes(request.nextUrl.pathname)
 
   if (isAuthRoute && user) {
-    const redirect = request.nextUrl.searchParams.get("redirect") || "/"
+    const redirectParam = request.nextUrl.searchParams.get("redirect") || "/"
+    // Validate redirect is a safe relative path (prevents open redirect attacks)
+    const redirect = redirectParam.startsWith("/") && !redirectParam.startsWith("//")
+      ? redirectParam
+      : "/"
     const url = request.nextUrl.clone()
     url.pathname = redirect
     url.search = ""

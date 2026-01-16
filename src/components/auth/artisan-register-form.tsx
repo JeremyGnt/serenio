@@ -63,7 +63,7 @@ export function ArtisanRegisterForm() {
     if (!formData.street.trim()) newErrors.street = "Adresse requise"
     if (!formData.postalCode.trim()) newErrors.postalCode = "Code postal requis"
     if (!formData.city.trim()) newErrors.city = "Ville requise"
-    if (formData.password.length < 6) newErrors.password = "Minimum 6 caractères"
+    if (formData.password.length < 8) newErrors.password = "Minimum 8 caractères"
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Mots de passe différents"
 
     setErrors(newErrors)
@@ -282,7 +282,7 @@ export function ArtisanRegisterForm() {
               id="password"
               value={formData.password}
               onChange={(e) => updateField("password", e.target.value)}
-              placeholder="Minimum 6 caractères"
+              placeholder="Minimum 8 caractères"
               className={`h-12 ${errors.password ? "border-red-300" : ""}`}
             />
             {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}

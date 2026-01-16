@@ -45,8 +45,8 @@ export async function simpleSignup(payload: {
     return { success: false, error: "Email requis" }
   }
 
-  if (payload.password.length < 6) {
-    return { success: false, error: "Le mot de passe doit contenir au moins 6 caractères" }
+  if (payload.password.length < 8) {
+    return { success: false, error: "Le mot de passe doit contenir au moins 8 caractères" }
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -96,8 +96,8 @@ export async function signup(payload: SignupPayload): Promise<AuthResult> {
     return { success: false, error: "Tous les champs obligatoires doivent être remplis" }
   }
 
-  if (payload.password.length < 6) {
-    return { success: false, error: "Le mot de passe doit contenir au moins 6 caractères" }
+  if (payload.password.length < 8) {
+    return { success: false, error: "Le mot de passe doit contenir au moins 8 caractères" }
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -240,8 +240,8 @@ export async function resetPassword(email: string): Promise<AuthResult> {
 export async function updatePassword(newPassword: string): Promise<AuthResult> {
   const supabase = await createClient()
 
-  if (!newPassword || newPassword.length < 6) {
-    return { success: false, error: "Le mot de passe doit contenir au moins 6 caractères" }
+  if (!newPassword || newPassword.length < 8) {
+    return { success: false, error: "Le mot de passe doit contenir au moins 8 caractères" }
   }
 
   const { error } = await supabase.auth.updateUser({ password: newPassword })

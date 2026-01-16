@@ -11,10 +11,10 @@ import { simpleSignup } from "@/lib/auth/actions"
 
 export function SimpleSignupForm() {
   const router = useRouter()
-  
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [serverError, setServerError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -28,8 +28,8 @@ export function SimpleSignupForm() {
       newErrors.email = "Email invalide"
     }
 
-    if (password.length < 6) {
-      newErrors.password = "Minimum 6 caractères"
+    if (password.length < 8) {
+      newErrors.password = "Minimum 8 caractères"
     }
 
     setErrors(newErrors)
@@ -124,7 +124,7 @@ export function SimpleSignupForm() {
                 })
               }
             }}
-            placeholder="Minimum 6 caractères"
+            placeholder="Minimum 8 caractères"
             className={`h-12 ${errors.password ? "border-red-300" : ""}`}
           />
           {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}

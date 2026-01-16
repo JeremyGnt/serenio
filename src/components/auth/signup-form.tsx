@@ -23,7 +23,7 @@ interface FormErrors {
 
 export function SignupForm() {
   const router = useRouter()
-  
+
   const [lastName, setLastName] = useState("")
   const [firstName, setFirstName] = useState("")
   const [email, setEmail] = useState("")
@@ -127,8 +127,8 @@ export function SignupForm() {
       case "password":
         if (!value) {
           newErrors.password = "Le mot de passe est requis"
-        } else if (value.length < 6) {
-          newErrors.password = "Minimum 6 caractères"
+        } else if (value.length < 8) {
+          newErrors.password = "Minimum 8 caractères"
         } else if (!/[A-Z]/.test(value)) {
           newErrors.password = "Doit contenir au moins une majuscule"
         } else if (!/[0-9]/.test(value)) {
@@ -181,7 +181,7 @@ export function SignupForm() {
       !postalCode.trim() ||
       !city.trim() ||
       !country.trim() ||
-      password.length < 6 ||
+      password.length < 8 ||
       password !== confirmPassword
 
     return !hasErrors
@@ -209,7 +209,7 @@ export function SignupForm() {
         city,
         country,
       })
-      
+
       if (!result.success) {
         setServerError(result.error || "Une erreur est survenue")
         setLoading(false)
@@ -439,7 +439,7 @@ export function SignupForm() {
           <p className="text-xs text-red-500">{errors.password}</p>
         ) : (
           <p className="text-xs text-muted-foreground">
-            Min. 6 caractères, 1 majuscule, 1 chiffre
+            Min. 8 caractères, 1 majuscule, 1 chiffre
           </p>
         )}
       </div>
