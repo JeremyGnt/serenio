@@ -45,6 +45,7 @@ import type { MissionDetails } from "@/lib/interventions/pro-queries"
 import type { SituationType } from "@/types/intervention"
 import { ClientChatWrapper } from "@/components/chat/client-chat-wrapper"
 import { MissionStepper } from "@/components/pro/mission-stepper"
+import { MissionClientChatButton } from "@/components/pro/mission-client-chat-button"
 import { cn } from "@/lib/utils"
 
 // Import MissionMap dynamically to avoid SSR issues with Leaflet
@@ -192,9 +193,12 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                                         </a>
                                     </Button>
                                     {canChat && (
-                                        <Button size="icon" onClick={() => setIsChatOpen(true)} className="h-10 w-10 rounded-xl active:scale-95 transition-all bg-indigo-500 hover:bg-indigo-600">
-                                            <MessageSquare className="w-4 h-4" />
-                                        </Button>
+                                        <MissionClientChatButton
+                                            interventionId={mission.id}
+                                            currentUserId={currentUserId}
+                                            onClick={() => setIsChatOpen(true)}
+                                            isOpen={isChatOpen}
+                                        />
                                     )}
                                 </div>
                             </div>

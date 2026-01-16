@@ -51,14 +51,18 @@ export function MissionStepper({ status, className }: MissionStepperProps) {
         <div className={cn("w-full py-6", className)}>
             <div className="relative">
                 {/* Connection Lines Container */}
-                <div className="absolute top-3 left-0 w-full h-[2px] z-0 px-4">
-                    {/* Background Track */}
-                    <div className="w-full h-full bg-gray-100 rounded-full" />
+                <div className="absolute top-3 left-0 w-full h-[2px] z-0">
+                    {/* Background Track - avec marge pour aligner avec les cercles */}
+                    <div className="mx-3 h-full bg-gray-100 rounded-full" />
 
-                    {/* Active Progress Gradient */}
+                    {/* Active Progress Gradient - s'arrête au centre du cercle actuel */}
                     <div
-                        className="absolute top-0 left-4 h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-700 ease-out"
-                        style={{ width: `calc(${(Math.max(0, currentStepIndex) / (STEPS.length - 1)) * 100}% - 32px)` }}
+                        className="absolute top-0 left-3 h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-700 ease-out"
+                        style={{
+                            width: currentStepIndex <= 0
+                                ? '0%'
+                                : `calc((100% - 24px) * ${Math.min(currentStepIndex, STEPS.length - 1) / (STEPS.length - 1)})`
+                        }}
                     />
                 </div>
 

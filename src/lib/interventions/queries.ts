@@ -76,6 +76,9 @@ export async function getInterventionByTracking(
 export async function getLiveTrackingData(
   trackingNumber: string
 ): Promise<LiveTrackingData | null> {
+  const { unstable_noStore } = await import("next/cache")
+  unstable_noStore()
+
   const adminClient = createAdminClient()
 
   const { data, error } = await adminClient

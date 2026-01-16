@@ -57,6 +57,7 @@ import { TrackingQuote } from "./tracking-quote"
 import { clearActiveTracking } from "@/lib/active-tracking"
 import { ClientChatWrapper } from "@/components/chat/client-chat-wrapper"
 import { InterventionPhotos } from "@/components/ui/intervention-photos"
+import { TrackingChatButton } from "@/components/tracking/tracking-chat-button"
 
 interface TrackingViewProps {
     data: LiveTrackingData
@@ -401,25 +402,15 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                                                 Appeler
                                             </a>
                                         </Button>
-                                        <Button
-                                            className="bg-indigo-500 hover:bg-indigo-600 w-full sm:w-auto"
+                                        <TrackingChatButton
+                                            interventionId={intervention.id}
+                                            currentUserId={currentUserId || ""}
                                             onClick={() => setIsChatOpen(true)}
-                                        >
-                                            <MessageSquare className="w-4 h-4 mr-2" />
-                                            Message
-                                        </Button>
+                                            isOpen={isChatOpen}
+                                            className="w-full sm:w-auto"
+                                        />
                                     </div>
                                 </div>
-                                {artisan.estimatedArrivalMinutes && intervention.status === "en_route" && (
-                                    <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                                        <div className="flex items-center gap-3 text-blue-700">
-                                            <Truck className="w-5 h-5" />
-                                            <span className="font-medium">
-                                                Arrivée estimée : ~{artisan.estimatedArrivalMinutes} min
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         )}
 

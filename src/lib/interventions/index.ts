@@ -9,6 +9,7 @@ export {
   linkInterventionToUser,
   acceptMission,
   refuseMission,
+  signalEnRoute,
   signalArrival,
   startIntervention,
   completeIntervention,

@@ -2,6 +2,7 @@ import { Inbox, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getRdvOpportunities } from "@/lib/interventions/pro-queries"
 import { OpportunitiesListWrapper } from "@/components/pro/opportunities-list-wrapper"
+import { DataProtectionAlert } from "@/components/pro/data-protection-alert"
 import { revalidatePath } from "next/cache"
 
 export const metadata = {
@@ -27,7 +28,7 @@ export default async function PropositionsPage() {
                         Opportunités
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        {opportunities.length > 0 
+                        {opportunities.length > 0
                             ? `${opportunities.length} mission${opportunities.length > 1 ? "s" : ""} disponible${opportunities.length > 1 ? "s" : ""}`
                             : "Missions planifiées à accepter"
                         }
@@ -41,13 +42,10 @@ export default async function PropositionsPage() {
                 </form>
             </div>
 
+
             {/* Info RGPD */}
-            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-6">
-                <p className="text-sm text-purple-700">
-                    <strong>Protection des données :</strong> Les informations personnelles du client 
-                    (nom, téléphone, adresse exacte) ne sont communiquées qu'après acceptation de la mission.
-                </p>
-            </div>
+            <DataProtectionAlert />
+
 
             {/* Liste des opportunités */}
             <OpportunitiesListWrapper opportunities={opportunities} />

@@ -681,6 +681,94 @@ export async function linkInterventionToUser(
 // ============================================
 
 /**
+ * Artisan signale qu'il est en route
+ */
+export async function signalEnRoute(
+  interventionId: string
+): Promise<InterventionResult> {
+  const supabase = await createClient()
+  const adminClient = createAdminClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, error: "Utilisateur non connecté" }
+  }
+
+  const role = user.user_metadata?.role
+  if (role !== "artisan") {
+    return { success: false, error: "Accès réservé aux artisans" }
+  }
+
+  try {
+    // Vérifier que l'artisan est bien assigné à cette intervention
+    const { data: assignment } = await adminClient
+      .from("artisan_assignments")
+      .select("id")
+      .eq("intervention_id", interventionId)
+      .eq("artisan_id", user.id)
+      .eq("status", "accepted")
+      .single()
+
+    if (!assignment) {
+      return { success: false, error: "Vous n'êtes pas assigné à cette mission" }
+    }
+
+    // Récupérer l'intervention
+    const { data: intervention, error: fetchError } = await adminClient
+      .from("intervention_requests")
+      .select("id, status, tracking_number")
+      .eq("id", interventionId)
+      .single()
+
+    if (fetchError || !intervention) {
+      return { success: false, error: "Intervention non trouvée" }
+    }
+
+    // Vérifier que le statut permet de signaler le départ
+    // On ne peut signaler "en route" que si on est assigné ou accepté (pas si déjà arrivé ou autre)
+    if (!["assigned", "accepted"].includes(intervention.status)) {
+      // Si déjà en route, on renvoie succès sans erreur pour l'idempotence
+      if (intervention.status === "en_route") {
+        return { success: true, trackingNumber: intervention.tracking_number }
+      }
+      return { success: false, error: "Statut incorrect pour signaler le départ" }
+    }
+
+    // Mettre à jour le statut
+    const { error: updateError } = await adminClient
+      .from("intervention_requests")
+      .update({
+        status: "en_route",
+      })
+      .eq("id", interventionId)
+
+    if (updateError) {
+      return { success: false, error: "Erreur lors de la mise à jour" }
+    }
+
+    // Ajouter à l'historique
+    await adminClient.from("intervention_status_history").insert({
+      intervention_id: interventionId,
+      previous_status: intervention.status,
+      new_status: "en_route",
+      changed_by: user.id,
+      changed_by_role: "artisan",
+      note: "Artisan en route",
+    })
+
+    revalidatePath(`/suivi/${intervention.tracking_number}`)
+    revalidatePath(`/rdv/suivi/${intervention.tracking_number}`)
+    revalidatePath(`/pro/mission/${intervention.tracking_number}`)
+    revalidatePath("/pro/missions")
+
+    return { success: true, trackingNumber: intervention.tracking_number }
+  } catch (error) {
+    console.error("Erreur signalEnRoute:", error)
+    return { success: false, error: "Une erreur est survenue" }
+  }
+}
+
+/**
  * Artisan signale son arrivée sur place
  */
 export async function signalArrival(

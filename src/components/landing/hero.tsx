@@ -70,7 +70,10 @@ export function Hero({ isLoggedIn }: HeroProps) {
 
   const fetchTrackingData = async (trackingNumber: string) => {
     try {
+      console.log("Hero: Fetching tracking data for", trackingNumber)
       const data = await getLiveTrackingData(trackingNumber)
+      console.log("Hero: Data received:", data?.intervention.status)
+
       if (data) {
         // Si l'intervention appartient à un utilisateur et qu'on n'est pas connecté, on nettoie
         if (data.intervention.clientId && !isLoggedIn) {
@@ -100,35 +103,35 @@ export function Hero({ isLoggedIn }: HeroProps) {
     }
   }
 
-  // S'abonner aux changements en temps réel
+  // S'abonner aux changements en temps réel - MÊME PATTERN QUE LE DEBUG MONITOR
   useEffect(() => {
     if (!activeTrackingNumber) return
 
-    const channel = supabase
-      .channel(`hero-tracking-${activeTrackingNumber}`)
+    // Canal pour intervention_requests
+    const interventionChannel = supabase.channel(`hero-intervention-${activeTrackingNumber}`)
       .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "intervention_requests",
-          filter: `tracking_number=eq.${activeTrackingNumber}`
-        },
-        () => fetchTrackingData(activeTrackingNumber)
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'intervention_requests' },
+        (payload) => {
+          if (payload.new && 'tracking_number' in payload.new && payload.new.tracking_number === activeTrackingNumber) {
+            fetchTrackingData(activeTrackingNumber)
+          }
+        }
       )
+      .subscribe()
+
+    // Canal séparé pour artisan_assignments
+    const assignmentChannel = supabase.channel(`hero-assignment-${activeTrackingNumber}`)
       .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "artisan_assignments"
-        },
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'artisan_assignments' },
         () => fetchTrackingData(activeTrackingNumber)
       )
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      supabase.removeChannel(interventionChannel)
+      supabase.removeChannel(assignmentChannel)
     }
   }, [activeTrackingNumber])
 
@@ -173,8 +176,6 @@ export function Hero({ isLoggedIn }: HeroProps) {
               switch (status) {
                 case "assigned":
                 case "accepted":
-                case "en_route":
-                case "arrived":
                 case "diagnosing":
                 case "quote_sent":
                 case "quote_accepted":
@@ -190,6 +191,34 @@ export function Hero({ isLoggedIn }: HeroProps) {
                     btnHoverBg: "hover:bg-emerald-700",
                     iconColor: "text-emerald-600",
                     animateIcon: false
+                  }
+                case "en_route":
+                  return {
+                    ...base,
+                    title: "Serrurier en route",
+                    icon: Truck,
+                    iconBg: "bg-blue-100",
+                    textColor: "text-blue-900",
+                    borderColor: "border-blue-200",
+                    shadowColor: "shadow-blue-100/50",
+                    btnBg: "bg-blue-600",
+                    btnHoverBg: "hover:bg-blue-700",
+                    iconColor: "text-blue-600",
+                    animateIcon: true
+                  }
+                case "arrived":
+                  return {
+                    ...base,
+                    title: "Serrurier sur place",
+                    icon: MapPin,
+                    iconBg: "bg-purple-100",
+                    textColor: "text-purple-900",
+                    borderColor: "border-purple-200",
+                    shadowColor: "shadow-purple-100/50",
+                    btnBg: "bg-purple-600",
+                    btnHoverBg: "hover:bg-purple-700",
+                    iconColor: "text-purple-600",
+                    animateIcon: true
                   }
                 case "in_progress":
                   return {
@@ -238,7 +267,7 @@ export function Hero({ isLoggedIn }: HeroProps) {
                       "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 relative transition-colors duration-500",
                       config.iconBg
                     )}>
-                      <StatusIcon className={cn("w-5 h-5", config.iconColor, config.animateIcon ? "animate-pulse" : "")} />
+                      <StatusIcon className={cn("w-5 h-5", config.iconColor, config.animateIcon && config.icon === Loader2 ? "animate-spin" : config.animateIcon ? "animate-pulse" : "")} />
                     </div>
                     <div className="flex-1">
                       <h3 className={cn("font-semibold transition-colors duration-500", config.textColor)}>

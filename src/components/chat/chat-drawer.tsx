@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { MessageSquare, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ChatBox } from "./chat-box"
@@ -19,10 +19,15 @@ export function ChatDrawer({ conversationData, currentUserId, unreadCount = 0, i
     const [localUnreadCount, setLocalUnreadCount] = useState(unreadCount)
 
     // Reset compteur à l'ouverture
+    useEffect(() => {
+        if (isOpen) {
+            setLocalUnreadCount(0)
+        }
+    }, [isOpen])
+
     const handleOpen = () => {
         onOpenChange(true)
-        setLocalUnreadCount(0)
-        // TODO: appeler server action markAsRead ici si besoin
+        // setLocalUnreadCount(0) // Now handled by effect
     }
 
     // Déterminer le texte en fonction du rôle

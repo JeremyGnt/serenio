@@ -3,10 +3,10 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import {
-    Clock,
     CheckCircle2,
     Play,
     Loader2,
+    Truck,
     MapPin,
     AlertCircle,
 } from "lucide-react"
@@ -21,7 +21,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { signalArrival, startIntervention, completeIntervention } from "@/lib/interventions"
+import { signalArrival, signalEnRoute, startIntervention, completeIntervention } from "@/lib/interventions"
 
 interface MissionActionsProps {
     interventionId: string
@@ -34,6 +34,18 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
     const [isPending, startTransition] = useTransition()
     const [showCompleteDialog, setShowCompleteDialog] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    const handleSignalEnRoute = async () => {
+        setError(null)
+        const result = await signalEnRoute(interventionId)
+        if (result.success) {
+            startTransition(() => {
+                router.refresh()
+            })
+        } else {
+            setError(result.error || "Erreur lors de la mise à jour")
+        }
+    }
 
     const handleSignalArrival = async () => {
         setError(null)
@@ -49,13 +61,6 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
 
     const handleStartIntervention = async () => {
         setError(null)
-
-        // Si on n'est pas encore "sur place", on signale l'arrivée d'abord (automatiquement)
-        if (["assigned", "accepted", "en_route"].includes(status)) {
-            // On ne bloque pas si ça échoue (ex: déjà fait ailleurs), on tente le start ensuite
-            await signalArrival(interventionId)
-        }
-
         const result = await startIntervention(interventionId)
         if (result.success) {
             startTransition(() => {
@@ -79,24 +84,20 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
         }
     }
 
-    // Déterminer quelles actions sont disponibles selon le statut
-    const canSignalArrival = ["assigned", "accepted", "en_route"].includes(status)
-    const canStartIntervention = ["arrived", "diagnosing", "quote_accepted"].includes(status)
-    const canComplete = ["arrived", "in_progress", "diagnosing", "quote_accepted"].includes(status)
     const isCompleted = status === "completed"
     const isCancelled = status === "cancelled"
 
     if (isCompleted) {
         return (
-            <div className="bg-white rounded-xl border border-gray-200 p-5">
-                <div className="flex items-center gap-3 text-emerald-600">
-                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                        <CheckCircle2 className="w-5 h-5" />
+            <div className="bg-emerald-50/50 rounded-xl border border-emerald-100 p-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     </div>
-                    <div>
-                        <h2 className="font-semibold">Mission terminée</h2>
-                        <p className="text-sm text-muted-foreground">
-                            Cette intervention a été complétée avec succès
+                    <div className="flex-1 min-w-0">
+                        <h2 className="font-semibold text-sm text-emerald-900">Mission terminée</h2>
+                        <p className="text-xs text-emerald-600/80">
+                            Intervention complétée avec succès
                         </p>
                     </div>
                 </div>
@@ -106,14 +107,14 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
 
     if (isCancelled) {
         return (
-            <div className="bg-white rounded-xl border border-gray-200 p-5">
-                <div className="flex items-center gap-3 text-red-600">
-                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                        <AlertCircle className="w-5 h-5" />
+            <div className="bg-red-50/50 rounded-xl border border-red-100 p-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <AlertCircle className="w-4 h-4 text-red-600" />
                     </div>
-                    <div>
-                        <h2 className="font-semibold">Mission annulée</h2>
-                        <p className="text-sm text-muted-foreground">
+                    <div className="flex-1 min-w-0">
+                        <h2 className="font-semibold text-sm text-red-900">Mission annulée</h2>
+                        <p className="text-xs text-red-600/80">
                             Cette intervention a été annulée
                         </p>
                     </div>
@@ -123,54 +124,67 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-3">
             {error && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                     {error}
                 </div>
             )}
 
-            {/* Current Status Indicator */}
-            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100/50">
-                <div className="flex items-center justify-between gap-2 text-sm">
-                    <span className="font-medium text-gray-500">Statut actuel</span>
-                    <StatusBadge status={status} />
-                </div>
-            </div>
-
-            <div className="flex flex-col gap-3">
-                {/* Démarrer Button */}
-                {!["in_progress", "completed", "cancelled"].includes(status) && (
+            <div className="grid gap-2">
+                {/* 1. Bouton "Je pars" */}
+                {["assigned", "accepted"].includes(status) && (
                     <Button
-                        size="lg"
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-base h-14 rounded-2xl shadow-lg shadow-emerald-100 transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-emerald-800 active:duration-75 group"
-                        onClick={handleStartIntervention}
+                        className="w-full h-11 bg-white hover:bg-blue-50 active:bg-blue-100 border border-blue-200 hover:border-blue-300 text-blue-700 shadow-sm transition-all duration-200 rounded-lg active:scale-[0.97] touch-manipulation"
+                        onClick={handleSignalEnRoute}
                         disabled={isPending}
                     >
-                        {isPending ? (
-                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        ) : (
-                            <Play className="w-5 h-5 mr-3 fill-white group-hover:scale-110 transition-transform" />
-                        )}
-                        <span className="font-bold">Démarrer l'intervention</span>
+                        <div className="flex items-center justify-center w-full gap-2">
+                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Truck className="w-4 h-4" />}
+                            <span className="font-medium text-sm">Je pars en intervention</span>
+                        </div>
                     </Button>
                 )}
 
-                {/* Terminer Button */}
+                {/* 2. Bouton "Je suis sur place" */}
+                {status === "en_route" && (
+                    <Button
+                        className="w-full h-11 bg-white hover:bg-purple-50 active:bg-purple-100 border border-purple-200 hover:border-purple-300 text-purple-700 shadow-sm transition-all duration-200 rounded-lg active:scale-[0.97] touch-manipulation"
+                        onClick={handleSignalArrival}
+                        disabled={isPending}
+                    >
+                        <div className="flex items-center justify-center w-full gap-2">
+                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
+                            <span className="font-medium text-sm">Je suis sur place</span>
+                        </div>
+                    </Button>
+                )}
+
+                {/* 3. Bouton "Démarrer l'intervention" */}
+                {["arrived"].includes(status) && (
+                    <Button
+                        className="w-full h-11 bg-white hover:bg-emerald-50 active:bg-emerald-100 border border-emerald-300 hover:border-emerald-400 text-emerald-700 shadow-sm transition-all duration-200 rounded-lg active:scale-[0.97] touch-manipulation"
+                        onClick={handleStartIntervention}
+                        disabled={isPending}
+                    >
+                        <div className="flex items-center justify-center w-full gap-2">
+                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
+                            <span className="font-medium text-sm">Commencer l'intervention</span>
+                        </div>
+                    </Button>
+                )}
+
+                {/* 4. Bouton "Terminer" */}
                 {["in_progress", "diagnosing", "quote_sent", "quote_accepted"].includes(status) && (
                     <Button
-                        size="lg"
-                        variant="outline"
-                        className="w-full border-2 border-emerald-600/20 text-emerald-600 hover:bg-emerald-50 text-base h-14 rounded-2xl transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-emerald-100 active:duration-75"
+                        className="w-full h-11 bg-white hover:bg-gray-50 active:bg-emerald-50 border border-gray-200 text-gray-700 hover:text-emerald-700 hover:border-emerald-200 active:border-emerald-300 shadow-sm transition-all duration-200 rounded-lg active:scale-[0.97] touch-manipulation"
                         onClick={() => setShowCompleteDialog(true)}
                         disabled={isPending}
                     >
-                        {isPending ? (
-                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        ) : (
-                            <CheckCircle2 className="w-5 h-5 mr-2" />
-                        )}
-                        <span className="font-bold">Terminer la mission</span>
+                        <div className="flex items-center justify-center w-full gap-2">
+                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                            <span className="font-medium text-sm">Terminer la mission</span>
+                        </div>
                     </Button>
                 )}
             </div>
