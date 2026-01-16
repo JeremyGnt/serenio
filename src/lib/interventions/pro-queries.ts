@@ -120,8 +120,7 @@ export async function getPendingInterventions(): Promise<AnonymizedIntervention[
           situation_type,
           situation_details,
           door_type,
-          lock_type,
-          diagnostic_answers
+          lock_type
         )
       `)
             .in("status", ["pending", "searching"])
@@ -175,7 +174,7 @@ export async function getPendingInterventions(): Promise<AnonymizedIntervention[
                 situationDetails: diagnostic?.situation_details,
                 doorType: diagnostic?.door_type,
                 lockType: diagnostic?.lock_type,
-                diagnosticAnswers: diagnostic?.diagnostic_answers as Record<string, unknown> | undefined,
+                // diagnosticAnswers: diagnostic?.diagnostic_answers, // Optimisation: Chargé à la demande via getInterventionDetailsForModal
                 isUrgent: intervention.is_urgent,
                 urgencyLevel: intervention.urgency_level || 2,
                 createdAt: intervention.created_at,
@@ -1211,5 +1210,73 @@ export async function getArtisanSettings(): Promise<ArtisanSettings | null> {
         availabilityRadius: artisan.availability_radius_km || 20,
         baseLatitude: artisan.base_latitude,
         baseLongitude: artisan.base_longitude
+    }
+}
+// ============================================
+// DÉTAILS MODALE (FETCH ON DEMAND)
+// ============================================
+
+/**
+ * Récupère les détails complets pour la modale (diagnostic complet)
+ * Appelé uniquement quand la modale s'ouvre pour alléger la liste initiale
+ */
+export async function getInterventionDetailsForModal(interventionId: string): Promise<AnonymizedIntervention | null> {
+    const supabase = await createClient()
+    const adminClient = createAdminClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user || user.user_metadata?.role !== "artisan") return null
+
+    try {
+        const { data: intervention, error } = await adminClient
+            .from("intervention_requests")
+            .select(`
+                id,
+                tracking_number,
+                latitude,
+                longitude,
+                address_city,
+                address_postal_code,
+                is_urgent,
+                urgency_level,
+                created_at,
+                submitted_at,
+                intervention_diagnostics (
+                    situation_type,
+                    situation_details,
+                    door_type,
+                    lock_type,
+                    diagnostic_answers
+                )
+            `)
+            .eq("id", interventionId)
+            .single()
+
+        if (error || !intervention) return null
+
+        const diagnostic = Array.isArray(intervention.intervention_diagnostics)
+            ? intervention.intervention_diagnostics[0]
+            : intervention.intervention_diagnostics
+
+        return {
+            id: intervention.id,
+            trackingNumber: intervention.tracking_number,
+            latitude: intervention.latitude,
+            longitude: intervention.longitude,
+            city: intervention.address_city,
+            postalCode: intervention.address_postal_code,
+            situationType: diagnostic?.situation_type || "other",
+            situationDetails: diagnostic?.situation_details,
+            doorType: diagnostic?.door_type,
+            lockType: diagnostic?.lock_type,
+            diagnosticAnswers: diagnostic?.diagnostic_answers as Record<string, unknown> | undefined,
+            isUrgent: intervention.is_urgent,
+            urgencyLevel: intervention.urgency_level || 2,
+            createdAt: intervention.created_at,
+            submittedAt: intervention.submitted_at,
+        }
+    } catch (e) {
+        console.error("Error modal details", e)
+        return null
     }
 }

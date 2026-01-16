@@ -18,7 +18,13 @@ import { Button } from "@/components/ui/button"
 import { InterventionPhotos } from "@/components/ui/intervention-photos"
 import type { AnonymizedIntervention } from "@/lib/interventions"
 import type { SituationType } from "@/types/intervention"
-import { UrgentRequestModal, isInterventionViewed } from "./urgent-request-modal"
+import { isInterventionViewed } from "@/lib/interventions/view-tracking"
+import dynamic from "next/dynamic"
+
+const UrgentRequestModal = dynamic(
+    () => import("./urgent-request-modal").then((mod) => mod.UrgentRequestModal),
+    { ssr: false }
+)
 
 // Labels des situations
 const SITUATION_LABELS: Record<SituationType, string> = {
@@ -85,7 +91,7 @@ export function UrgentRequestCard({ intervention, onAccept, onRefuse }: UrgentRe
                 )}
                 <div className="flex items-center gap-4">
                     {/* Photo thumbnail ou icône situation */}
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 w-16 h-16 bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center border border-gray-100">
                         <InterventionPhotos
                             interventionId={intervention.id}
                             thumbnailMode={true}

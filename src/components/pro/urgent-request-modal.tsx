@@ -30,6 +30,8 @@ import { Button } from "@/components/ui/button"
 import { InterventionPhotos } from "@/components/ui/intervention-photos"
 import type { AnonymizedIntervention } from "@/lib/interventions"
 import { acceptMission, refuseMission } from "@/lib/interventions"
+import { getInterventionDetailsForModal } from "@/lib/interventions/pro-queries"
+import { markAsViewed } from "@/lib/interventions/view-tracking"
 import type { SituationType, DoorType, LockType } from "@/types/intervention"
 
 // Lazy load de la carte
@@ -63,31 +65,7 @@ const LOCK_LABELS: Record<LockType, string> = {
     other: "Non spécifié",
 }
 
-// Gestion des interventions vues
-const VIEWED_KEY = "serenio_viewed_interventions"
 
-function getViewedInterventions(): string[] {
-    if (typeof window === "undefined") return []
-    try {
-        return JSON.parse(localStorage.getItem(VIEWED_KEY) || "[]")
-    } catch {
-        return []
-    }
-}
-
-function markAsViewed(interventionId: string): void {
-    if (typeof window === "undefined") return
-    try {
-        const viewed = getViewedInterventions()
-        if (!viewed.includes(interventionId)) {
-            localStorage.setItem(VIEWED_KEY, JSON.stringify([...viewed.slice(-99), interventionId]))
-        }
-    } catch { /* ignore */ }
-}
-
-export function isInterventionViewed(interventionId: string): boolean {
-    return getViewedInterventions().includes(interventionId)
-}
 
 interface UrgentRequestModalProps {
     intervention: AnonymizedIntervention
@@ -110,6 +88,8 @@ export function UrgentRequestModal({
     const [showMobileDetails, setShowMobileDetails] = useState(false)
     const [isViewed, setIsViewed] = useState(false)
     const [successState, setSuccessState] = useState<"accepted" | "refused" | null>(null)
+    const [detailedIntervention, setDetailedIntervention] = useState<AnonymizedIntervention>(intervention)
+    const [loadingDetails, setLoadingDetails] = useState(false)
 
     useEffect(() => {
         if (isOpen) {
@@ -118,6 +98,20 @@ export function UrgentRequestModal({
             // Reset states when modal opens
             setSuccessState(null)
             setError(null)
+
+            // Si pas de diagnosticAnswers, on va les chercher
+            if (!detailedIntervention.diagnosticAnswers) {
+                setLoadingDetails(true)
+                getInterventionDetailsForModal(intervention.id)
+                    .then((details) => {
+                        if (details) {
+                            setDetailedIntervention(details)
+                        }
+                    })
+                    .finally(() => {
+                        setLoadingDetails(false)
+                    })
+            }
         }
     }, [isOpen, intervention.id])
 
@@ -229,8 +223,17 @@ export function UrgentRequestModal({
             return String(value)
         }
 
-        const answers = intervention.diagnosticAnswers || {}
+        const answers = detailedIntervention.diagnosticAnswers || {}
         const answerEntries = Object.entries(answers)
+
+        if (loadingDetails) {
+            return (
+                <div className="flex flex-col items-center justify-center p-8 text-gray-400">
+                    <Loader2 className="w-8 h-8 animate-spin mb-2" />
+                    <p className="text-sm">Chargement des détails...</p>
+                </div>
+            )
+        }
 
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -244,23 +247,23 @@ export function UrgentRequestModal({
                 </div>
 
                 {/* Type de porte depuis le diagnostic (si présent) */}
-                {intervention.doorType && (
+                {detailedIntervention.doorType && (
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                         <DoorClosed className="w-5 h-5 text-gray-400 flex-shrink-0" />
                         <div className="min-w-0">
                             <div className="text-xs text-gray-500">Type de porte</div>
-                            <div className="font-medium text-gray-900 truncate">{DOOR_LABELS[intervention.doorType]}</div>
+                            <div className="font-medium text-gray-900 truncate">{DOOR_LABELS[detailedIntervention.doorType]}</div>
                         </div>
                     </div>
                 )}
 
                 {/* Type de serrure depuis le diagnostic (si présent) */}
-                {intervention.lockType && (
+                {detailedIntervention.lockType && (
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                         <Lock className="w-5 h-5 text-gray-400 flex-shrink-0" />
                         <div className="min-w-0">
                             <div className="text-xs text-gray-500">Type de serrure</div>
-                            <div className="font-medium text-gray-900 truncate">{LOCK_LABELS[intervention.lockType]}</div>
+                            <div className="font-medium text-gray-900 truncate">{LOCK_LABELS[detailedIntervention.lockType]}</div>
                         </div>
                     </div>
                 )}
