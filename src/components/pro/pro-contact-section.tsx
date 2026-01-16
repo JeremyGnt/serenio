@@ -47,8 +47,8 @@ export function ProContactSection({ user }: ProContactSectionProps) {
 
 
       <form onSubmit={handleSubmit}>
-        <Card className="border-0 shadow-none ring-0 p-0">
-          <CardContent className="p-0 space-y-8">
+        <Card>
+          <CardContent className="p-6 space-y-8">
 
             {/* Avatar Upload */}
             <div className="pb-6 border-b border-gray-100">

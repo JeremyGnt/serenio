@@ -50,8 +50,8 @@ export function ProPasswordSection() {
 
 
       <form onSubmit={handleSubmit}>
-        <Card className="border-0 shadow-none ring-0 p-0">
-          <CardContent className="p-0 space-y-6">
+        <Card>
+          <CardContent className="p-6 space-y-6">
 
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">

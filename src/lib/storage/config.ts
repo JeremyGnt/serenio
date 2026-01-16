@@ -14,7 +14,7 @@ export const STORAGE_CONFIG = {
   maxPhotosPerIntervention: 5,
   allowedMimeTypes: [
     "image/jpeg",
-    "image/png", 
+    "image/png",
     "image/webp",
     "image/heic",
     "image/heif",
@@ -172,7 +172,7 @@ export function generateStoragePath(
 ): string {
   // Extraire l'extension
   const extension = filename.split(".").pop()?.toLowerCase() || "jpg"
-  
+
   // Chemin: {intervention_id}/{photo_id}.{ext}
   return `${interventionId}/${photoId}.${extension}`
 }

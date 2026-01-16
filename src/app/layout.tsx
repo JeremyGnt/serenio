@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
-import { SpeedInsights } from "@vercel/speed-insights/next"
+// import { SpeedInsights } from "@vercel/speed-insights/next" // Moved to AnalyticsGuard
 import "./globals.css"
 import { InterventionSubmissionProvider } from "@/components/providers/intervention-submission-provider"
+import { CookieBanner } from "@/components/layout/cookie-banner"
+import { AnalyticsGuard } from "@/components/layout/analytics-guard"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -66,7 +68,8 @@ export default function RootLayout({
         <InterventionSubmissionProvider>
           {children}
         </InterventionSubmissionProvider>
-        <SpeedInsights />
+        <CookieBanner />
+        <AnalyticsGuard />
       </body>
     </html>
   )

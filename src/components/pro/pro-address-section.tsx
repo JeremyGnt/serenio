@@ -245,7 +245,7 @@ export function ProAddressSection({ user }: ProAddressSectionProps) {
           <div className="space-y-6">
             {/* Address Card / Edit Form */}
             {!isEditingAddress ? (
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative group transition-all hover:border-gray-300">
+              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative group transition-all hover:border-gray-300">
                 <div className="absolute top-4 right-4">
                   <Button
                     variant="ghost"
@@ -272,7 +272,7 @@ export function ProAddressSection({ user }: ProAddressSectionProps) {
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-50/50 p-4 rounded-xl border border-blue-100/50">
+              <div className="bg-gray-50/50 p-6 rounded-xl border border-blue-100/50">
                 <form onSubmit={handleSaveAddress} className="space-y-4">
                   {/* Adresse avec autocomplétion intégrée */}
                   <div ref={searchRef} className="relative space-y-2">

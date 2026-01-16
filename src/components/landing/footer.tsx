@@ -75,17 +75,17 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-white active:text-white active:scale-[0.98] touch-manipulation transition-all duration-200 ease-out active:duration-75 inline-block">
+                <Link href="/mentions-legales" className="hover:text-white active:text-white active:scale-[0.98] touch-manipulation transition-all duration-200 ease-out active:duration-75 inline-block">
                   Mentions légales
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-white active:text-white active:scale-[0.98] touch-manipulation transition-all duration-200 ease-out active:duration-75 inline-block">
+                <Link href="/politique-de-confidentialite" className="hover:text-white active:text-white active:scale-[0.98] touch-manipulation transition-all duration-200 ease-out active:duration-75 inline-block">
                   Politique de confidentialité
                 </Link>
               </li>
               <li>
-                <Link href="#" className="hover:text-white active:text-white active:scale-[0.98] touch-manipulation transition-all duration-200 ease-out active:duration-75 inline-block">
+                <Link href="/cgu" className="hover:text-white active:text-white active:scale-[0.98] touch-manipulation transition-all duration-200 ease-out active:duration-75 inline-block">
                   CGU
                 </Link>
               </li>
