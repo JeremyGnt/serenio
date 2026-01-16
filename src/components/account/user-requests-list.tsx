@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import { deleteDraftIntervention } from "@/lib/interventions"
+import { deleteDraft } from "@/lib/db"
 import type { UserRequest } from "@/lib/interventions/client-types"
 import { STATUS_LABELS } from "@/lib/interventions/client-types"
 
@@ -144,6 +145,13 @@ export function UserRequestsList({ requests, userId }: UserRequestsListProps) {
         const result = await deleteDraftIntervention(deletingId)
 
         if (result.success) {
+            // Also clear local draft data so /urgence page resets to step 1
+            try {
+                await deleteDraft("serenio_draft_urgence_form")
+                localStorage.removeItem("serenio_pending_urgence_form")
+            } catch (e) {
+                console.error("Failed to clear local draft:", e)
+            }
             setShowDeleteDialog(false)
             setDeletingId(null)
             router.refresh()

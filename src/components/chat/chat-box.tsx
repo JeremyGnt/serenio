@@ -206,7 +206,7 @@ export function ChatBox({
             {/* Messages */}
             <div
                 ref={messagesContainerRef}
-                className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[200px] max-h-[400px]"
+                className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0"
             >
                 {messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center py-8">

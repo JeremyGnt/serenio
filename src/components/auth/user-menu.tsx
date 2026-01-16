@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { LogOut, User, ChevronDown, ClipboardList, LayoutDashboard } from "lucide-react"
 import { logout } from "@/lib/auth/actions"
+import { deleteDraft } from "@/lib/db"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { supabase } from "@/lib/supabase/client"
 import { getTotalUnreadCount } from "@/lib/chat/actions"
@@ -118,7 +119,14 @@ export function UserMenu({ user, pendingRequestsCount = 0, unreadMessagesCount =
 
     // Nettoyer les brouillons locaux
     if (typeof window !== "undefined") {
-      // Urgence (localStorage)
+      // Urgence (IndexedDB - where the actual draft is stored)
+      try {
+        await deleteDraft("serenio_draft_urgence_form")
+      } catch (e) {
+        console.error("Failed to delete urgence draft:", e)
+      }
+
+      // Also clear localStorage keys
       localStorage.removeItem("serenio_draft_urgence_form")
       localStorage.removeItem("serenio_pending_urgence_form")
 

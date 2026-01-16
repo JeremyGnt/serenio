@@ -96,7 +96,7 @@ export function FlowHeader({
                                     variant="ghost"
                                     size="sm"
                                     asChild
-                                    className="h-8 w-8 sm:w-auto sm:px-2.5 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 active:scale-95 touch-manipulation transition-all gap-1.5"
+                                    className="h-8 w-8 sm:w-auto sm:px-2.5 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 active:scale-90 active:bg-gray-200 touch-manipulation transition-all duration-150 active:duration-75 gap-1.5"
                                 >
                                     <Link href={backHref} aria-label="Retour à l'accueil">
                                         <ChevronLeft className="w-5 h-5" />
@@ -108,7 +108,7 @@ export function FlowHeader({
                                     variant="ghost"
                                     size="sm"
                                     onClick={handleBack}
-                                    className="h-8 w-8 sm:w-auto sm:px-2.5 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 active:scale-95 touch-manipulation transition-all gap-1.5"
+                                    className="h-8 w-8 sm:w-auto sm:px-2.5 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 active:scale-90 active:bg-gray-200 touch-manipulation transition-all duration-150 active:duration-75 gap-1.5"
                                     aria-label="Retour à l'étape précédente"
                                 >
                                     <ChevronLeft className="w-5 h-5" />
@@ -152,7 +152,7 @@ export function FlowHeader({
                             variant="ghost"
                             size="sm"
                             onClick={onClose}
-                            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 flex-shrink-0 active:scale-95 touch-manipulation transition-all"
+                            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 flex-shrink-0 active:scale-90 active:bg-gray-200 touch-manipulation transition-all duration-150 active:duration-75"
                             aria-label="Fermer et retourner à l'accueil"
                         >
                             <X className="w-5 h-5" />
@@ -162,7 +162,7 @@ export function FlowHeader({
                             variant="ghost"
                             size="sm"
                             asChild
-                            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 flex-shrink-0 active:scale-95 touch-manipulation transition-all"
+                            className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100/80 flex-shrink-0 active:scale-90 active:bg-gray-200 touch-manipulation transition-all duration-150 active:duration-75"
                         >
                             <Link href={closeHref} aria-label="Fermer et retourner à l'accueil">
                                 <X className="w-5 h-5" />

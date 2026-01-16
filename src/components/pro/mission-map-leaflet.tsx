@@ -2,7 +2,7 @@
 
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
-import { useMemo, useEffect } from "react"
+import { useMemo, useEffect, useState } from "react"
 import L from "leaflet"
 
 // Fix Leaflet default icons - run once when module loads
@@ -33,9 +33,16 @@ function MapController({ center }: { center: [number, number] }) {
 }
 
 export function MissionMapLeaflet({ latitude, longitude, className }: MissionMapLeafletProps) {
+    const [isMounted, setIsMounted] = useState(false)
     const center = useMemo<[number, number]>(() => [latitude, longitude], [latitude, longitude])
 
+    // Wait for client-side hydration
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
+
     const customIcon = useMemo(() => {
+        if (typeof window === "undefined") return undefined
         return L.divIcon({
             className: "bg-transparent border-none",
             html: `
@@ -51,6 +58,11 @@ export function MissionMapLeaflet({ latitude, longitude, className }: MissionMap
         })
     }, [])
 
+    // Don't render until mounted on client
+    if (!isMounted) {
+        return <div className={className}><div className="h-full w-full bg-gray-100 animate-pulse" /></div>
+    }
+
     return (
         <div className={className}>
             <MapContainer
@@ -64,9 +76,10 @@ export function MissionMapLeaflet({ latitude, longitude, className }: MissionMap
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                 />
-                <Marker position={center} icon={customIcon} />
+                {customIcon && <Marker position={center} icon={customIcon} />}
                 <MapController center={center} />
             </MapContainer>
         </div>
     )
 }
+

@@ -10,9 +10,10 @@ interface ClientChatWrapperProps {
     currentUserId: string
     isOpen: boolean
     onOpenChange: (open: boolean) => void
+    hideFloatingButton?: boolean
 }
 
-export function ClientChatWrapper({ interventionId, currentUserId, isOpen, onOpenChange }: ClientChatWrapperProps) {
+export function ClientChatWrapper({ interventionId, currentUserId, isOpen, onOpenChange, hideFloatingButton = false }: ClientChatWrapperProps) {
     const [conversationData, setConversationData] = useState<ConversationWithMessages | null>(null)
     const [unreadCount, setUnreadCount] = useState(0)
     const [loading, setLoading] = useState(true)
@@ -54,6 +55,8 @@ export function ClientChatWrapper({ interventionId, currentUserId, isOpen, onOpe
             unreadCount={unreadCount}
             isOpen={isOpen}
             onOpenChange={onOpenChange}
+            hideFloatingButton={hideFloatingButton}
         />
     )
 }
+

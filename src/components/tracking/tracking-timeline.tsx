@@ -54,14 +54,14 @@ export function TrackingTimeline({ history, compact = false }: TrackingTimelineP
 
         return (
           <div key={entry.id} className="relative pb-6 last:pb-0">
-            {/* Ligne verticale de connexion */}
+            {/* Ligne verticale de connexion - positionnée pour relier les cercles */}
             {!isLastItem && !showSeparator && (
-              <div className="absolute left-[5.5px] top-3 bottom-0 w-0.5 bg-gray-200" />
+              <div className="absolute left-[6px] top-5 -bottom-2 w-0.5 bg-gray-200" />
             )}
 
-            {/* Cas spécial separator */}
+            {/* Cas spécial separator avec ligne pointillée */}
             {showSeparator && (
-              <div className="absolute left-[5.5px] top-3 bottom-0 w-0.5 border-l-2 border-dotted border-gray-300" />
+              <div className="absolute left-[6px] top-5 -bottom-2 w-0.5 border-l-2 border-dotted border-gray-300" />
             )}
 
             <div className="flex gap-4 relative">

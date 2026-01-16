@@ -13,9 +13,10 @@ interface ChatDrawerProps {
     unreadCount?: number
     isOpen: boolean
     onOpenChange: (open: boolean) => void
+    hideFloatingButton?: boolean
 }
 
-export function ChatDrawer({ conversationData, currentUserId, unreadCount = 0, isOpen, onOpenChange }: ChatDrawerProps) {
+export function ChatDrawer({ conversationData, currentUserId, unreadCount = 0, isOpen, onOpenChange, hideFloatingButton = false }: ChatDrawerProps) {
     const [localUnreadCount, setLocalUnreadCount] = useState(unreadCount)
 
     // Reset compteur à l'ouverture
@@ -37,37 +38,39 @@ export function ChatDrawer({ conversationData, currentUserId, unreadCount = 0, i
     return (
         <>
             {/* Bouton flottant pour ouvrir */}
-            <Button
-                onClick={handleOpen}
-                className={cn(
-                    "fixed z-50 h-14 w-14 rounded-full shadow-lg transition-all duration-300",
-                    // Mobile: plus haut pour éviter la navbar
-                    "bottom-20 right-4",
-                    // Desktop: position standard
-                    "lg:bottom-6 lg:right-6",
-                    "bg-indigo-500 hover:bg-indigo-600",
-                    isOpen && "hidden"
-                )}
-            >
-                <MessageSquare className="w-10 h-10" />
-                {localUnreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold ring-2 ring-white">
-                        {localUnreadCount > 9 ? "9+" : localUnreadCount}
-                    </span>
-                )}
-            </Button>
+            {!hideFloatingButton && (
+                <Button
+                    onClick={handleOpen}
+                    className={cn(
+                        "fixed z-50 h-14 w-14 rounded-full shadow-lg transition-all duration-300",
+                        // Mobile: plus haut pour éviter la navbar
+                        "bottom-20 right-4",
+                        // Desktop: position standard
+                        "lg:bottom-6 lg:right-6",
+                        "bg-indigo-500 hover:bg-indigo-600",
+                        isOpen && "hidden"
+                    )}
+                >
+                    <MessageSquare className="w-10 h-10" />
+                    {localUnreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold ring-2 ring-white">
+                            {localUnreadCount > 9 ? "9+" : localUnreadCount}
+                        </span>
+                    )}
+                </Button>
+            )}
 
             {/* Overlay */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/20 z-40 lg:hidden"
+                    className="fixed inset-0 bg-black/20 z-[80] lg:hidden"
                     onClick={() => onOpenChange(false)}
                 />
             )}
 
             {/* Drawer */}
             <div className={cn(
-                "fixed z-50 bg-white shadow-2xl transition-transform duration-300 ease-out",
+                "fixed z-[90] bg-white shadow-2xl transition-transform duration-300 ease-out",
                 // Mobile: bottom sheet
                 "inset-x-0 bottom-0 h-[80vh] rounded-t-2xl",
                 // Desktop: right panel

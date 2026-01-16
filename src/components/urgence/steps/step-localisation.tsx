@@ -53,6 +53,46 @@ export function StepLocalisation({
   const [searchLoading, setSearchLoading] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
 
+  // Track if a manual edit was made (vs autocomplete selection)
+  const [manualEditPending, setManualEditPending] = useState(false)
+
+  // Geocode address when manually edited
+  useEffect(() => {
+    if (!manualEditPending) return
+    if (!street && !city) return
+
+    const geocodeAddress = async () => {
+      // Build search query from current address
+      const searchAddress = [street, postalCode, city].filter(Boolean).join(" ")
+      if (searchAddress.length < 5) return
+
+      try {
+        const response = await fetch(
+          `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(searchAddress)}&limit=1`
+        )
+        const data = await response.json()
+
+        if (data.features && data.features.length > 0) {
+          const [lon, lat] = data.features[0].geometry.coordinates
+          onUpdate({ latitude: lat, longitude: lon })
+        }
+      } catch {
+        // Silent fail for geocoding
+      } finally {
+        setManualEditPending(false)
+      }
+    }
+
+    const debounce = setTimeout(geocodeAddress, 800)
+    return () => clearTimeout(debounce)
+  }, [street, postalCode, city, manualEditPending, onUpdate])
+
+  // Helper to handle manual field changes (triggers coordinate update)
+  const handleManualAddressChange = (updates: Parameters<typeof onUpdate>[0]) => {
+    setManualEditPending(true)
+    onUpdate(updates)
+  }
+
   // Fermer les suggestions quand on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -282,7 +322,7 @@ export function StepLocalisation({
             <Input
               id="street"
               value={street}
-              onChange={(e) => onUpdate({ addressStreet: e.target.value })}
+              onChange={(e) => handleManualAddressChange({ addressStreet: e.target.value })}
               placeholder="Numéro et rue"
               className="h-12"
             />
@@ -294,7 +334,7 @@ export function StepLocalisation({
               <PostalCodeInput
                 id="postalCode"
                 value={postalCode}
-                onChange={(value) => onUpdate({ addressPostalCode: value })}
+                onChange={(value) => handleManualAddressChange({ addressPostalCode: value })}
                 placeholder="69000"
                 className="h-12"
               />
@@ -304,7 +344,7 @@ export function StepLocalisation({
               <Input
                 id="city"
                 value={city}
-                onChange={(e) => onUpdate({ addressCity: e.target.value })}
+                onChange={(e) => handleManualAddressChange({ addressCity: e.target.value })}
                 placeholder="Lyon"
                 className="h-12"
               />

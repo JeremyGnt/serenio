@@ -29,6 +29,7 @@ import { supabase } from "@/lib/supabase/client"
 import { getTotalUnreadCount } from "@/lib/chat/actions"
 import { updateArtisanAvailability } from "@/lib/pro/actions"
 import { logout } from "@/lib/auth/actions"
+import { deleteDraft } from "@/lib/db"
 
 // Type pour les items de navigation
 interface NavItem {
@@ -116,6 +117,17 @@ export function ProSidebar({
         } finally {
             setIsUpdating(false)
         }
+    }
+
+    // Handle logout with draft cleanup
+    const handleLogout = async () => {
+        try {
+            await deleteDraft("serenio_draft_urgence_form")
+            localStorage.removeItem("serenio_pending_urgence_form")
+        } catch (e) {
+            console.error("Failed to clear drafts on logout:", e)
+        }
+        await logout()
     }
 
     useEffect(() => {
@@ -421,7 +433,7 @@ export function ProSidebar({
                     </Link>
                     {/* Logout visible only on mobile drawer */}
                     <button
-                        onClick={() => logout()}
+                        onClick={handleLogout}
                         className="flex md:hidden items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-600 active:bg-red-50 transition-all duration-200 active:scale-[0.98] touch-manipulation text-sm font-medium w-full text-left"
                     >
                         <LogOut className="w-4 h-4" />
@@ -437,7 +449,7 @@ export function ProSidebar({
                     <Link
                         href="/pro/urgences"
                         className={cn(
-                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-100 active:text-red-700 rounded-lg",
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-90 transition-all duration-150 active:duration-75 touch-manipulation active:bg-gray-100 active:text-red-700 rounded-lg",
                             (pathname === "/pro/urgences") ? "text-red-600" : "text-gray-400"
                         )}
                     >
@@ -456,7 +468,7 @@ export function ProSidebar({
                     <Link
                         href="/pro/missions"
                         className={cn(
-                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-100 active:text-gray-900 rounded-lg",
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-90 transition-all duration-150 active:duration-75 touch-manipulation active:bg-gray-100 active:text-gray-900 rounded-lg",
                             (pathname.startsWith("/pro/missions")) ? "text-emerald-600" : "text-gray-400"
                         )}
                     >
@@ -465,21 +477,21 @@ export function ProSidebar({
                             {unreadCount > 0 && (
                                 <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500 ring-2 ring-white" />
                             )}
+                            {activeMissionsCountState > 0 && (
+                                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5 translate-x-1 -translate-y-1">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500 ring-2 ring-white"></span>
+                                </span>
+                            )}
                         </div>
                         <span className="text-[10px] font-medium">Missions</span>
-                        {activeMissionsCountState > 0 && (
-                            <span className="absolute top-2 right-1/4 flex h-1.5 w-1.5">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-yellow-500"></span>
-                            </span>
-                        )}
                     </Link>
 
                     {/* Planning */}
                     <Link
                         href="/pro/rendez-vous"
                         className={cn(
-                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-100 active:text-gray-900 rounded-lg",
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-90 transition-all duration-150 active:duration-75 touch-manipulation active:bg-gray-100 active:text-gray-900 rounded-lg",
                             (pathname.startsWith("/pro/rendez-vous")) ? "text-emerald-600" : "text-gray-400"
                         )}
                     >
@@ -491,7 +503,7 @@ export function ProSidebar({
                     <button
                         onClick={() => setMobileOpen(true)}
                         className={cn(
-                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-95 transition-all duration-200 touch-manipulation active:bg-gray-100 active:text-gray-900 rounded-lg text-gray-400 hover:text-gray-600"
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-90 transition-all duration-150 active:duration-75 touch-manipulation active:bg-gray-100 active:text-gray-900 rounded-lg text-gray-400 hover:text-gray-600"
                         )}
                     >
                         <Menu className="w-6 h-6" />

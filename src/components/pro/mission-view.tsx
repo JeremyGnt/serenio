@@ -46,6 +46,7 @@ import type { SituationType } from "@/types/intervention"
 import { ClientChatWrapper } from "@/components/chat/client-chat-wrapper"
 import { MissionStepper } from "@/components/pro/mission-stepper"
 import { MissionClientChatButton } from "@/components/pro/mission-client-chat-button"
+import { MissionQuickAction } from "@/components/pro/mission-quick-action"
 import { cn } from "@/lib/utils"
 
 // Import MissionMap dynamically to avoid SSR issues with Leaflet
@@ -524,9 +525,13 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                         currentUserId={currentUserId}
                         isOpen={isChatOpen}
                         onOpenChange={setIsChatOpen}
+                        hideFloatingButton={true}
                     />
                 )
             }
+
+            {/* Quick Action FAB - Mobile only */}
+            <MissionQuickAction interventionId={mission.id} status={mission.status} />
         </div >
     )
 }
