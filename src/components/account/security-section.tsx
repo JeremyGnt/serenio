@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Smartphone, Monitor, Clock, MapPin } from "lucide-react"
+import { Shield, Monitor, Clock, LogOut, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { logoutAllDevices } from "@/lib/account/actions"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
@@ -40,23 +40,31 @@ export function SecuritySection({ user }: SecuritySectionProps) {
 
   return (
     <div>
-      <h2 className="text-lg font-bold mb-1">Sécurité</h2>
-      <p className="text-sm text-muted-foreground mb-6">
-        Gérez la sécurité de votre compte
-      </p>
+      {/* Section Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+          <Shield className="w-5 h-5 text-blue-600" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Sécurité</h2>
+          <p className="text-sm text-muted-foreground">Gérez la sécurité de votre compte</p>
+        </div>
+      </div>
 
       {/* Informations du compte */}
       <div className="space-y-4 mb-8">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
           Activité du compte
         </h3>
-        
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
-            <Clock className="w-5 h-5 text-muted-foreground" />
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
+              <Clock className="w-5 h-5 text-gray-500" />
+            </div>
             <div>
-              <div className="text-sm font-medium">Compte créé le</div>
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-muted-foreground">Compte créé le</div>
+              <div className="text-sm font-medium text-gray-900">
                 {createdAt ? createdAt.toLocaleDateString("fr-FR", {
                   day: "numeric",
                   month: "long",
@@ -66,11 +74,13 @@ export function SecuritySection({ user }: SecuritySectionProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
-            <Monitor className="w-5 h-5 text-muted-foreground" />
+          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
+              <Monitor className="w-5 h-5 text-gray-500" />
+            </div>
             <div>
-              <div className="text-sm font-medium">Dernière connexion</div>
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-muted-foreground">Dernière connexion</div>
+              <div className="text-sm font-medium text-gray-900">
                 {lastSignIn ? lastSignIn.toLocaleDateString("fr-FR", {
                   day: "numeric",
                   month: "long",
@@ -86,38 +96,44 @@ export function SecuritySection({ user }: SecuritySectionProps) {
 
       {/* Sessions actives */}
       <div className="space-y-4 mb-8">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
           Session actuelle
         </h3>
-        
-        <div className="flex items-center gap-3 p-4 border border-border rounded-lg">
-          <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
-            <Monitor className="w-5 h-5 text-emerald-600" />
+
+        <div className="flex items-center gap-4 p-4 bg-emerald-50/50 rounded-xl border border-emerald-100">
+          <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+            <Monitor className="w-6 h-6 text-emerald-600" />
           </div>
           <div className="flex-1">
-            <div className="text-sm font-medium">Cet appareil</div>
+            <div className="text-sm font-medium text-gray-900">Cet appareil</div>
             <div className="text-xs text-muted-foreground">
               Actuellement connecté
             </div>
           </div>
-          <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs text-emerald-600 font-medium">Actif</span>
+          </div>
         </div>
       </div>
 
       {/* Actions de sécurité */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
           Actions de sécurité
         </h3>
 
         {success && (
-          <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-sm text-emerald-700">
-            Tous les appareils ont été déconnectés
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-100">
+            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+              <CheckCircle className="w-4 h-4 text-emerald-600" />
+            </div>
+            <span className="text-sm font-medium text-emerald-700">Tous les appareils ont été déconnectés</span>
           </div>
         )}
 
         {error && (
-          <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-sm text-red-700">
+          <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700">
             {error}
           </div>
         )}
@@ -126,12 +142,12 @@ export function SecuritySection({ user }: SecuritySectionProps) {
           variant="outline"
           onClick={handleLogoutAll}
           disabled={loading}
-          className="h-12"
+          className="h-12 px-6 border-gray-200 hover:border-gray-300 hover:bg-gray-50 active:scale-95 transition-all duration-200 touch-manipulation"
         >
+          <LogOut className="w-4 h-4 mr-2" />
           {loading ? "Déconnexion..." : "Déconnecter tous les appareils"}
         </Button>
       </div>
     </div>
   )
 }
-

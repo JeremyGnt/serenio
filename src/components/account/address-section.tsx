@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { MapPin, Search, Loader2, CheckCircle } from "lucide-react"
+import { MapPin, Search, Loader2, CheckCircle, Navigation } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -125,19 +125,25 @@ export function AddressSection({ user }: AddressSectionProps) {
 
   return (
     <div>
-      <h2 className="text-xl sm:text-2xl font-bold mb-2">Adresse</h2>
-      <p className="text-sm sm:text-base text-muted-foreground mb-8">
-        Votre adresse pour les interventions
-      </p>
+      {/* Section Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-lg bg-violet-100 flex items-center justify-center">
+          <MapPin className="w-5 h-5 text-violet-600" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Adresse</h2>
+          <p className="text-sm text-muted-foreground">Votre adresse pour les interventions</p>
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Champ adresse unifié avec autocomplétion */}
-        <div className="space-y-2" ref={wrapperRef}>
-          <Label htmlFor="street" className="text-sm font-medium">
+        <div className="space-y-2 relative" ref={wrapperRef}>
+          <Label htmlFor="street" className="text-sm font-medium text-gray-700">
             Adresse
           </Label>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               id="street"
               type="text"
@@ -150,16 +156,16 @@ export function AddressSection({ user }: AddressSectionProps) {
               }}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               placeholder="Tapez pour rechercher une adresse..."
-              className="h-12 sm:h-14 pl-10 text-base"
+              className="h-12 pl-11 text-base border-gray-200 focus:border-violet-300 focus:ring-violet-200"
             />
             {isSearching && (
-              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
+              <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />
             )}
           </div>
 
           {/* Liste des suggestions */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute z-50 w-full max-w-lg bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden mt-1">
+            <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden mt-1">
               {suggestions.map((suggestion, index) => (
                 <button
                   key={index}
@@ -167,8 +173,10 @@ export function AddressSection({ user }: AddressSectionProps) {
                   onClick={() => selectSuggestion(suggestion)}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-all duration-200 border-b border-gray-100 last:border-0 touch-manipulation active:bg-gray-100 active:duration-75"
                 >
-                  <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span className="text-sm truncate">{suggestion.label}</span>
+                  <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center flex-shrink-0">
+                    <Navigation className="w-4 h-4 text-violet-600" />
+                  </div>
+                  <span className="text-sm truncate text-gray-700">{suggestion.label}</span>
                 </button>
               ))}
             </div>
@@ -178,55 +186,61 @@ export function AddressSection({ user }: AddressSectionProps) {
         {/* Code postal & Ville */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="postalCode" className="text-sm font-medium">Code postal</Label>
+            <Label htmlFor="postalCode" className="text-sm font-medium text-gray-700">Code postal</Label>
             <PostalCodeInput
               id="postalCode"
               value={postalCode}
               onChange={(value) => { setPostalCode(value); setSuccess(false) }}
               placeholder="69003"
-              className="h-12 sm:h-14 text-base"
+              className="h-12 text-base border-gray-200"
             />
           </div>
           <div className="sm:col-span-2 space-y-2">
-            <Label htmlFor="city" className="text-sm font-medium">Ville</Label>
+            <Label htmlFor="city" className="text-sm font-medium text-gray-700">Ville</Label>
             <Input
               id="city"
               type="text"
               value={city}
               onChange={(e) => { setCity(e.target.value); setSuccess(false) }}
               placeholder="Lyon"
-              className="h-12 sm:h-14 text-base"
+              className="h-12 text-base border-gray-200"
             />
           </div>
         </div>
 
         {/* Pays */}
         <div className="space-y-2">
-          <Label htmlFor="country" className="text-sm font-medium">Pays</Label>
+          <Label htmlFor="country" className="text-sm font-medium text-gray-700">Pays</Label>
           <Input
             id="country"
             type="text"
             value={country}
             onChange={(e) => { setCountry(e.target.value); setSuccess(false) }}
             placeholder="France"
-            className="h-12 sm:h-14 text-base"
+            className="h-12 text-base border-gray-200 bg-gray-50"
           />
         </div>
 
         {success && (
-          <div className="flex items-center gap-2 p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700">
-            <CheckCircle className="w-5 h-5 flex-shrink-0" />
-            <span className="text-sm sm:text-base">Adresse mise à jour avec succès</span>
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-100">
+            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+              <CheckCircle className="w-4 h-4 text-emerald-600" />
+            </div>
+            <span className="text-sm font-medium text-emerald-700">Adresse mise à jour avec succès</span>
           </div>
         )}
 
         {error && (
-          <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-sm sm:text-base text-red-700">
+          <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700">
             {error}
           </div>
         )}
 
-        <Button type="submit" disabled={loading} className="w-full sm:w-auto h-12 sm:h-14 px-8 text-base">
+        <Button
+          type="submit"
+          disabled={loading}
+          className="h-12 px-8 text-base bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-all duration-200 touch-manipulation"
+        >
           {loading ? "Enregistrement..." : "Enregistrer l'adresse"}
         </Button>
       </form>

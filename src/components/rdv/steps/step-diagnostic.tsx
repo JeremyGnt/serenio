@@ -258,7 +258,7 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
               min="0"
               max="50"
               value={diagnostic.floorNumber || ""}
-              onChange={(e) => onUpdate({ floorNumber: parseInt(e.target.value) || undefined })}
+              onChange={(e) => onUpdate({ floorNumber: parseInt(e.target.value, 10) || undefined })}
               placeholder="Ex: 3"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />

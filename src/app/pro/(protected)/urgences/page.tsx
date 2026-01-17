@@ -1,5 +1,5 @@
 import { Siren } from "lucide-react"
-import { getPendingInterventions, getArtisanAvailability, getArtisanSettings } from "@/lib/interventions"
+import { getPendingInterventions, getArtisanData } from "@/lib/interventions"
 import { UrgentRequestsList } from "@/components/pro/urgent-requests-list"
 import { getUser } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
@@ -16,10 +16,10 @@ export default async function UrgencesPage() {
         redirect("/login?redirect=/pro")
     }
 
-    const [pendingInterventions, isAvailable, artisanSettings] = await Promise.all([
+    // ⚡ OPTIMISÉ: 2 appels parallèles au lieu de 3 séquentiels
+    const [pendingInterventions, artisanData] = await Promise.all([
         getPendingInterventions(),
-        getArtisanAvailability(),
-        getArtisanSettings()
+        getArtisanData()
     ])
 
     return (
@@ -27,9 +27,9 @@ export default async function UrgencesPage() {
             {/* Dashboard des urgences */}
             <UrgentRequestsList
                 initialInterventions={pendingInterventions}
-                isAvailable={isAvailable}
+                isAvailable={artisanData.isAvailable}
                 userId={user.id}
-                artisanSettings={artisanSettings}
+                artisanSettings={artisanData.settings}
             />
         </div>
     )

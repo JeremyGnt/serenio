@@ -99,8 +99,8 @@ export async function updateAddress(data: {
 export async function updateUserPassword(newPassword: string): Promise<ActionResult> {
   const supabase = await createClient()
 
-  if (!newPassword || newPassword.length < 6) {
-    return { success: false, error: "Le mot de passe doit contenir au moins 6 caractères" }
+  if (!newPassword || newPassword.length < 8) {
+    return { success: false, error: "Le mot de passe doit contenir au moins 8 caractères" }
   }
 
   const { error } = await supabase.auth.updateUser({ password: newPassword })

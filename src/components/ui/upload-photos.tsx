@@ -90,7 +90,7 @@ export function UploadPhotos({
 
       // Créer l'objet preview
       const previewUrl = URL.createObjectURL(file)
-      const photoId = `preview_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+      const photoId = `preview_${Date.now()}_${crypto.randomUUID().substring(0, 8)}`
 
       newPhotos.push({
         id: photoId,

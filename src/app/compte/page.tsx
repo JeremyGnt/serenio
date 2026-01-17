@@ -17,39 +17,34 @@ export default async function AccountPage() {
     redirect("/login?redirect=/compte")
   }
 
+  const firstName = user.user_metadata?.first_name || ""
+  const lastName = user.user_metadata?.last_name || ""
+  const displayName = firstName || lastName
+    ? `${firstName} ${lastName}`.trim()
+    : user.email?.split("@")[0] || "Utilisateur"
+
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-secondary/30">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-          {/* Bouton retour */}
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground active:text-gray-900 mb-4 sm:mb-6 transition-all duration-200 active:scale-95 touch-manipulation"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Retour à l'accueil</span>
-          </Link>
-
-          {/* Header de page */}
-          <div className="flex items-center gap-3 mb-6 sm:mb-8">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <User className="w-6 h-6 sm:w-7 sm:h-7 text-emerald-600" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Mon compte
-              </h1>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Gérez vos informations personnelles
-              </p>
-            </div>
+      <main className="min-h-screen bg-gray-50">
+        {/* Mobile Header - just back button */}
+        <div className="lg:hidden px-4 pt-4 pb-2">
+          <div className="flex items-center h-12">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 active:text-gray-900 transition-all duration-200 active:scale-95 touch-manipulation"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Retour</span>
+            </Link>
           </div>
+        </div>
 
-          <AccountTabs user={user} />
+        {/* Main Layout */}
+        <div className="lg:flex lg:min-h-[calc(100vh-4rem)]">
+          <AccountTabs user={user} displayName={displayName} />
         </div>
       </main>
     </>
   )
 }
-

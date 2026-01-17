@@ -41,7 +41,6 @@ export function LoginForm() {
       }
 
       router.push(result.redirectTo || redirectTo)
-      router.refresh()
     } catch {
       setError("Une erreur est survenue")
       setLoading(false)

@@ -82,56 +82,57 @@ export async function getPendingInterventions(): Promise<AnonymizedIntervention[
     }
 
     try {
-        // Récupérer les coordonnées et rayon de l'artisan
-        const { data: artisan } = await adminClient
-            .from("artisans")
-            .select("base_latitude, base_longitude, availability_radius_km")
-            .eq("id", user.id)
-            .single()
+        // ⚡ OPTIMISATION: Exécuter les 3 requêtes en parallèle au lieu de séquentiellement
+        const [artisanResult, refusedResult, interventionsResult] = await Promise.all([
+            // Récupérer les coordonnées et rayon de l'artisan
+            adminClient
+                .from("artisans")
+                .select("base_latitude, base_longitude, availability_radius_km")
+                .eq("id", user.id)
+                .single(),
+            // Récupérer les IDs des interventions refusées par cet artisan
+            adminClient
+                .from("artisan_assignments")
+                .select("intervention_id")
+                .eq("artisan_id", user.id)
+                .eq("status", "refused"),
+            // Récupérer les interventions en attente avec diagnostic
+            adminClient
+                .from("intervention_requests")
+                .select(`
+                    id,
+                    tracking_number,
+                    latitude,
+                    longitude,
+                    address_city,
+                    address_postal_code,
+                    is_urgent,
+                    urgency_level,
+                    created_at,
+                    submitted_at,
+                    intervention_diagnostics (
+                        situation_type,
+                        situation_details,
+                        door_type,
+                        lock_type
+                    )
+                `)
+                .in("status", ["pending", "searching"])
+                .eq("intervention_type", "urgence")
+                .order("submitted_at", { ascending: false })
+                .limit(50)
+        ])
 
+        const artisan = artisanResult.data
         const artisanLat = artisan?.base_latitude
         const artisanLon = artisan?.base_longitude
         const radiusKm = artisan?.availability_radius_km || 20
 
-        // D'abord, récupérer les IDs des interventions refusées par cet artisan
-        const { data: refusedAssignments } = await adminClient
-            .from("artisan_assignments")
-            .select("intervention_id")
-            .eq("artisan_id", user.id)
-            .eq("status", "refused")
+        const refusedIds = refusedResult.data?.map(a => a.intervention_id) || []
+        const interventions = interventionsResult.data
 
-        const refusedIds = refusedAssignments?.map(a => a.intervention_id) || []
-
-        // Récupérer les interventions en attente avec diagnostic
-        const query = adminClient
-            .from("intervention_requests")
-            .select(`
-        id,
-        tracking_number,
-        latitude,
-        longitude,
-        address_city,
-        address_postal_code,
-        is_urgent,
-        urgency_level,
-        created_at,
-        submitted_at,
-        intervention_diagnostics (
-          situation_type,
-          situation_details,
-          door_type,
-          lock_type
-        )
-      `)
-            .in("status", ["pending", "searching"])
-            .eq("intervention_type", "urgence")
-            .order("submitted_at", { ascending: false })
-            .limit(50) // On récupère plus pour filtrer après
-
-        const { data: interventions, error } = await query
-
-        if (error || !interventions) {
-            console.error("Erreur récupération interventions:", error)
+        if (interventionsResult.error || !interventions) {
+            console.error("Erreur récupération interventions:", interventionsResult.error)
             return []
         }
 
@@ -1154,8 +1155,52 @@ export async function getRdvOpportunities(): Promise<RdvOpportunity[]> {
 // ============================================
 
 /**
+ * ⚡ OPTIMISÉ: Récupère toutes les données artisan en UNE SEULE requête
+ * Combine availability et settings pour éviter les requêtes multiples
+ */
+export interface ArtisanData {
+    isAvailable: boolean
+    settings: ArtisanSettings | null
+}
+
+export async function getArtisanData(): Promise<ArtisanData> {
+    const supabase = await createClient()
+    const adminClient = createAdminClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { isAvailable: false, settings: null }
+    }
+
+    try {
+        const { data: artisan } = await adminClient
+            .from("artisans")
+            .select("is_available, availability_radius_km, base_latitude, base_longitude")
+            .eq("id", user.id)
+            .single()
+
+        if (!artisan) {
+            return { isAvailable: false, settings: null }
+        }
+
+        return {
+            isAvailable: artisan.is_available ?? false,
+            settings: {
+                availabilityRadius: artisan.availability_radius_km || 20,
+                baseLatitude: artisan.base_latitude,
+                baseLongitude: artisan.base_longitude
+            }
+        }
+    } catch (error) {
+        console.error("Erreur getArtisanData:", error)
+        return { isAvailable: false, settings: null }
+    }
+}
+
+/**
+ * @deprecated Utiliser getArtisanData() à la place pour une meilleure performance
  * Récupère le statut de disponibilité de l'artisan connecté
- * Retourne true si disponible, false sinon
  */
 export async function getArtisanAvailability(): Promise<boolean> {
     const supabase = await createClient()
@@ -1188,6 +1233,7 @@ export type ArtisanSettings = {
 }
 
 /**
+ * @deprecated Utiliser getArtisanData() à la place pour une meilleure performance
  * Récupère les paramètres de l'artisan (rayon, position)
  */
 export async function getArtisanSettings(): Promise<ArtisanSettings | null> {

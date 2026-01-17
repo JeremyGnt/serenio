@@ -9,7 +9,7 @@ export function calculateDistance(
     lon2: number | null | undefined
 ): number | null {
     // If any coordinate is missing, return null
-    if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) {
+    if (lat1 === null || lat1 === undefined || lon1 === null || lon1 === undefined || lat2 === null || lat2 === undefined || lon2 === null || lon2 === undefined) {
         return null
     }
 
@@ -43,7 +43,7 @@ function toRadians(degrees: number): number {
  * @returns Formatted string like "2.1 km" or null if unavailable
  */
 export function formatDistance(distance: number | null): string | null {
-    if (distance == null) {
+    if (distance === null || distance === undefined) {
         return null
     }
 

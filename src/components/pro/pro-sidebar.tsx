@@ -275,18 +275,20 @@ export function ProSidebar({
                         <button
                             onClick={() => handleStatusChange(!available)}
                             disabled={isUpdating}
-                            className={cn(
-                                "w-10 h-5 rounded-full relative transition-all duration-200 shrink-0 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 active:scale-90 touch-manipulation",
-                                available
-                                    ? "bg-emerald-500"
-                                    : "bg-gray-300"
-                            )}
+                            className="p-1 -m-1 shrink-0 touch-manipulation active:scale-90 transition-transform duration-200"
                             title={available ? "Passer indisponible" : "Passer disponible"}
                         >
                             <div className={cn(
-                                "absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300",
-                                available ? "translate-x-5" : "translate-x-0.5"
-                            )} />
+                                "w-10 h-5 rounded-full relative transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20",
+                                available
+                                    ? "bg-emerald-500"
+                                    : "bg-gray-300"
+                            )}>
+                                <div className={cn(
+                                    "absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 pointer-events-none",
+                                    available ? "translate-x-5" : "translate-x-0.5"
+                                )} />
+                            </div>
                         </button>
                     </div>
                 </div>

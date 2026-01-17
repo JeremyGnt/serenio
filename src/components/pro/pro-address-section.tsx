@@ -43,7 +43,7 @@ export function ProAddressSection({ user }: ProAddressSectionProps) {
   const initialPostalCode = metadata.postal_code || ""
   const initialCity = metadata.city || ""
   const initialRadius = () => {
-    const val = parseInt(metadata.availability_radius_km || "20")
+    const val = parseInt(metadata.availability_radius_km || "20", 10)
     // Clamped between 1 and 25
     return Math.min(Math.max(val, 1), 25).toString()
   }
@@ -178,7 +178,7 @@ export function ProAddressSection({ user }: ProAddressSectionProps) {
       street,
       postalCode,
       city,
-      availabilityRadius: parseInt(radius),
+      availabilityRadius: parseInt(radius, 10),
       latitude,
       longitude,
     })
@@ -221,7 +221,7 @@ export function ProAddressSection({ user }: ProAddressSectionProps) {
         street,
         postalCode,
         city,
-        availabilityRadius: parseInt(newRadius),
+        availabilityRadius: parseInt(newRadius, 10),
         latitude,
         longitude,
       })
@@ -384,11 +384,11 @@ export function ProAddressSection({ user }: ProAddressSectionProps) {
 
                 <div className="px-1 py-1">
                   <Slider
-                    defaultValue={[parseInt(radius)]}
+                    defaultValue={[parseInt(radius, 10)]}
                     max={25}
                     min={1}
                     step={1}
-                    value={[parseInt(radius)]}
+                    value={[parseInt(radius, 10)]}
                     onValueChange={(vals) => handleRadiusChange(vals[0].toString())}
                     className="cursor-pointer py-3"
                   />
@@ -400,7 +400,7 @@ export function ProAddressSection({ user }: ProAddressSectionProps) {
                 <div className="h-[350px] w-full rounded-2xl overflow-hidden border border-gray-200 shadow-md transform transition-all duration-300 hover:shadow-lg">
                   <InterventionRadiusMap
                     center={[latitude, longitude]}
-                    radiusKm={parseInt(radius)}
+                    radiusKm={parseInt(radius, 10)}
                     className="h-full w-full"
                   />
                 </div>
