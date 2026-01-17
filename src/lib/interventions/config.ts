@@ -353,7 +353,7 @@ export const STATUS_LABELS: Record<string, { label: string; color: string; descr
   quote_accepted: { label: "Devis accepté", color: "green", description: "Intervention confirmée" },
   quote_refused: { label: "Devis refusé", color: "red", description: "Vous avez refusé le devis" },
   in_progress: { label: "En cours", color: "green", description: "Intervention en cours" },
-  completed: { label: "Terminé", color: "green", description: "Intervention terminée" },
+  completed: { label: "Terminé", color: "indigo", description: "Intervention terminée" },
   cancelled: { label: "Annulé", color: "gray", description: "Demande annulée" },
   disputed: { label: "Litige", color: "red", description: "Litige en cours de traitement" },
 }

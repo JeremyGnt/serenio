@@ -117,19 +117,20 @@ export function UrgentRequestModal({
 
     if (!isOpen) return null
 
+    const [isAccepting, setIsAccepting] = useState(false)
+
     const handleAccept = async () => {
         setLoading(true)
+        setIsAccepting(true)
         setError(null)
         const result = await acceptMission(intervention.id)
-        setLoading(false)
 
         if (result.success) {
-            // Redirection immédiate
-            // On n'appelle PAS onAccept() ici pour éviter que la modal ne se ferme 
-            // et que le composant ne se démonte avant la redirection.
-            // Le changement de page fera le travail de nettoyage.
+            // Keep loading/accepting true during redirect
             router.push(`/pro/mission/${intervention.trackingNumber}`)
         } else {
+            setLoading(false)
+            setIsAccepting(false)
             setError(result.error || "Erreur lors de l'acceptation")
         }
     }
@@ -357,6 +358,27 @@ export function UrgentRequestModal({
                     <p className="text-gray-600">
                         L'annonce ne vous sera plus proposée.
                     </p>
+                </div>
+            </div>
+        )
+    }
+
+    if (isAccepting) {
+        return (
+            <div className="fixed inset-0 z-[80] flex items-center justify-center bg-white/60 backdrop-blur-md animate-in fade-in duration-300">
+                <div className="flex flex-col items-center gap-4 p-8 bg-white/80 rounded-2xl shadow-2xl border border-white/50 backdrop-blur-xl">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full animate-pulse" />
+                        <Loader2 className="w-12 h-12 text-emerald-600 animate-spin relative z-10" />
+                    </div>
+                    <div className="text-center space-y-1">
+                        <p className="text-lg font-semibold text-gray-900">
+                            Acceptation de la mission...
+                        </p>
+                        <p className="text-sm text-gray-500">
+                            Création de l'espace d'intervention
+                        </p>
+                    </div>
                 </div>
             </div>
         )

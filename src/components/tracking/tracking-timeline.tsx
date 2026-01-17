@@ -56,12 +56,12 @@ export function TrackingTimeline({ history, compact = false }: TrackingTimelineP
           <div key={entry.id} className="relative pb-6 last:pb-0">
             {/* Ligne verticale de connexion - positionnée pour relier les cercles */}
             {!isLastItem && !showSeparator && (
-              <div className="absolute left-[6px] top-5 -bottom-2 w-0.5 bg-gray-200" />
+              <div className="absolute left-[7px] top-5 -bottom-2 w-0.5 bg-gray-200" />
             )}
 
             {/* Cas spécial separator avec ligne pointillée */}
             {showSeparator && (
-              <div className="absolute left-[6px] top-5 -bottom-2 w-0.5 border-l-2 border-dotted border-gray-300" />
+              <div className="absolute left-[7px] top-5 -bottom-2 w-0.5 border-l-2 border-dotted border-gray-300" />
             )}
 
             <div className="flex gap-4 relative">
@@ -76,7 +76,7 @@ export function TrackingTimeline({ history, compact = false }: TrackingTimelineP
               {/* Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-0.5">
-                  <p className={`font-medium text-sm truncate pr-2 ${index === 0 ? "text-gray-900" : "text-gray-600"}`}>
+                  <p className={`${index === 0 ? "font-bold text-gray-900" : "font-medium text-gray-600"} text-sm truncate pr-2`}>
                     {statusInfo.label}
                   </p>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">

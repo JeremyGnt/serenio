@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Shield, LogIn, UserPlus, LayoutDashboard } from "lucide-react"
+import { Shield, LogIn, UserPlus, LayoutDashboard, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { UserMenu } from "@/components/auth/user-menu"
 import { getUser } from "@/lib/supabase/server"
@@ -15,7 +15,12 @@ import { getTotalUnreadCount } from "@/lib/chat/actions"
 
 // ...
 
-export async function Header() {
+interface HeaderProps {
+  backHref?: string
+  backLabel?: string
+}
+
+export async function Header({ backHref, backLabel }: HeaderProps = {}) {
   const user = await getUser()
   const isAdmin = user && ADMIN_EMAILS.includes(user.email || "")
   const isArtisan = user?.user_metadata?.role === "artisan" || user?.user_metadata?.role === "artisan_pending"
@@ -37,30 +42,64 @@ export async function Header() {
 
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-border">
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 h-14 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 font-bold text-lg active:scale-95 transition-all duration-200 ease-out active:duration-75 touch-manipulation">
-            {/* Logo seul sur mobile (< sm) */}
-            <Image
-              src="/logo.svg"
-              alt="Serenio"
-              width={28}
-              height={28}
-              className="sm:hidden"
-            />
+          {/* Logo & Navigation gauche */}
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2 font-bold text-lg active:scale-95 transition-all duration-200 ease-out active:duration-75 touch-manipulation">
+              {backHref ? (
+                <>
+                  <Image
+                    src="/logo.svg"
+                    alt="Serenio"
+                    width={28}
+                    height={28}
+                  />
+                  <span className="hidden lg:inline">Serenio</span>
+                </>
+              ) : (
+                <>
+                  {/* Logo seul sur mobile (< sm) */}
+                  <Image
+                    src="/logo.svg"
+                    alt="Serenio"
+                    width={28}
+                    height={28}
+                    className="sm:hidden"
+                  />
 
-            {/* Texte seul sur tablette (sm à lg) */}
-            <span className="hidden sm:inline lg:hidden">Serenio</span>
+                  {/* Texte seul sur tablette (sm à lg) */}
+                  <span className="hidden sm:inline lg:hidden">Serenio</span>
 
-            {/* Logo + Texte sur desktop (lg+) */}
-            <Image
-              src="/logo.svg"
-              alt="Serenio"
-              width={28}
-              height={28}
-              className="hidden lg:block"
-            />
-            <span className="hidden lg:inline">Serenio</span>
-          </Link>
+                  {/* Logo + Texte sur desktop (lg+) */}
+                  <Image
+                    src="/logo.svg"
+                    alt="Serenio"
+                    width={28}
+                    height={28}
+                    className="hidden lg:block"
+                  />
+                  <span className="hidden lg:inline">Serenio</span>
+                </>
+              )}
+            </Link>
+
+            {backHref && (
+              <>
+                {/* Séparateur vertical premium */}
+                <div className="h-6 w-px bg-gray-200" />
+
+                {/* Bouton Retour intégré au header */}
+                <Link
+                  href={backHref}
+                  className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200 active:scale-95 touch-manipulation"
+                >
+                  <div className="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
+                    <ArrowLeft className="w-4 h-4" />
+                  </div>
+                  <span className="hidden sm:inline">{backLabel || "Retour"}</span>
+                </Link>
+              </>
+            )}
+          </div>
 
           {/* Navigation */}
           <nav className="flex items-center gap-2 sm:gap-3">

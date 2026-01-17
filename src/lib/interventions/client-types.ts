@@ -7,33 +7,33 @@ export interface UserRequest {
     trackingNumber: string
     interventionType: "urgence" | "rdv"
     status: string
-    
+
     // Service
     serviceType?: {
         name: string
         icon: string
     }
-    
+
     // Localisation
     city: string
     postalCode: string
-    
+
     // Planning (pour RDV)
     scheduledDate?: string
     scheduledTimeStart?: string
     scheduledTimeEnd?: string
-    
+
     // Prix estimé
     estimatedPriceMin?: number
     estimatedPriceMax?: number
-    
+
     // Artisan assigné
     artisan?: {
         companyName: string
         phone?: string
         rating?: number
     }
-    
+
     // Timestamps
     createdAt: string
     submittedAt?: string

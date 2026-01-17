@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { WifiOff } from "lucide-react"
+import { WifiOff, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { PriceScenarioDisplay, SituationType, DiagnosticAnswers } from "@/types/intervention"
@@ -99,6 +99,9 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
     const [error, setError] = useState("")
     const { submitInBackground } = useInterventionSubmission()
 
+    // Ref pour traquer les photos et nettoyer les URLs au démontage
+    const photosRef = useRef<PhotoPreview[]>([])
+
     // Hook de sauvegarde automatique
     const {
         formState,
@@ -134,6 +137,22 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
         updateForm(updates)
         setError("")
     }
+
+    // Mettre à jour la ref quand les photos changent
+    useEffect(() => {
+        photosRef.current = formState.photos
+    }, [formState.photos])
+
+    // Nettoyer les URLs au démontage du composant global (UrgenceFlow)
+    useEffect(() => {
+        return () => {
+            photosRef.current.forEach(photo => {
+                if (photo.previewUrl.startsWith("blob:")) {
+                    URL.revokeObjectURL(photo.previewUrl)
+                }
+            })
+        }
+    }, [])
 
     // Régénérer les URLs des photos après restauration IDB
     useEffect(() => {
@@ -478,11 +497,14 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
         // Stocker le tracking pour redirection future (bannière landing, bouton SOS)
         setActiveTracking(trackingNumber)
 
-        // Nettoyer le brouillon local
-        clearDraft()
-
         // Rediriger immédiatement vers la page de suivi
         router.push(`/suivi/${trackingNumber}`)
+
+        // Nettoyer le brouillon local après un court délai pour éviter 
+        // que l'interface ne repasse à l'étape 1 pendant la navigation
+        setTimeout(() => {
+            clearDraft()
+        }, 1000)
     }
 
     // Trouver le scénario de prix correspondant
@@ -660,6 +682,25 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
                     )} */}
                 </div>
             </footer>
+            {/* Premium Loading Overlay */}
+            {loading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-md animate-in fade-in duration-300">
+                    <div className="flex flex-col items-center gap-4 p-8 bg-white/80 rounded-2xl shadow-2xl border border-white/50 backdrop-blur-xl">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full animate-pulse" />
+                            <Loader2 className="w-12 h-12 text-blue-600 animate-spin relative z-10" />
+                        </div>
+                        <div className="text-center space-y-1">
+                            <p className="text-lg font-semibold text-gray-900">
+                                {currentStepId === "contact" ? "Création de votre dossier..." : "Finalisation en cours..."}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                                Veuillez patienter quelques instants
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
             <ScrollToTop />
         </div>
     )

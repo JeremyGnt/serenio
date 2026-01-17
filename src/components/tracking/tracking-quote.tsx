@@ -51,14 +51,13 @@ export function TrackingQuote({ quote, interventionId }: TrackingQuoteProps) {
   const isRefused = quote.status === "refused"
 
   return (
-    <div className={`rounded-xl border p-4 ${
-      isAccepted ? "bg-green-50 border-green-200" :
-      isRefused ? "bg-red-50 border-red-200" :
-      "bg-white border-gray-200"
-    }`}>
+    <div className={`rounded-2xl border p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300 ${isAccepted ? "bg-emerald-50/50 border-emerald-200" :
+      isRefused ? "bg-red-50/50 border-red-200" :
+        "bg-white border-gray-100"
+      }`}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-          <FileText className="w-5 h-5" />
+          <FileText className="w-5 h-5 text-emerald-600" />
           Devis #{quote.quoteNumber}
         </h2>
         {isAccepted && (
@@ -96,7 +95,7 @@ export function TrackingQuote({ quote, interventionId }: TrackingQuoteProps) {
             <span>{formatPrice(quote.partsFeeCents)} €</span>
           </div>
         )}
-        
+
         <div className="border-t border-gray-200 pt-2 mt-2">
           <div className="flex justify-between text-muted-foreground">
             <span>Sous-total HT</span>

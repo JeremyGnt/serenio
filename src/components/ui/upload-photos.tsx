@@ -57,30 +57,12 @@ export function UploadPhotos({
   const [error, setError] = useState<string | null>(null)
   const dragCounterRef = useRef(0)
 
-  // Nettoyer les URLs d'objets au démontage
-  useEffect(() => {
-    return () => {
-      photos.forEach(photo => {
-        if (photo.previewUrl.startsWith("blob:")) {
-          URL.revokeObjectURL(photo.previewUrl)
-        }
-      })
-    }
-  }, []) // Empty dependency array = run on unmount only (for the initial batch) - actually ideally we track all created URLs.
+  // CHANGE: Nous ne nettoyons plus les URLs au démontage du composant
+  // car cela casse la persistance des images lors de la navigation entre les étapes (ex: UrgenceFlow).
+  // Le composant parent (UrgenceFlow) est responsable du nettoyage final.
 
-  // Better approach: Cleanup purely on unmount based on current ref or just trust the browser? 
-  // React best practice: Cleanup effect should revoke what IT created. But here we have state.
-  // Let's revoke on unmount for all current photos.
-  useEffect(() => {
-    const currentPhotos = photos;
-    return () => {
-      currentPhotos.forEach(p => {
-        if (p.previewUrl.startsWith("blob:")) {
-          URL.revokeObjectURL(p.previewUrl)
-        }
-      })
-    }
-  }, [photos])
+  // Cependant, nous nous assurons que si une photo est supprimée EXPLICITEMENT,
+  // son URL est révoquée (déjà géré dans removePhoto et processFiles via validation).
 
 
   // ============================================
@@ -264,9 +246,14 @@ export function UploadPhotos({
           </div>
 
           <p className="text-gray-600 mb-2 font-medium">
-            {isDragging
-              ? "Déposez vos photos ici"
-              : "Glissez-déposez ou cliquez pour ajouter"}
+            {isDragging ? (
+              "Déposez vos photos ici"
+            ) : (
+              <>
+                <span className="hidden sm:inline">Glissez-déposez ou </span>
+                Cliquez pour ajouter
+              </>
+            )}
           </p>
           <p className="text-sm text-muted-foreground">
             JPG, PNG ou WebP • Max {STORAGE_CONFIG.maxFileSizeMB} Mo • {photos.length}/{maxPhotos} photos
@@ -286,7 +273,7 @@ export function UploadPhotos({
 
       {/* Photos sélectionnées */}
       {photos.length > 0 && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
           {photos.map((photo) => (
             <PhotoThumbnail
               key={photo.id}
