@@ -188,14 +188,20 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
         setTimeout(() => setRefreshing(false), 1000)
     }, [router])
 
-    // Supabase Realtime subscription pour les mises à jour de l'intervention
+    // Polling de secours : Uniquement si PAS connecté en realtime
     useEffect(() => {
-        if (isSnapshot) return // Ne pas se connecter si c'est un snapshot
+        if (isSnapshot || isConnected) return
 
-        // Fallback: Polling toutes les 10 secondes pour garantir la mise à jour
         const pollInterval = setInterval(() => {
             router.refresh()
         }, 10000)
+
+        return () => clearInterval(pollInterval)
+    }, [isSnapshot, isConnected, router])
+
+    // Supabase Realtime subscription pour les mises à jour de l'intervention
+    useEffect(() => {
+        if (isSnapshot) return // Ne pas se connecter si c'est un snapshot
 
         const channel = supabase
             .channel(`tracking:${intervention.id}`)
@@ -208,10 +214,6 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                     filter: `id=eq.${intervention.id}`
                 },
                 (payload: RealtimePostgresChangesPayload<InterventionPayload>) => {
-                    const updated = payload.new as InterventionPayload
-
-                    // On rafraîchit quoi qu'il arrive si le statut change
-                    // On compare avec la ref actuelle ou on trigger juste le refresh
                     handleRefresh()
                 }
             )
@@ -235,10 +237,10 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
         channelRef.current = channel
 
         return () => {
-            clearInterval(pollInterval)
             if (channelRef.current) {
                 supabase.removeChannel(channelRef.current)
             }
+            setIsConnected(false)
         }
     }, [intervention.id, handleRefresh, isSnapshot])
 

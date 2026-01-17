@@ -153,8 +153,7 @@ export function Hero({ isLoggedIn }: HeroProps) {
       <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-red-100/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
       <div className={cn(
-        "relative px-4 pb-12 md:pb-20 transition-all duration-300",
-        activeTrackingNumber ? "pt-2 md:pt-4" : "pt-10 md:pt-16"
+        "relative px-4 pb-12 md:pb-20 pt-10 md:pt-16 transition-all duration-300"
       )}>
         <div className="max-w-4xl mx-auto">
           {/* Active Tracking Banner - Affiché si une demande est en cours */}

@@ -58,6 +58,29 @@ export function UploadPhotos({
   const dragCounterRef = useRef(0)
 
   // Nettoyer les URLs d'objets au démontage
+  useEffect(() => {
+    return () => {
+      photos.forEach(photo => {
+        if (photo.previewUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(photo.previewUrl)
+        }
+      })
+    }
+  }, []) // Empty dependency array = run on unmount only (for the initial batch) - actually ideally we track all created URLs.
+
+  // Better approach: Cleanup purely on unmount based on current ref or just trust the browser? 
+  // React best practice: Cleanup effect should revoke what IT created. But here we have state.
+  // Let's revoke on unmount for all current photos.
+  useEffect(() => {
+    const currentPhotos = photos;
+    return () => {
+      currentPhotos.forEach(p => {
+        if (p.previewUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(p.previewUrl)
+        }
+      })
+    }
+  }, [photos])
 
 
   // ============================================

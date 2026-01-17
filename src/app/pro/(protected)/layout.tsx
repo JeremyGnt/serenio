@@ -44,19 +44,20 @@ export default async function ProLayout({
         redirect("/compte")
     }
 
-    // Fetch stats for approved artisan
-    const stats = await getArtisanStats()
-
-    // Fetch global unread messages count (user is approved artisan at this point)
-    const totalUnreadMessages = await getTotalUnreadCount(user.id)
-
-    // Fetch artisan availability status
+    // Parallelize independent data fetching
     const supabase = await createClient()
-    const { data: artisan } = await supabase
-        .from("artisans")
-        .select("is_available, company_name, city, postal_code, availability_radius_km")
-        .eq("id", user.id)
-        .single()
+
+    const [stats, totalUnreadMessages, artisanData] = await Promise.all([
+        getArtisanStats(),
+        getTotalUnreadCount(user.id),
+        supabase
+            .from("artisans")
+            .select("is_available, company_name, city, postal_code, availability_radius_km")
+            .eq("id", user.id)
+            .single()
+    ])
+
+    const artisan = artisanData.data
     const isAvailable = artisan?.is_available ?? true
 
     const firstName = user.user_metadata?.first_name || "Artisan"
