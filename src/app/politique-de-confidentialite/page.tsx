@@ -5,19 +5,27 @@ export const metadata: Metadata = {
     description: "Politique de confidentialité et protection des données personnelles de Serenio.",
 }
 
+"use client"
+
 import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 
 export default function PrivacyPage() {
+    const router = useRouter()
+
     return (
         <div className="max-w-4xl mx-auto px-4 py-8 md:py-12">
             <div className="mb-8">
-                <Button variant="ghost" asChild className="pl-0 hover:bg-transparent hover:text-slate-900 text-slate-500">
-                    <Link href="/" className="inline-flex items-center gap-2">
+                <Button
+                    variant="ghost"
+                    className="pl-0 hover:bg-transparent hover:text-slate-900 text-slate-500 active:scale-90 transition-transform duration-200 touch-manipulation"
+                    onClick={() => router.back()}
+                >
+                    <span className="inline-flex items-center gap-2">
                         <ArrowLeft className="w-4 h-4" />
-                        Retour à l'accueil
-                    </Link>
+                        Retour
+                    </span>
                 </Button>
             </div>
             <h1 className="text-3xl md:text-4xl font-bold mb-8">Politique de Confidentialité</h1>

@@ -22,42 +22,45 @@ export default function Loading() {
                     <div className="space-y-6">
                         {/* Tabs Skeleton */}
                         <div className="flex bg-white/50 backdrop-blur-sm p-1 rounded-2xl w-fit border border-gray-200/50">
-                            <Skeleton className="h-10 w-32 rounded-xl bg-white" />
-                            <Skeleton className="h-10 w-32 rounded-xl bg-transparent" />
+                            <Skeleton className="h-9 w-28 rounded-xl bg-white" />
+                            <Skeleton className="h-9 w-28 rounded-xl bg-transparent" />
                         </div>
 
-                        {/* Cards Skeleton */}
-                        <div className="space-y-4">
+                        {/* Cards Skeleton - Compact */}
+                        <div className="space-y-3">
                             {[1, 2, 3].map((i) => (
                                 <div
                                     key={i}
-                                    className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-6"
+                                    className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5"
                                 >
-                                    <div className="flex items-start gap-4 sm:gap-6">
+                                    <div className="flex gap-4 sm:gap-5">
                                         {/* Icon */}
-                                        <Skeleton className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl shrink-0" />
+                                        <Skeleton className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl shrink-0" />
 
-                                        <div className="flex-1 min-w-0 space-y-4">
+                                        <div className="flex-1 min-w-0">
                                             {/* Header */}
-                                            <div className="flex justify-between items-start">
+                                            <div className="flex justify-between items-start mb-3">
                                                 <div className="space-y-2">
-                                                    <Skeleton className="h-6 w-48" />
-                                                    <Skeleton className="h-4 w-20" />
+                                                    <Skeleton className="h-5 w-48" />
+                                                    <Skeleton className="h-3 w-20" />
                                                 </div>
                                                 <Skeleton className="h-6 w-24 rounded-full" />
                                             </div>
 
-                                            {/* Details Grid */}
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-gray-50/50 border border-gray-100/50 transition-colors">
-                                                <div className="flex items-center gap-3">
-                                                    <Skeleton className="w-8 h-8 rounded-lg" />
-                                                    <Skeleton className="h-4 w-24" />
+                                            {/* Details - Horizontal Flow */}
+                                            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <Skeleton className="w-3.5 h-3.5 rounded-full" />
+                                                    <Skeleton className="h-3 w-24" />
                                                 </div>
-                                                <div className="flex items-center gap-3">
-                                                    <Skeleton className="w-8 h-8 rounded-lg" />
-                                                    <Skeleton className="h-4 w-32" />
+                                                <div className="flex items-center gap-2">
+                                                    <Skeleton className="w-3.5 h-3.5 rounded-full" />
+                                                    <Skeleton className="h-3 w-32" />
                                                 </div>
                                             </div>
+
+                                            {/* Artisan Pill Skeleton */}
+                                            <Skeleton className="h-6 w-40 rounded-full" />
                                         </div>
                                     </div>
                                 </div>

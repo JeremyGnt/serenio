@@ -180,6 +180,20 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
         setLiveData(data)
     }, [data])
 
+    // Update local snapshot when data changes to ensure cache freshness
+    useEffect(() => {
+        if (liveData) {
+            try {
+                localStorage.setItem(
+                    `tracking_snapshot_${liveData.intervention.trackingNumber}`,
+                    JSON.stringify(liveData)
+                )
+            } catch (e) {
+                console.error("Failed to update tracking snapshot", e)
+            }
+        }
+    }, [liveData])
+
     const { intervention, artisan, quote, statusHistory } = liveData
     const [cancelling, setCancelling] = useState(false)
     const [showCancelDialog, setShowCancelDialog] = useState(false)
@@ -333,15 +347,15 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                         <div className="h-6 w-px bg-gray-200" />
 
                         {/* Bouton Retour intégré au header */}
-                        <Link
-                            href="/"
-                            className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200 active:scale-95 touch-manipulation"
+                        <button
+                            onClick={() => router.back()}
+                            className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200 active:scale-90 touch-manipulation"
                         >
                             <div className="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                                 <ArrowLeft className="w-4 h-4" />
                             </div>
                             <span className="hidden sm:inline">Retour</span>
-                        </Link>
+                        </button>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -371,106 +385,109 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                 </div>
             </header>
 
-            <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8 sm:pb-12 space-y-6">
+            <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-8 sm:pb-12 space-y-6">
 
 
 
                 {/* Contenu principal */}
                 <div className="space-y-6">
                     {/* Première ligne : Serrurier + Historique */}
-                    <div className="grid gap-6 lg:grid-cols-2">
-                        {/* Artisan Card */}
-                        {artisan && (
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300 p-5">
-                                <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                    <User className="w-5 h-5 text-emerald-600" />
-                                    Votre serrurier
-                                </h2>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-emerald-100 shadow-sm">
-                                        {artisan.avatarUrl ? (
-                                            <Image
-                                                src={artisan.avatarUrl}
-                                                alt={artisan.firstName}
-                                                width={56}
-                                                height={56}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <span className="text-xl font-bold text-emerald-600">
-                                                {artisan.firstName.charAt(0).toUpperCase()}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="font-semibold text-gray-900">{artisan.companyName}</p>
-                                        <p className="text-sm text-gray-500">{artisan.firstName}</p>
-                                        {(artisan.rating ?? 0) > 0 && (
-                                            <div className="flex items-center gap-1 mt-1">
-                                                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                                                <span className="text-sm font-medium">{artisan.rating?.toFixed(1)}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <Button asChild variant="outline" className="border-blue-100 text-blue-600 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-all duration-200 w-full sm:w-auto shadow-sm">
-                                            <a href={`tel:${artisan.phone}`}>
-                                                <Phone className="w-4 h-4 mr-2" />
-                                                Appeler
-                                            </a>
-                                        </Button>
-                                        <TrackingChatButton
-                                            interventionId={intervention.id}
-                                            currentUserId={currentUserId || ""}
-                                            onClick={() => setIsChatOpen(true)}
-                                            isOpen={isChatOpen}
-                                            className="w-full sm:w-auto shadow-sm"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Waiting for artisan - Pas affiché pour les brouillons */}
-                        {!artisan && !isCancelled && !isCompleted && intervention.status !== "draft" && (
-                            <div className="bg-amber-50/50 rounded-2xl border border-amber-100/50 p-5 shadow-[0_2px_8px_rgba(251,191,36,0.1)]">
-                                <h2 className="font-semibold text-amber-900 mb-4 flex items-center gap-2">
-                                    <User className="w-5 h-5 text-amber-600" />
-                                    Votre serrurier
-                                </h2>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse">
-                                        <Loader2 className="w-6 h-6 text-amber-600 animate-spin" />
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-amber-900">Recherche en cours...</p>
-                                        <p className="text-sm text-amber-700/80">
-                                            Nous recherchons le meilleur serrurier disponible
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Timeline - Caché pour annulé */}
-                        {!isCancelled && (
-                            <div
-                                className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300 p-5 cursor-pointer group relative"
-                                onClick={() => setShowHistoryDialog(true)}
-                            >
-                                <div className="absolute top-5 right-5 text-gray-300 group-hover:text-emerald-600 transition-colors duration-300">
-                                    <ArrowUpRight className="w-5 h-5" />
-                                </div>
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-                                        <Clock className="w-5 h-5 text-emerald-600" />
-                                        Historique
+                    {/* Masquer la grille si annulé sans artisan pour éviter une marge vide */}
+                    {(!isCancelled || artisan) && (
+                        <div className="grid gap-6 lg:grid-cols-2">
+                            {/* Artisan Card */}
+                            {artisan && (
+                                <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300 p-5">
+                                    <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                        <User className="w-5 h-5 text-emerald-600" />
+                                        Votre serrurier
                                     </h2>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-emerald-100 shadow-sm">
+                                            {artisan.avatarUrl ? (
+                                                <Image
+                                                    src={artisan.avatarUrl}
+                                                    alt={artisan.firstName}
+                                                    width={56}
+                                                    height={56}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <span className="text-xl font-bold text-emerald-600">
+                                                    {artisan.firstName.charAt(0).toUpperCase()}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="font-semibold text-gray-900">{artisan.companyName}</p>
+                                            <p className="text-sm text-gray-500">{artisan.firstName}</p>
+                                            {(artisan.rating ?? 0) > 0 && (
+                                                <div className="flex items-center gap-1 mt-1">
+                                                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                                                    <span className="text-sm font-medium">{artisan.rating?.toFixed(1)}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            <Button asChild variant="outline" className="border-blue-100 text-blue-600 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-all duration-200 w-full sm:w-auto shadow-sm">
+                                                <a href={`tel:${artisan.phone}`}>
+                                                    <Phone className="w-4 h-4 mr-2" />
+                                                    Appeler
+                                                </a>
+                                            </Button>
+                                            <TrackingChatButton
+                                                interventionId={intervention.id}
+                                                currentUserId={currentUserId || ""}
+                                                onClick={() => setIsChatOpen(true)}
+                                                isOpen={isChatOpen}
+                                                className="w-full sm:w-auto shadow-sm"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
-                                <TrackingTimeline history={statusHistory} compact={true} />
-                            </div>
-                        )}
-                    </div>
+                            )}
+
+                            {/* Waiting for artisan - Pas affiché pour les brouillons */}
+                            {!artisan && !isCancelled && !isCompleted && intervention.status !== "draft" && (
+                                <div className="bg-amber-50/50 rounded-2xl border border-amber-100/50 p-5 shadow-[0_2px_8px_rgba(251,191,36,0.1)]">
+                                    <h2 className="font-semibold text-amber-900 mb-4 flex items-center gap-2">
+                                        <User className="w-5 h-5 text-amber-600" />
+                                        Votre serrurier
+                                    </h2>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse">
+                                            <Loader2 className="w-6 h-6 text-amber-600 animate-spin" />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-amber-900">Recherche en cours...</p>
+                                            <p className="text-sm text-amber-700/80">
+                                                Nous recherchons le meilleur serrurier disponible
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Timeline - Caché pour annulé */}
+                            {!isCancelled && (
+                                <div
+                                    className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300 p-5 cursor-pointer group relative"
+                                    onClick={() => setShowHistoryDialog(true)}
+                                >
+                                    <div className="absolute top-5 right-5 text-gray-300 group-hover:text-emerald-600 transition-colors duration-300">
+                                        <ArrowUpRight className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                                            <Clock className="w-5 h-5 text-emerald-600" />
+                                            Historique
+                                        </h2>
+                                    </div>
+                                    <TrackingTimeline history={statusHistory} compact={true} />
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Devis (pleine largeur si présent) */}
                     {quote && <TrackingQuote quote={quote} interventionId={intervention.id} />}

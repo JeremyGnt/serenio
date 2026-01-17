@@ -44,93 +44,97 @@ export function DeleteAccountSection() {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Section Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-          <Trash2 className="w-5 h-5 text-red-600" />
-        </div>
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-semibold text-red-600">Supprimer mon compte</h2>
-          <p className="text-sm text-muted-foreground">Conformément au RGPD</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-red-600 flex items-center gap-3">
+            <Trash2 className="w-8 h-8 text-red-600" />
+            Supprimer mon compte
+          </h2>
+          <p className="text-muted-foreground mt-1 text-base">
+            Gérez la suppression de votre compte conformément au RGPD
+          </p>
         </div>
       </div>
 
-      {/* Info RGPD */}
-      <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl mb-5">
-        <div className="flex gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-            <Clock className="w-5 h-5 text-blue-600" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-blue-800 mb-1">Période de grâce de 30 jours</p>
-            <p className="text-sm text-blue-700 leading-relaxed">
-              Votre compte sera désactivé immédiatement mais vos données seront conservées pendant 30 jours.
-              Vous pourrez annuler la suppression en nous contactant durant cette période.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-4 bg-red-50 border border-red-100 rounded-xl mb-6">
-        <div className="flex gap-3">
-          <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
-            <ShieldAlert className="w-5 h-5 text-red-600" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-red-800 mb-2">Après 30 jours, la suppression sera définitive :</p>
-            <ul className="space-y-1.5 text-sm text-red-700">
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                Toutes vos données personnelles seront effacées
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                Votre historique d'interventions sera supprimé
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                Votre compte ne pourra pas être récupéré
-              </li>
-            </ul>
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        {/* Info RGPD */}
+        <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl mb-5">
+          <div className="flex gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <Clock className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-blue-800 mb-1">Période de grâce de 30 jours</p>
+              <p className="text-sm text-blue-700 leading-relaxed">
+                Votre compte sera désactivé immédiatement mais vos données seront conservées pendant 30 jours.
+                Vous pourrez annuler la suppression en nous contactant durant cette période.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="confirmation" className="text-sm font-medium text-red-600">
-            Tapez SUPPRIMER pour confirmer
-          </Label>
-          <Input
-            id="confirmation"
-            type="text"
-            value={confirmation}
-            onChange={(e) => setConfirmation(e.target.value.toUpperCase())}
-            placeholder="SUPPRIMER"
-            className="h-12 border-red-200 focus-visible:ring-red-200 focus:border-red-300"
-          />
+        <div className="p-4 bg-red-50 border border-red-100 rounded-xl mb-6">
+          <div className="flex gap-3">
+            <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+              <ShieldAlert className="w-5 h-5 text-red-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-red-800 mb-2">Après 30 jours, la suppression sera définitive :</p>
+              <ul className="space-y-1.5 text-sm text-red-700">
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                  Toutes vos données personnelles seront effacées
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                  Votre historique d'interventions sera supprimé
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                  Votre compte ne pourra pas être récupéré
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
 
-        {error && (
-          <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700">
-            {error}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="confirmation" className="text-sm font-medium text-red-600">
+              Tapez SUPPRIMER pour confirmer
+            </Label>
+            <Input
+              id="confirmation"
+              type="text"
+              value={confirmation}
+              onChange={(e) => setConfirmation(e.target.value.toUpperCase())}
+              placeholder="SUPPRIMER"
+              className="h-12 border-red-200 focus-visible:ring-red-200 focus:border-red-300 sm:max-w-xs"
+            />
           </div>
-        )}
 
-        <Button
-          variant="destructive"
-          onClick={handleDelete}
-          disabled={loading || confirmation !== "SUPPRIMER"}
-          className="h-12 px-6 active:scale-95 transition-all duration-200 touch-manipulation"
-        >
-          <AlertTriangle className="w-4 h-4 mr-2" />
-          {loading ? "Traitement..." : "Demander la suppression de mon compte"}
-        </Button>
+          {error && (
+            <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
-        <p className="text-xs text-muted-foreground">
-          Un email de confirmation vous sera envoyé avec les détails de la procédure.
-        </p>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={loading || confirmation !== "SUPPRIMER"}
+            className="h-12 px-6 active:scale-95 transition-all duration-200 touch-manipulation"
+          >
+            <AlertTriangle className="w-4 h-4 mr-2" />
+            {loading ? "Traitement..." : "Demander la suppression de mon compte"}
+          </Button>
+
+          <p className="text-xs text-muted-foreground">
+            Un email de confirmation vous sera envoyé avec les détails de la procédure.
+          </p>
+        </div>
       </div>
     </div>
   )

@@ -145,7 +145,6 @@ export function UserRequestsList({ requests, userId }: UserRequestsListProps) {
         const result = await deleteDraftIntervention(deletingId)
 
         if (result.success) {
-            // Also clear local draft data so /urgence page resets to step 1
             try {
                 await deleteDraft("serenio_draft_urgence_form")
                 localStorage.removeItem("serenio_pending_urgence_form")
@@ -231,73 +230,74 @@ export function UserRequestsList({ requests, userId }: UserRequestsListProps) {
                         return (
                             <div
                                 key={request.id}
-                                className="group relative bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-300 p-5 sm:p-6"
+                                className="group relative bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-300 p-4 sm:p-5"
                             >
                                 <Link
                                     href={isRdv ? `/rdv/suivi/${request.trackingNumber}` : `/suivi/${request.trackingNumber}`}
                                     className="block"
+                                    onClick={() => {
+                                        // Clear potentially stale snapshot to force fresh load and avoid "Searching..." flash
+                                        try {
+                                            localStorage.removeItem(`tracking_snapshot_${request.trackingNumber}`)
+                                        } catch (e) {
+                                            // Ignore storage errors
+                                        }
+                                    }}
                                 >
-                                    <div className="flex items-start gap-4 sm:gap-6">
-                                        {/* Status Icon Indicator */}
+                                    <div className="flex gap-4 sm:gap-5">
+                                        {/* Status Icon Indicator - Compact */}
                                         <div className={cn(
-                                            "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border transition-colors duration-300",
+                                            "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 border transition-all duration-300",
                                             isRdv
-                                                ? "bg-purple-50 border-purple-100 text-purple-600 group-hover:border-purple-200 group-hover:scale-105"
-                                                : "bg-red-50 border-red-100 text-red-600 group-hover:border-red-200 group-hover:scale-105"
+                                                ? "bg-purple-50 border-purple-100 text-purple-600 group-hover:border-purple-200"
+                                                : "bg-red-50 border-red-100 text-red-600 group-hover:border-red-200"
                                         )}>
-                                            <ServiceIcon className="w-6 h-6 sm:w-7 sm:h-7" />
+                                            <ServiceIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                                         </div>
 
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3 sm:mb-2">
+                                            {/* Header Row */}
+                                            <div className="flex items-start justify-between gap-2 mb-2">
                                                 <div>
-                                                    <h3 className="font-bold text-gray-900 text-base sm:text-lg tracking-tight group-hover:text-emerald-700 transition-colors">
+                                                    <h3 className="font-bold text-gray-900 text-sm sm:text-base tracking-tight group-hover:text-emerald-700 transition-colors">
                                                         {request.serviceType?.name || (isRdv ? "Intervention planifiée" : "Urgence")}
                                                     </h3>
-                                                    <p className="text-xs sm:text-sm font-mono text-gray-400 mt-1">
+                                                    <p className="text-xs font-mono text-gray-400 mt-0.5">
                                                         #{request.trackingNumber}
                                                     </p>
                                                 </div>
                                                 <StatusBadge status={request.status} />
                                             </div>
 
-                                            {/* Details Grid */}
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-500 mt-4 bg-gray-50/50 p-4 rounded-xl border border-gray-100/50">
-                                                <div className="flex items-center gap-2.5">
-                                                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm border border-gray-100 text-gray-400 shrink-0">
-                                                        <MapPin className="w-4 h-4" />
-                                                    </div>
-                                                    <span className="font-medium text-gray-700 truncate">{request.city}</span>
+                                            {/* Details - Minimalist Horizontal Flow */}
+                                            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-gray-500 mt-2">
+                                                <div className="flex items-center gap-1.5">
+                                                    <MapPin className="w-3.5 h-3.5 text-gray-400" />
+                                                    <span className="font-medium text-gray-700 truncate max-w-[120px]">{request.city}</span>
                                                 </div>
 
                                                 {(request.scheduledDate || request.createdAt) && (
-                                                    <div className="flex items-center gap-2.5">
-                                                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm border border-gray-100 text-gray-400 shrink-0">
-                                                            {request.scheduledDate ? <Calendar className="w-4 h-4 text-purple-500" /> : <Clock className="w-4 h-4" />}
-                                                        </div>
+                                                    <div className="flex items-center gap-1.5">
+                                                        {request.scheduledDate ? <Calendar className="w-3.5 h-3.5 text-purple-500" /> : <Clock className="w-3.5 h-3.5 text-gray-400" />}
                                                         <span className="font-medium text-gray-700">
                                                             {request.scheduledDate
                                                                 ? formatDate(request.scheduledDate)
-                                                                : `Créée ${formatRelativeDate(request.createdAt).toLowerCase()}`
+                                                                : `Il y a ${formatRelativeDate(request.createdAt).replace("Il y a ", "")}`
                                                             }
                                                         </span>
                                                     </div>
                                                 )}
 
                                                 {request.scheduledTimeStart && (
-                                                    <div className="flex items-center gap-2.5">
-                                                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm border border-gray-100 text-gray-400 shrink-0">
-                                                            <Clock className="w-4 h-4" />
-                                                        </div>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Clock className="w-3.5 h-3.5 text-gray-400" />
                                                         <span className="font-medium text-gray-700">{formatTime(request.scheduledTimeStart)}</span>
                                                     </div>
                                                 )}
 
                                                 {(request.estimatedPriceMin || request.estimatedPriceMax) && (
-                                                    <div className="flex items-center gap-2.5">
-                                                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm border border-gray-100 text-gray-400 shrink-0">
-                                                            <Euro className="w-4 h-4 text-emerald-600" />
-                                                        </div>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Euro className="w-3.5 h-3.5 text-emerald-600" />
                                                         <span className="font-medium text-gray-900">
                                                             {request.estimatedPriceMin}-{request.estimatedPriceMax}€
                                                         </span>
@@ -305,53 +305,46 @@ export function UserRequestsList({ requests, userId }: UserRequestsListProps) {
                                                 )}
                                             </div>
 
-                                            {/* Artisan Details */}
+                                            {/* Artisan Details - Compact Inline Pill */}
                                             {request.artisan && (
-                                                <div className="mt-4 flex items-center gap-4 p-3 rounded-xl bg-white border border-emerald-100/50 shadow-sm relative overflow-hidden group/artisan">
-                                                    <div className="absolute inset-0 bg-emerald-50/30 opacity-0 group-hover/artisan:opacity-100 transition-opacity" />
-
-                                                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center shrink-0 relative z-10">
-                                                        <Wrench className="w-5 h-5 text-emerald-700" />
+                                                <div className="mt-3 inline-flex items-center gap-2 pr-3 py-1 rounded-full bg-emerald-50/50 border border-emerald-100 hover:bg-emerald-50 transition-colors">
+                                                    <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center shrink-0">
+                                                        <Wrench className="w-3 h-3 text-emerald-700" />
                                                     </div>
-
-                                                    <div className="flex-1 min-w-0 relative z-10">
-                                                        <p className="text-sm font-semibold text-gray-900 truncate">
-                                                            {request.artisan.companyName}
-                                                        </p>
-                                                        {request.artisan.rating && (
-                                                            <div className="flex items-center gap-1 mt-0.5">
-                                                                <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                                                                <span className="text-xs font-semibold text-gray-600">{request.artisan.rating.toFixed(1)}</span>
-                                                                {request.artisan.phone && (
-                                                                    <span className="text-xs text-gray-400 ml-1">• {request.artisan.phone}</span>
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                                    <span className="text-xs font-semibold text-emerald-900 truncate max-w-[150px]">
+                                                        {request.artisan.companyName}
+                                                    </span>
+                                                    {request.artisan.rating && (
+                                                        <>
+                                                            <div className="w-px h-3 bg-emerald-200 mx-0.5" />
+                                                            <span className="flex items-center gap-1 text-xs font-medium text-emerald-700">
+                                                                <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                                                                {request.artisan.rating.toFixed(1)}
+                                                            </span>
+                                                        </>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Arrow Hover Effect */}
-                                        <div className="hidden sm:flex self-center pl-2">
-                                            <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-emerald-100 group-hover:text-emerald-700 transition-all duration-300">
-                                                <ChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
-                                            </div>
+                                        {/* Arrow Hover Effect - Subtle */}
+                                        <div className="hidden sm:flex self-center pl-1 text-gray-300 group-hover:text-emerald-600 sm:group-hover:translate-x-1 transition-all duration-300">
+                                            <ChevronRight className="w-5 h-5" />
                                         </div>
                                     </div>
                                 </Link>
 
                                 {/* Delete Draft Button */}
                                 {isDraft && (
-                                    <div className="absolute top-5 right-5 sm:relative sm:top-auto sm:right-auto sm:mt-4 sm:flex sm:justify-end">
+                                    <div className="absolute top-4 right-4 sm:relative sm:top-auto sm:right-auto sm:mt-2 sm:flex sm:justify-end">
                                         <Button
                                             variant="ghost"
-                                            size="sm"
-                                            className="h-8 px-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200"
+                                            size="icon"
+                                            className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full sm:w-auto sm:px-3 sm:rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200"
                                             onClick={(e) => handleDeleteClick(e, request.id)}
                                         >
-                                            <Trash2 className="w-4 h-4 mr-1.5" />
-                                            <span className="text-xs font-medium">Supprimer</span>
+                                            <Trash2 className="w-4 h-4 sm:mr-1.5" />
+                                            <span className="hidden sm:inline text-xs font-medium">Supprimer</span>
                                         </Button>
                                     </div>
                                 )}
@@ -410,7 +403,6 @@ export function UserRequestsList({ requests, userId }: UserRequestsListProps) {
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* Chat Drawer pour l'intervention active la plus récente */}
             {/* Chat Drawer pour l'intervention active la plus récente */}
             {(() => {
                 const activeRequest = requests.find(r => !["completed", "cancelled", "draft", "quote_refused"].includes(r.status))

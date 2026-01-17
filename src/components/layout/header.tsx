@@ -15,12 +15,15 @@ import { getTotalUnreadCount } from "@/lib/chat/actions"
 
 // ...
 
+import { HeaderBackButton } from "./header-back-button"
+
 interface HeaderProps {
   backHref?: string
   backLabel?: string
+  showBackButton?: boolean
 }
 
-export async function Header({ backHref, backLabel }: HeaderProps = {}) {
+export async function Header({ backHref, backLabel, showBackButton }: HeaderProps = {}) {
   const user = await getUser()
   const isAdmin = user && ADMIN_EMAILS.includes(user.email || "")
   const isArtisan = user?.user_metadata?.role === "artisan" || user?.user_metadata?.role === "artisan_pending"
@@ -35,6 +38,8 @@ export async function Header({ backHref, backLabel }: HeaderProps = {}) {
     ? await getTotalUnreadCount(user.id)
     : 0
 
+  const hasBack = backHref || showBackButton
+
   return (
     <>
       {/* Lier automatiquement les interventions anonymes au compte */}
@@ -45,7 +50,7 @@ export async function Header({ backHref, backLabel }: HeaderProps = {}) {
           {/* Logo & Navigation gauche */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2 font-bold text-lg active:scale-95 transition-all duration-200 ease-out active:duration-75 touch-manipulation">
-              {backHref ? (
+              {hasBack ? (
                 <>
                   <Image
                     src="/logo.svg"
@@ -82,21 +87,25 @@ export async function Header({ backHref, backLabel }: HeaderProps = {}) {
               )}
             </Link>
 
-            {backHref && (
+            {hasBack && (
               <>
                 {/* Séparateur vertical premium */}
                 <div className="h-6 w-px bg-gray-200" />
 
-                {/* Bouton Retour intégré au header */}
-                <Link
-                  href={backHref}
-                  className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200 active:scale-95 touch-manipulation"
-                >
-                  <div className="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
-                    <ArrowLeft className="w-4 h-4" />
-                  </div>
-                  <span className="hidden sm:inline">{backLabel || "Retour"}</span>
-                </Link>
+                {showBackButton ? (
+                  <HeaderBackButton label={backLabel} />
+                ) : backHref ? (
+                  /* Bouton Retour statique intégré au header */
+                  <Link
+                    href={backHref}
+                    className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200 active:scale-95 touch-manipulation"
+                  >
+                    <div className="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
+                      <ArrowLeft className="w-4 h-4" />
+                    </div>
+                    <span className="hidden sm:inline">{backLabel || "Retour"}</span>
+                  </Link>
+                ) : null}
               </>
             )}
           </div>
