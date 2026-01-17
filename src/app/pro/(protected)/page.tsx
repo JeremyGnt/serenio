@@ -23,10 +23,7 @@ export default async function ProPage() {
         supabase.from("artisans").select("availability_radius_km").eq("id", user.id).single().then(res => res.data)
     ])
 
-    // 🔴 Cas 3 : Si urgences disponibles → redirection immédiate
-    if (pendingInterventions.length > 0 && isAvailable) {
-        redirect("/pro/urgences")
-    }
+
 
     const firstName = user.user_metadata?.first_name || "Artisan"
 

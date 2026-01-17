@@ -26,13 +26,13 @@ export default async function AccountPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gray-50">
+      <main className="min-h-screen bg-gray-50 relative">
         {/* Mobile Header - just back button */}
         <div className="lg:hidden px-4 pt-4 pb-2">
           <div className="flex items-center h-12">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 active:text-gray-900 transition-all duration-200 active:scale-95 touch-manipulation"
+              className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 active:text-gray-900 transition-all duration-200 active:scale-90 touch-manipulation"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Retour</span>

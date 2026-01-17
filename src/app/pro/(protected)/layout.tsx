@@ -4,6 +4,7 @@ import { ProSidebar } from "@/components/pro/pro-sidebar"
 import { getArtisanStats } from "@/lib/interventions"
 import { getTotalUnreadCount } from "@/lib/chat/actions"
 import { getArtisanStatus } from "@/lib/auth/artisan-guard"
+import { AvailabilityProvider } from "@/components/pro/availability-provider"
 
 export default async function ProLayout({
     children,
@@ -65,24 +66,30 @@ export default async function ProLayout({
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <ProSidebar
-                urgentCount={stats.pendingCount}
-                opportunitiesCount={stats.opportunitiesCount}
-                firstName={firstName}
-                userId={user.id}
-                totalUnreadMessages={totalUnreadMessages}
-                isAvailable={isAvailable}
-                avatarUrl={avatarUrl}
-                companyName={artisan?.company_name}
-                addressCity={artisan?.city}
-                interventionRadius={artisan?.availability_radius_km}
-                activeMissionsCount={stats.activeMissionsCount}
-            />
+            <AvailabilityProvider userId={user.id} initialIsAvailable={isAvailable}>
+                <ProSidebar
+                    urgentCount={stats.pendingCount}
+                    opportunitiesCount={stats.opportunitiesCount}
+                    firstName={firstName}
+                    userId={user.id}
+                    totalUnreadMessages={totalUnreadMessages}
+                    // isAvailable prop is passed for initial state in sidebar if needed, 
+                    // but sidebar will now prefer context.
+                    // We keep passing it or remove it depending on sidebar implementation.
+                    // Let's keep passing it for now as we haven't updated sidebar yet.
+                    isAvailable={isAvailable}
+                    avatarUrl={avatarUrl}
+                    companyName={artisan?.company_name}
+                    addressCity={artisan?.city}
+                    interventionRadius={artisan?.availability_radius_km}
+                    activeMissionsCount={stats.activeMissionsCount}
+                />
 
-            {/* Main content - offset for sidebar */}
-            <main className="md:ml-72 pt-16 md:pt-0 pb-20 md:pb-0 min-h-screen">
-                {children}
-            </main>
+                {/* Main content - offset for sidebar */}
+                <main className="md:ml-72 pt-16 md:pt-0 pb-20 md:pb-0 min-h-screen">
+                    {children}
+                </main>
+            </AvailabilityProvider>
         </div>
     )
 }

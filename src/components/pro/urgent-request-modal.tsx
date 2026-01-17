@@ -125,7 +125,9 @@ export function UrgentRequestModal({
 
         if (result.success) {
             // Redirection immédiate
-            onAccept()
+            // On n'appelle PAS onAccept() ici pour éviter que la modal ne se ferme 
+            // et que le composant ne se démonte avant la redirection.
+            // Le changement de page fera le travail de nettoyage.
             router.push(`/pro/mission/${intervention.trackingNumber}`)
         } else {
             setError(result.error || "Erreur lors de l'acceptation")

@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation"
 import { Bell, Play, Loader2, Sparkles, MousePointerClick } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase/client"
-import { updateArtisanAvailability } from "@/lib/pro/actions"
 import { cn } from "@/lib/utils"
+import { useAvailability } from "@/components/pro/availability-provider"
 
 interface ProDashboardProps {
     isAvailable: boolean
@@ -24,8 +24,9 @@ export function ProDashboard({
     interventionRadius = 20
 }: ProDashboardProps) {
     const router = useRouter()
-    const [available, setAvailable] = useState(isAvailable)
-    const [loading, setLoading] = useState(false)
+    // Use context instead of local state
+    const { isAvailable: contextIsAvailable, toggleAvailability, isLoading } = useAvailability()
+    const available = contextIsAvailable
     const [isConnected, setIsConnected] = useState(false)
 
     // Realtime : surveiller les nouvelles urgences
@@ -45,7 +46,8 @@ export function ProDashboard({
                 (payload) => {
                     // Nouvelle urgence → redirection
                     if (payload.new) {
-                        router.push("/pro/urgences")
+                        // router.push("/pro/urgences")
+                        // Notification sonore ou visuelle simple à la place ?
                     }
                 }
             )
@@ -60,7 +62,7 @@ export function ProDashboard({
                     const newStatus = (payload.new as { status: string }).status
                     const newType = (payload.new as { intervention_type: string }).intervention_type
                     if ((newStatus === "pending" || newStatus === "searching") && newType === "urgence") {
-                        router.push("/pro/urgences")
+                        // router.push("/pro/urgences")
                     }
                 }
             )
@@ -73,46 +75,10 @@ export function ProDashboard({
         }
     }, [available, userId, router])
 
-    // Realtime : surveiller les changements de disponibilité
-    useEffect(() => {
-        const channel = supabase
-            .channel(`pro-dashboard-availability-${userId}`)
-            .on(
-                "postgres_changes",
-                {
-                    event: "UPDATE",
-                    schema: "public",
-                    table: "artisans",
-                    filter: `id=eq.${userId}`
-                },
-                (payload) => {
-                    const newAvailability = (payload.new as { is_available: boolean }).is_available
-                    setAvailable(newAvailability)
-                }
-            )
-            .subscribe()
-
-        return () => {
-            supabase.removeChannel(channel)
-        }
-    }, [userId])
+    // Removed local realtime availability subscription since context handles it
 
     const handleToggleAvailability = async () => {
-        const newStatus = !available
-        setLoading(true)
-        // Optimistic update
-        setAvailable(newStatus)
-
-        const result = await updateArtisanAvailability(newStatus)
-
-        if (result.success) {
-            router.refresh()
-        } else {
-            // Revert on failure
-            setAvailable(!newStatus)
-            console.error(result.error)
-        }
-        setLoading(false)
+        await toggleAvailability()
     }
 
     // 🟢 Cas 1 : Pro disponible, aucune urgence (ou Pro Indisponible - Affichage unifié)
@@ -136,7 +102,7 @@ export function ProDashboard({
 
                 {/* Availability Toggle - Large & Prominent */}
                 <div className={cn(
-                    "flex items-center gap-3 p-1.5 pl-4 pr-1.5 rounded-full border shadow-sm transition-all duration-300",
+                    "flex items-center gap-3 p-1.5 pl-4 pr-1.5 rounded-full border shadow-sm transition-all duration-100", // Reduced transition
                     available
                         ? "bg-white border-emerald-100 ring-4 ring-emerald-50/50"
                         : "bg-white border-gray-200"
@@ -154,18 +120,15 @@ export function ProDashboard({
                     </div>
                     <Button
                         onClick={handleToggleAvailability}
-                        disabled={loading}
                         size="sm"
                         className={cn(
-                            "rounded-full px-4 h-9 font-semibold transition-all duration-300 shadow-sm",
+                            "rounded-full px-4 h-9 font-semibold transition-all duration-100 shadow-sm active:scale-95",
                             available
                                 ? "bg-emerald-500 hover:bg-emerald-600 text-white"
                                 : "bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-200"
                         )}
                     >
-                        {loading ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : available ? (
+                        {available ? (
                             "Désactiver"
                         ) : (
                             <span className="flex items-center gap-1.5">

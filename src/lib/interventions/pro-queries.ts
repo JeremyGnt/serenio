@@ -584,14 +584,20 @@ export async function getAllArtisanMissions(filter: MissionFilter = "all"): Prom
     }
 
     try {
-        // Récupérer tous les assignments acceptés de l'artisan avec les détails de l'intervention
-        const { data: assignments, error } = await adminClient
+        // Statuts actifs (en cours)
+        const activeStatuses = ["assigned", "en_route", "arrived", "diagnosing", "in_progress"]
+        // Statuts terminés
+        const completedStatuses = ["completed"]
+        // Statuts annulés
+        const cancelledStatuses = ["cancelled"]
+
+        let query = adminClient
             .from("artisan_assignments")
             .select(`
                 id,
                 status,
                 responded_at,
-                intervention_requests (
+                intervention_requests!inner (
                     id,
                     tracking_number,
                     client_first_name,
@@ -612,27 +618,28 @@ export async function getAllArtisanMissions(filter: MissionFilter = "all"): Prom
             .eq("artisan_id", user.id)
             .eq("status", "accepted")
             .order("responded_at", { ascending: false })
-            .limit(100)
+
+        // ⚡ OPTIMISATION: Filtrage DB avec !inner join
+        if (filter === "active") {
+            query = query.in("intervention_requests.status", activeStatuses)
+        } else if (filter === "completed") {
+            query = query.in("intervention_requests.status", completedStatuses)
+        } else if (filter === "cancelled") {
+            query = query.in("intervention_requests.status", cancelledStatuses)
+        }
+
+        // Apply limit after filtering
+        const { data: assignments, error } = await query.limit(50)
 
         if (error || !assignments) {
             console.error("Erreur récupération missions:", error)
             return []
         }
 
-        // Statuts actifs (en cours)
-        const activeStatuses = ["assigned", "en_route", "arrived", "diagnosing", "in_progress"]
-        // Statuts terminés
-        const completedStatuses = ["completed"]
-        // Statuts annulés
-        const cancelledStatuses = ["cancelled"]
-
-        // Filtrer d'abord pour avoir un index cohérent
-        const validAssignments = assignments.filter((a) => a.intervention_requests)
-
         // Récupérer les URLs signées pour toutes les photos trouvées
         const photosToSign: { index: number, path: string }[] = []
 
-        validAssignments.forEach((assignment, index) => {
+        assignments.forEach((assignment, index) => {
             const intervention = assignment.intervention_requests as any
             const photos = intervention.intervention_photos as { storage_path: string }[]
 
@@ -657,7 +664,7 @@ export async function getAllArtisanMissions(filter: MissionFilter = "all"): Prom
             }
         }
 
-        return validAssignments
+        return assignments
             .map((assignment, index) => {
                 const intervention = assignment.intervention_requests as unknown as {
                     id: string
@@ -691,13 +698,6 @@ export async function getAllArtisanMissions(filter: MissionFilter = "all"): Prom
                     completedAt: intervention.completed_at,
                     firstPhotoUrl: signedUrlsMap[index]
                 }
-            })
-            .filter((mission) => {
-                if (filter === "all") return true
-                if (filter === "active") return activeStatuses.includes(mission.status)
-                if (filter === "completed") return completedStatuses.includes(mission.status)
-                if (filter === "cancelled") return cancelledStatuses.includes(mission.status)
-                return true
             })
     } catch (error) {
         console.error("Erreur getAllArtisanMissions:", error)

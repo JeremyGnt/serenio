@@ -42,7 +42,7 @@ export function AccountTabs({ user, displayName = "Utilisateur" }: AccountTabsPr
       <div className="p-5 border-b border-gray-200">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-5 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-5 transition-all duration-200 active:scale-90 touch-manipulation"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Retour à l'accueil</span>
@@ -149,7 +149,7 @@ export function AccountTabs({ user, displayName = "Utilisateur" }: AccountTabsPr
       {/* Mobile Hamburger - Fixed top right */}
       <button
         onClick={() => setSidebarOpen(true)}
-        className="lg:hidden fixed top-[4.9rem] right-4 z-40 p-2 rounded-lg hover:bg-gray-100 active:scale-90 active:rotate-90 transition-all duration-150 touch-manipulation"
+        className="lg:hidden absolute top-[1.4rem] right-4 z-40 p-2 rounded-lg hover:bg-gray-100 active:scale-90 active:rotate-90 transition-all duration-150 touch-manipulation"
         aria-label="Ouvrir le menu"
       >
         <Menu className="w-5 h-5 text-gray-600" />

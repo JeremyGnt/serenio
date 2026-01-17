@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 
 // ... (existing code)
+import { useAvailability } from "@/components/pro/availability-provider"
 
 
 import { LucideIcon } from "lucide-react"
@@ -27,7 +28,6 @@ import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase/client"
 import { getTotalUnreadCount } from "@/lib/chat/actions"
-import { updateArtisanAvailability } from "@/lib/pro/actions"
 import { logout } from "@/lib/auth/actions"
 import { deleteDraft } from "@/lib/db"
 
@@ -92,31 +92,19 @@ export function ProSidebar({
     const [urgentCountState, setUrgentCountState] = useState(urgentCount)
     const [opportunitiesCountState, setOpportunitiesCountState] = useState(opportunitiesCount)
     const [activeMissionsCountState, setActiveMissionsCountState] = useState(activeMissionsCount)
-    const [available, setAvailable] = useState(isAvailable)
-    const [isUpdating, setIsUpdating] = useState(false)
+    const { isAvailable: contextAvailable, toggleAvailability, isLoading: isUpdating } = useAvailability()
 
-    // Sync with prop changes
-    useEffect(() => {
-        setAvailable(isAvailable)
-    }, [isAvailable])
+    // We can just alias contextAvailable to available or use it directly
+    // Ideally we remove local state `available` completely and rely on context
+    const available = contextAvailable
 
-    const handleStatusChange = async (newStatus: boolean) => {
-        if (newStatus === available) return
+    // ... (rest of state items)
 
-        // Optimistic update
-        setAvailable(newStatus)
-        setIsUpdating(true)
+    // Removed local useEffect for syncing props since context handles it
+    // Removed handleStatusChange implementation since context handles it
 
-        try {
-            const result = await updateArtisanAvailability(newStatus)
-            if (!result.success) {
-                setAvailable(!newStatus) // Revert
-            }
-        } catch (error) {
-            setAvailable(!newStatus) // Revert
-        } finally {
-            setIsUpdating(false)
-        }
+    const handleStatusChange = async () => {
+        await toggleAvailability()
     }
 
     // Handle logout with draft cleanup
@@ -273,7 +261,7 @@ export function ProSidebar({
 
                         {/* Status Toggle */}
                         <button
-                            onClick={() => handleStatusChange(!available)}
+                            onClick={() => handleStatusChange()}
                             disabled={isUpdating}
                             className="p-1 -m-1 shrink-0 touch-manipulation active:scale-90 transition-transform duration-200"
                             title={available ? "Passer indisponible" : "Passer disponible"}
