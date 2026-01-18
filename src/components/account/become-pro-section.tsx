@@ -120,16 +120,16 @@ export function BecomeProSection({ user }: BecomeProSectionProps) {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Briefcase className="w-6 h-6 text-gray-900" />
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <Briefcase className="w-8 h-8 text-gray-900" />
             Devenir serrurier partenaire
           </h2>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="text-muted-foreground mt-1">
             Complétez vos informations professionnelles pour rejoindre notre réseau.
           </p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm max-w-3xl">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 p-6 md:p-8 shadow-lg shadow-gray-200/50 ring-1 ring-gray-900/5">
           <form onSubmit={handleSubmit} className="space-y-6">
             {serverError && (
               <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-sm text-red-700 animate-in fade-in-50">
@@ -291,7 +291,7 @@ export function BecomeProSection({ user }: BecomeProSectionProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-6">
+      <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 p-6 md:p-8 shadow-lg shadow-gray-200/50 ring-1 ring-gray-900/5 space-y-6">
         {/* Avantages */}
         <div className="grid gap-4">
           <div className="flex items-start gap-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100">

@@ -43,16 +43,16 @@ export function SecuritySection({ user }: SecuritySectionProps) {
     <div className="space-y-6">
       {/* Section Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Shield className="w-6 h-6 text-blue-600" />
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
+          <Shield className="w-8 h-8 text-blue-600" />
           Sécurité
         </h2>
-        <p className="text-muted-foreground mt-1 text-sm">
+        <p className="text-muted-foreground mt-1">
           Gérez la sécurité et l'activité de votre compte
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm max-w-3xl">
+      <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 p-6 md:p-8 shadow-lg shadow-gray-200/50 ring-1 ring-gray-900/5">
         {/* Double Authentification (2FA) - Placeholder */}
         <div className="space-y-4 mb-8">
           <div className="flex items-start justify-between">

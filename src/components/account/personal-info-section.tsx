@@ -47,16 +47,16 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
     <div className="space-y-6">
       {/* Section Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <UserIcon className="w-6 h-6 text-emerald-600" />
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
+          <UserIcon className="w-8 h-8 text-emerald-600" />
           Informations personnelles
         </h2>
-        <p className="text-muted-foreground mt-1 text-sm">
+        <p className="text-muted-foreground mt-1">
           Modifiez vos informations de base et de contact
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm max-w-3xl">
+      <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 p-6 md:p-8 shadow-lg shadow-gray-200/50 ring-1 ring-gray-900/5">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email (non modifiable) */}
           <div className="space-y-2">
@@ -105,14 +105,14 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
           </div>
 
           {/* Téléphone */}
-          <div className="space-y-2">
+          <div className="space-y-2 sm:max-w-sm">
             <Label htmlFor="phone" className="text-sm font-medium text-gray-700">Téléphone</Label>
             <PhoneInput
               id="phone"
               value={phone}
               onChange={(value) => { setPhone(value); setSuccess(false) }}
               placeholder="06 12 34 56 78"
-              className="h-11 text-sm sm:max-w-sm"
+              className="h-11 text-sm"
             />
           </div>
 

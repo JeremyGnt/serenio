@@ -162,6 +162,21 @@
   animation: pulse-slower 6s ease-in-out infinite;
 }
 
+/* Shimmer animation for premium skeleton loading effects */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
 
 
 /* Hide scrollbar for Chrome, Safari and Opera */

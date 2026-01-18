@@ -62,7 +62,7 @@ export function AccountTabs({ user, displayName = "Utilisateur" }: AccountTabsPr
       </div>
 
       {/* Navigation Groups */}
-      <div className="flex-1 flex flex-col px-4 py-2 gap-6 overflow-y-auto">
+      <div className="flex-1 flex flex-col px-4 py-2 overflow-y-auto">
         {/* Main Nav */}
         <nav className="space-y-1">
           <p className="px-3 mb-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Général</p>
@@ -101,51 +101,52 @@ export function AccountTabs({ user, displayName = "Utilisateur" }: AccountTabsPr
           })}
         </nav>
 
-        {/* Actions Section */}
-        <div className="mt-auto space-y-4 pb-8">
-          {/* Become Pro CTA - Moved to bottom actions */}
-          {becomeProTab && (
-            <div>
-              <p className="px-3 mb-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Professionnel</p>
-              <button
-                onClick={() => {
-                  setActiveTab(becomeProTab.id)
-                  onTabClick?.()
-                }}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
-                  "text-[14px]",
-                  activeTab === becomeProTab.id
-                    ? "bg-gray-100 text-gray-900 font-medium"
-                    : "text-purple-600 hover:bg-purple-50 font-medium",
-                  "active:scale-[0.98] touch-manipulation"
-                )}
-              >
-                <Briefcase className="w-[18px] h-[18px] opacity-75" />
-                <span>{becomeProTab.label}</span>
-              </button>
-            </div>
-          )}
+        {/* Become Pro CTA - Only for non-artisans */}
+        {becomeProTab && (
+          <div className="mt-6">
+            <p className="px-3 mb-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Professionnel</p>
+            <button
+              onClick={() => {
+                setActiveTab(becomeProTab.id)
+                onTabClick?.()
+              }}
+              className={cn(
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                "text-[14px]",
+                activeTab === becomeProTab.id
+                  ? "bg-gray-100 text-gray-900 font-medium"
+                  : "text-purple-600 hover:bg-purple-50 font-medium",
+                "active:scale-[0.98] touch-manipulation"
+              )}
+            >
+              <Briefcase className="w-[18px] h-[18px] opacity-75" />
+              <span>{becomeProTab.label}</span>
+            </button>
+          </div>
+        )}
 
-          {/* Status Messages */}
-          {userRole === "artisan_pending" && (
-            <div className="p-3 mx-2 bg-amber-50 rounded-lg border border-amber-100/50">
-              <p className="text-sm font-medium text-amber-800">Candidature Pro</p>
-              <p className="text-xs text-amber-700 mt-0.5">En cours de traitement</p>
-            </div>
-          )}
+        {/* Status Messages */}
+        {userRole === "artisan_pending" && (
+          <div className="p-3 mx-2 mt-6 bg-amber-50 rounded-lg border border-amber-100/50">
+            <p className="text-sm font-medium text-amber-800">Candidature Pro</p>
+            <p className="text-xs text-amber-700 mt-0.5">En cours de traitement</p>
+          </div>
+        )}
 
-          {userRole === "artisan_rejected" && (
-            <div className="p-3 mx-2 bg-red-50 rounded-lg border border-red-100/50">
-              <p className="text-sm font-medium text-red-800">Candidature refusée</p>
-              <a href="/artisan-refuse" className="text-xs text-red-600 underline hover:no-underline">
-                Voir détails
-              </a>
-            </div>
-          )}
+        {userRole === "artisan_rejected" && (
+          <div className="p-3 mx-2 mt-6 bg-red-50 rounded-lg border border-red-100/50">
+            <p className="text-sm font-medium text-red-800">Candidature refusée</p>
+            <a href="/artisan-refuse" className="text-xs text-red-600 underline hover:no-underline">
+              Voir détails
+            </a>
+          </div>
+        )}
 
-          {/* Divider before Danger Zone */}
-          <div className="h-px bg-gray-100 mx-2 my-2" />
+        {/* Spacer to push bottom actions down */}
+        <div className="flex-1" />
+
+        {/* Bottom Actions - Always at bottom */}
+        <div className="space-y-1 pt-4 border-t border-gray-100 mt-4">
 
           {/* Danger Zone (Delete Account) */}
           {deleteTab && (
@@ -198,7 +199,7 @@ export function AccountTabs({ user, displayName = "Utilisateur" }: AccountTabsPr
       {/* Mobile Hamburger - Fixed top right */}
       <button
         onClick={() => setSidebarOpen(true)}
-        className="lg:hidden absolute top-[1.4rem] right-4 z-40 p-2 rounded-lg hover:bg-gray-100 active:scale-90 active:rotate-90 transition-all duration-150 touch-manipulation"
+        className="lg:hidden absolute top-[0.4rem] right-2 z-40 p-2 rounded-lg hover:bg-gray-100 active:scale-90 active:rotate-90 transition-all duration-150 touch-manipulation"
         aria-label="Ouvrir le menu"
       >
         <Menu className="w-5 h-5 text-gray-600" />
@@ -233,7 +234,7 @@ export function AccountTabs({ user, displayName = "Utilisateur" }: AccountTabsPr
 
       {/* Content Area */}
       <div className="flex-1 lg:overflow-y-auto bg-gray-50 min-h-[calc(100vh-4rem)]">
-        <div className="h-full p-4 lg:p-10">
+        <div className="h-full px-4 pt-2 pb-4 lg:px-10 lg:pt-6 lg:pb-10">
           <div className="max-w-[1200px] mx-auto w-full">
             {activeTab === "personal" && <PersonalInfoSection user={user} />}
             {activeTab === "address" && <AddressSection user={user} />}

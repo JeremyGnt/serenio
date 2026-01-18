@@ -112,8 +112,8 @@ export async function Header({ backHref, backLabel, showBackButton }: HeaderProp
 
           {/* Navigation */}
           <nav className="flex items-center gap-2 sm:gap-3">
-            {/* Lien SOS */}
-            <SosLink isLoggedIn={!!user} />
+            {/* Lien SOS - Visible uniquement pour les clients (pas les pros) */}
+            {!isArtisan && <SosLink isLoggedIn={!!user} />}
 
             {/* Lien Dashboard Pro si artisan */}
             {isArtisan && (
