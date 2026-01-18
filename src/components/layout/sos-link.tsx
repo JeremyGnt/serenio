@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Zap } from "lucide-react"
+import { Siren } from "lucide-react"
 import { getActiveTracking, setActiveTracking } from "@/lib/active-tracking"
 
 interface SosLinkProps {
@@ -50,7 +50,7 @@ export function SosLink({ isLoggedIn }: SosLinkProps) {
             href={targetUrl}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 active:bg-red-100 active:scale-95 touch-manipulation transition-all duration-200 ease-out active:duration-75"
         >
-            <Zap className={`w-4 h-4 ${isChecking ? "animate-pulse" : ""}`} />
+            <Siren className={`w-5 h-5 ${isChecking ? "animate-pulse" : ""}`} />
             <span>SOS</span>
         </Link>
     )

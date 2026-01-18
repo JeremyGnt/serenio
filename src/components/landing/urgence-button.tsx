@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Zap } from "lucide-react"
+import { Siren } from "lucide-react"
 import { getActiveTracking, setActiveTracking } from "@/lib/active-tracking"
 import { supabase } from "@/lib/supabase/client"
 
@@ -74,7 +74,7 @@ export function UrgenceButton({ isLoggedIn }: UrgenceButtonProps) {
             {/* Effet de brillance */}
             <span className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-            <Zap className={`w-5 h-5 ${isChecking ? "animate-pulse" : ""}`} />
+            <Siren className={`w-6 h-6 ${isChecking ? "animate-pulse" : ""}`} />
             <span>Urgence 24/7</span>
         </Link>
     )
