@@ -61,20 +61,18 @@ export function PasswordSection() {
   return (
     <div className="space-y-6">
       {/* Section Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Lock className="w-8 h-8 text-amber-600" />
-            Mot de passe
-          </h2>
-          <p className="text-muted-foreground mt-1 text-base">
-            Modifiez votre mot de passe pour sécuriser votre compte
-          </p>
-        </div>
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <Lock className="w-6 h-6 text-amber-600" />
+          Mot de passe
+        </h2>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Modifiez votre mot de passe pour sécuriser votre compte
+        </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-        <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm max-w-3xl">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Mot de passe actuel */}
           <div className="space-y-2 sm:max-w-sm">
             <Label htmlFor="currentPassword" className="text-sm font-medium text-gray-700">Mot de passe actuel</Label>
@@ -83,9 +81,11 @@ export function PasswordSection() {
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="••••••••"
-              className="h-12 border-gray-200"
+              className="h-11 border-gray-200"
             />
           </div>
+
+          <div className="h-px bg-gray-100 my-2" />
 
           {/* Nouveau mot de passe */}
           <div className="space-y-2 sm:max-w-sm">
@@ -95,26 +95,31 @@ export function PasswordSection() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="••••••••"
-              className="h-12 border-gray-200"
+              className="h-11 border-gray-200"
             />
+
+            {/* Password Strength */}
             {newPassword.length > 0 && (
-              <div className="space-y-1.5">
-                <div className="flex gap-1">
+              <div className="space-y-2 mt-2 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <div className="flex gap-1.5">
                   {[1, 2, 3].map((level) => (
                     <div
                       key={level}
-                      className={`h-1 flex-1 rounded-full transition-all duration-300 ${level <= strength.level ? strength.color : "bg-gray-200"
+                      className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${level <= strength.level ? strength.color : "bg-gray-200"
                         }`}
                     />
                   ))}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Force : <span className={strength.level >= 2 ? "text-emerald-600" : "text-amber-600"}>{strength.label}</span>
-                </p>
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-muted-foreground">
+                    Force : <span className={`font-medium ${strength.level >= 2 ? "text-emerald-600" : "text-amber-600"}`}>{strength.label}</span>
+                  </p>
+                </div>
               </div>
             )}
-            <p className="text-xs text-muted-foreground">
-              Minimum 6 caractères
+            <p className="text-xs text-muted-foreground flex items-start gap-1.5 mt-1">
+              <ShieldCheck className="w-3.5 h-3.5 mt-0.5 text-gray-400" />
+              <span>Utilisez au moins 12 caractères avec des chiffres et symboles pour une sécurité optimale.</span>
             </p>
           </div>
 
@@ -126,36 +131,35 @@ export function PasswordSection() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
-              className="h-12 border-gray-200"
+              className="h-11 border-gray-200"
             />
             {confirmPassword.length > 0 && newPassword === confirmPassword && (
-              <p className="text-xs text-emerald-600 flex items-center gap-1">
+              <div className="flex items-center gap-2 text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-1 rounded-md w-fit">
                 <CheckCircle className="w-3 h-3" />
                 Les mots de passe correspondent
-              </p>
+              </div>
             )}
           </div>
 
           {success && (
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-100">
-              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              </div>
-              <span className="text-sm font-medium text-emerald-700">Mot de passe modifié avec succès</span>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50 border border-emerald-100/50 text-emerald-700 animate-in fade-in-50">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span className="text-sm font-medium">Mot de passe modifié avec succès</span>
             </div>
           )}
 
           {error && (
-            <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700">
+            <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-sm text-red-700 animate-in fade-in-50">
               {error}
             </div>
           )}
 
-          <div className="pt-2">
+          {/* Submit Button */}
+          <div className="flex justify-end pt-2">
             <Button
               type="submit"
               disabled={loading}
-              className="h-12 px-8 text-base bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-all duration-200 touch-manipulation w-full sm:w-auto"
+              className="h-11 px-6 text-sm bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-all duration-200 touch-manipulation w-full sm:w-auto font-medium"
             >
               {loading ? "Modification..." : "Modifier le mot de passe"}
             </Button>

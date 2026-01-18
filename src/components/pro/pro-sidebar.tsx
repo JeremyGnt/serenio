@@ -205,7 +205,7 @@ export function ProSidebar({
             <aside
                 className={cn(
                     "fixed top-0 left-0 h-full bg-white border-r border-gray-200 z-[60] transition-transform duration-300 flex flex-col shadow-xl md:shadow-none",
-                    "w-[85vw] max-w-[300px] md:w-72", // Mobile: 85% width, Desktop: 72 (18rem)
+                    "w-[85vw] max-w-[300px] md:w-64", // Mobile: 85% width, Desktop: 64 (16rem)
                     mobileOpen ? "translate-x-0" : "-translate-x-full",
                     "md:translate-x-0"
                 )}
@@ -238,8 +238,8 @@ export function ProSidebar({
                 </div>
 
                 {/* 2. Bloc Profil (Identité) */}
-                <div className="px-5 py-4 md:py-2 md:pt-6">
-                    <div className="p-3 bg-gray-50/80 rounded-2xl border border-gray-100 flex items-center gap-3">
+                <div className="py-4 md:py-0 md:pt-6 md:pb-2">
+                    <div className="px-5 py-4 bg-gray-50/80 border-y border-gray-100 flex items-center gap-3">
                         <div className={cn(
                             "w-10 h-10 rounded-full flex items-center justify-center overflow-hidden border-2 shrink-0",
                             available ? "border-emerald-500" : "border-gray-300"

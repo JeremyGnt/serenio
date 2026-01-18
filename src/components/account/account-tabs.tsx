@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { User, MapPin, Lock, Shield, Trash2, Briefcase, Menu, X } from "lucide-react"
+import { User, MapPin, Lock, Shield, Trash2, Briefcase, Menu, X, LogOut } from "lucide-react"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { PersonalInfoSection } from "./personal-info-section"
 import { AddressSection } from "./address-section"
@@ -44,119 +44,140 @@ export function AccountTabs({ user, displayName = "Utilisateur" }: AccountTabsPr
 
   const activeTabData = tabs.find(t => t.id === activeTab)
 
-  // Sidebar content (shared between desktop and mobile)
+  /* Split tabs for layout */
+  const navTabs = tabs.filter(t => !t.danger);
+  const deleteTab = tabs.find(t => t.danger);
+
   const SidebarContent = ({ onTabClick }: { onTabClick?: () => void }) => (
     <>
-      {/* Header */}
-      <div className="p-5 border-b border-gray-200">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center">
-            <User className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-gray-900">Mon compte</h1>
-            <p className="text-sm text-muted-foreground">{displayName}</p>
-          </div>
+      {/* Header Profile */}
+      <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+        <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center border-2 border-white shadow-sm shrink-0">
+          <User className="w-5 h-5 text-emerald-600" />
+        </div>
+        <div className="min-w-0">
+          <h1 className="text-sm font-bold text-gray-900 truncate">Mon compte</h1>
+          <p className="text-xs text-muted-foreground truncate">{displayName}</p>
         </div>
       </div>
 
-      {/* Navigation + Status in flex container */}
-      <div className="flex-1 flex flex-col justify-between p-3">
-        {/* Navigation */}
-        <nav>
-          <div className="space-y-1">
-            {tabs.map((tab) => {
-              const Icon = tab.icon
-              const isActive = activeTab === tab.id
-              const isDanger = tab.danger
-              const isHighlight = tab.highlight
+      {/* Navigation Groups */}
+      <div className="flex-1 flex flex-col px-4 py-2 gap-6 overflow-y-auto">
+        {/* Main Nav */}
+        <nav className="space-y-1">
+          <p className="px-3 mb-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Général</p>
+          {navTabs.map((tab) => {
+            const Icon = tab.icon
+            const isActive = activeTab === tab.id
+            const isHighlight = tab.highlight
 
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id)
-                    onTabClick?.()
-                  }}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                    isActive
-                      ? isDanger
-                        ? "bg-red-50 text-red-600"
-                        : isHighlight
-                          ? "bg-purple-50 text-purple-700"
-                          : "bg-emerald-50 text-emerald-700"
-                      : isDanger
-                        ? "text-red-500 hover:bg-red-50"
-                        : isHighlight
-                          ? "text-purple-600 hover:bg-purple-50"
-                          : "text-gray-600 hover:bg-gray-100",
-                    "active:scale-[0.98] touch-manipulation"
-                  )}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{tab.label}</span>
-                  {isHighlight && !isActive && (
-                    <span className="ml-auto text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">
-                      New
-                    </span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id)
+                  onTabClick?.()
+                }}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                  "text-[14px]", // Explicit 14px
+                  isActive
+                    ? "bg-gray-100 text-gray-900 font-medium" // Removed bold
+                    : isHighlight
+                      ? "text-purple-600 hover:bg-purple-50 font-medium"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-medium",
+                  "active:scale-[0.98] touch-manipulation"
+                )}
+              >
+                <Icon className={cn("w-[18px] h-[18px]", isActive ? "opacity-100" : "opacity-75")} />
+                <span>{tab.label}</span>
+                {isHighlight && !isActive && (
+                  <span className="ml-auto text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-bold">
+                    New
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </nav>
 
-        {/* Bottom Actions & Status Messages */}
-        <div className="mt-4 space-y-4">
+        {/* Actions Section */}
+        <div className="mt-auto space-y-4 pb-8">
+          {/* Become Pro CTA - Moved to bottom actions */}
           {becomeProTab && (
-            <button
-              onClick={() => {
-                setActiveTab(becomeProTab.id)
-                onTabClick?.()
-              }}
-              className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                activeTab === becomeProTab.id
-                  ? "bg-purple-50 text-purple-700"
-                  : "text-purple-600 hover:bg-purple-50",
-                "active:scale-[0.98] touch-manipulation border border-purple-100 shadow-sm"
-              )}
-            >
-              <Briefcase className="w-4 h-4" />
-              <span>{becomeProTab.label}</span>
-              {activeTab !== becomeProTab.id && (
-                <span className="ml-auto text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">
-                  New
-                </span>
-              )}
-            </button>
+            <div>
+              <p className="px-3 mb-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Professionnel</p>
+              <button
+                onClick={() => {
+                  setActiveTab(becomeProTab.id)
+                  onTabClick?.()
+                }}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                  "text-[14px]",
+                  activeTab === becomeProTab.id
+                    ? "bg-gray-100 text-gray-900 font-medium"
+                    : "text-purple-600 hover:bg-purple-50 font-medium",
+                  "active:scale-[0.98] touch-manipulation"
+                )}
+              >
+                <Briefcase className="w-[18px] h-[18px] opacity-75" />
+                <span>{becomeProTab.label}</span>
+              </button>
+            </div>
           )}
 
+          {/* Status Messages */}
           {userRole === "artisan_pending" && (
-            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-              <p className="text-sm font-medium text-amber-800">Demande Pro en cours</p>
-              <p className="text-xs text-amber-700 mt-0.5">En attente de validation.</p>
+            <div className="p-3 mx-2 bg-amber-50 rounded-lg border border-amber-100/50">
+              <p className="text-sm font-medium text-amber-800">Candidature Pro</p>
+              <p className="text-xs text-amber-700 mt-0.5">En cours de traitement</p>
             </div>
           )}
 
           {userRole === "artisan_rejected" && (
-            <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-              <p className="text-sm font-medium text-red-800">Demande Pro refusée</p>
-              <a href="/artisan-refuse" className="text-xs text-red-600 underline">
-                Voir les détails →
+            <div className="p-3 mx-2 bg-red-50 rounded-lg border border-red-100/50">
+              <p className="text-sm font-medium text-red-800">Candidature refusée</p>
+              <a href="/artisan-refuse" className="text-xs text-red-600 underline hover:no-underline">
+                Voir détails
               </a>
             </div>
           )}
 
-          {userRole === "artisan" && (
-            <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-              <p className="text-sm font-medium text-emerald-800">Compte Pro actif</p>
-              <a href="/pro/compte" className="text-xs text-emerald-600 underline">
-                Gérer mon compte pro →
-              </a>
-            </div>
+          {/* Divider before Danger Zone */}
+          <div className="h-px bg-gray-100 mx-2 my-2" />
+
+          {/* Danger Zone (Delete Account) */}
+          {deleteTab && (
+            <button
+              onClick={() => {
+                setActiveTab(deleteTab.id)
+                onTabClick?.()
+              }}
+              className={cn(
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                "text-[14px] group",
+                activeTab === deleteTab.id
+                  ? "bg-red-50 text-red-700 ring-1 ring-red-100 font-medium"
+                  : "text-gray-500 hover:text-red-600 hover:bg-red-50/50"
+              )}
+            >
+              <Trash2 className={cn("w-[18px] h-[18px]", activeTab === deleteTab.id ? "text-red-600" : "text-gray-400 group-hover:text-red-500")} />
+              <span>{deleteTab.label}</span>
+            </button>
           )}
+
+          {/* Logout */}
+          <button
+            onClick={() => {
+              // Assuming logout logic or redirection
+              window.location.href = "/auth/signout"
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50/50 transition-colors text-[14px]"
+          >
+            <LogOut className="w-[18px] h-[18px] opacity-75" />
+            <span>Déconnexion</span>
+          </button>
         </div>
       </div>
     </>
@@ -165,11 +186,14 @@ export function AccountTabs({ user, displayName = "Utilisateur" }: AccountTabsPr
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:flex-shrink-0 lg:border-r lg:border-gray-200 lg:bg-white">
-        <div className="sticky top-16 h-[calc(100vh-4rem)] flex flex-col">
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:flex-shrink-0 lg:border-r lg:border-gray-200 lg:bg-white fixed top-14 bottom-0 left-0 z-20">
+        <div className="h-full flex flex-col pb-4">
           <SidebarContent />
         </div>
       </aside>
+
+      {/* Spacer for fixed sidebar */}
+      <div className="hidden lg:block lg:w-64 lg:flex-shrink-0" />
 
       {/* Mobile Hamburger - Fixed top right */}
       <button
@@ -185,12 +209,12 @@ export function AccountTabs({ user, displayName = "Utilisateur" }: AccountTabsPr
         <div className="lg:hidden fixed inset-0 z-50">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/50 transition-opacity"
+            className="absolute inset-0 bg-black/50 transition-opacity backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
 
           {/* Sidebar */}
-          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-white shadow-xl flex flex-col animate-in slide-in-from-left duration-200">
+          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-2xl flex flex-col animate-in slide-in-from-left duration-300">
             {/* Close button */}
             <button
               onClick={() => setSidebarOpen(false)}
@@ -200,15 +224,17 @@ export function AccountTabs({ user, displayName = "Utilisateur" }: AccountTabsPr
               <X className="w-5 h-5 text-gray-500" />
             </button>
 
-            <SidebarContent onTabClick={() => setSidebarOpen(false)} />
+            <div className="mt-14 h-full flex flex-col">
+              <SidebarContent onTabClick={() => setSidebarOpen(false)} />
+            </div>
           </aside>
         </div>
       )}
 
       {/* Content Area */}
-      <div className="flex-1 lg:overflow-y-auto">
-        <div className="h-full p-4 lg:p-6 lg:pl-0">
-          <div className="max-w-4xl mx-auto">
+      <div className="flex-1 lg:overflow-y-auto bg-gray-50 min-h-[calc(100vh-4rem)]">
+        <div className="h-full p-4 lg:p-10">
+          <div className="max-w-[1200px] mx-auto w-full">
             {activeTab === "personal" && <PersonalInfoSection user={user} />}
             {activeTab === "address" && <AddressSection user={user} />}
             {activeTab === "password" && <PasswordSection />}

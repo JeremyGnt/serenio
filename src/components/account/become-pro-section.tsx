@@ -119,28 +119,26 @@ export function BecomeProSection({ user }: BecomeProSectionProps) {
   if (showForm) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <Briefcase className="w-8 h-8 text-gray-600" />
-              Devenir serrurier partenaire
-            </h2>
-            <p className="text-muted-foreground mt-1 text-base">
-              Complétez vos informations professionnelles pour rejoindre notre réseau.
-            </p>
-          </div>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Briefcase className="w-6 h-6 text-gray-900" />
+            Devenir serrurier partenaire
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Complétez vos informations professionnelles pour rejoindre notre réseau.
+          </p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm max-w-3xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             {serverError && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-sm text-red-700">
+              <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-sm text-red-700 animate-in fade-in-50">
                 {serverError}
               </div>
             )}
 
             {/* Infos pré-remplies */}
-            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <div className="p-4 bg-gray-50/50 rounded-xl border border-gray-100">
               <p className="text-sm font-medium text-gray-900 mb-2">Informations de votre compte</p>
               <div className="text-sm text-muted-foreground space-y-1">
                 <p><strong>Nom :</strong> {metadata.last_name} {metadata.first_name}</p>
@@ -150,87 +148,89 @@ export function BecomeProSection({ user }: BecomeProSectionProps) {
 
             {/* Entreprise */}
             <div>
-              <h3 className="font-semibold mb-4 text-gray-900 flex items-center gap-2">
-                <Building2 className="w-4 h-4" />
+              <h3 className="font-semibold mb-4 text-gray-900 flex items-center gap-2 text-sm uppercase tracking-wider">
+                <Building2 className="w-4 h-4 text-gray-500" />
                 Entreprise
               </h3>
               <div className="grid gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="companyName">Nom de l'entreprise *</Label>
+                  <Label htmlFor="companyName" className="text-sm font-medium text-gray-700">Nom de l'entreprise *</Label>
                   <Input
                     id="companyName"
                     value={formData.companyName}
                     onChange={(e) => updateField("companyName", e.target.value)}
                     placeholder="Ex: Serrurerie Dupont"
-                    className={`h-12 sm:max-w-md ${errors.companyName ? "border-red-300" : ""}`}
+                    className={`h-11 sm:max-w-md ${errors.companyName ? "border-red-300" : ""}`}
                   />
                   {errors.companyName && <p className="text-xs text-red-500">{errors.companyName}</p>}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="siret">Numéro SIRET *</Label>
+                  <Label htmlFor="siret" className="text-sm font-medium text-gray-700">Numéro SIRET *</Label>
                   <Input
                     id="siret"
                     value={formData.siret}
                     onChange={(e) => updateField("siret", e.target.value)}
                     placeholder="123 456 789 00012"
-                    className={`h-12 sm:max-w-sm ${errors.siret ? "border-red-300" : ""}`}
+                    className={`h-11 sm:max-w-sm ${errors.siret ? "border-red-300" : ""}`}
                   />
                   {errors.siret && <p className="text-xs text-red-500">{errors.siret}</p>}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Téléphone professionnel *</Label>
+                  <Label htmlFor="phone" className="text-sm font-medium text-gray-700">Téléphone professionnel *</Label>
                   <Input
                     id="phone"
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => updateField("phone", e.target.value)}
                     placeholder="06 12 34 56 78"
-                    className={`h-12 sm:max-w-sm ${errors.phone ? "border-red-300" : ""}`}
+                    className={`h-11 sm:max-w-sm ${errors.phone ? "border-red-300" : ""}`}
                   />
                   {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
                 </div>
               </div>
             </div>
 
+            <div className="h-px bg-gray-100" />
+
             {/* Adresse */}
             <div>
-              <h3 className="font-semibold mb-4 text-gray-900 flex items-center gap-2">
-                <FileText className="w-4 h-4" />
+              <h3 className="font-semibold mb-4 text-gray-900 flex items-center gap-2 text-sm uppercase tracking-wider">
+                <FileText className="w-4 h-4 text-gray-500" />
                 Adresse d'intervention
               </h3>
               <div className="grid gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="street">Rue *</Label>
+                  <Label htmlFor="street" className="text-sm font-medium text-gray-700">Rue *</Label>
                   <Input
                     id="street"
                     value={formData.street}
                     onChange={(e) => updateField("street", e.target.value)}
-                    className={`h-12 ${errors.street ? "border-red-300" : ""}`}
+                    className={`h-11 ${errors.street ? "border-red-300" : ""}`}
                   />
                   {errors.street && <p className="text-xs text-red-500">{errors.street}</p>}
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="postalCode">Code postal *</Label>
+                    <Label htmlFor="postalCode" className="text-sm font-medium text-gray-700">Code postal *</Label>
                     <Input
                       id="postalCode"
                       value={formData.postalCode}
                       onChange={(e) => updateField("postalCode", e.target.value)}
                       maxLength={5}
-                      className={`h-12 ${errors.postalCode ? "border-red-300" : ""}`}
+                      className={`h-11 ${errors.postalCode ? "border-red-300" : ""}`}
                     />
                     {errors.postalCode && <p className="text-xs text-red-500">{errors.postalCode}</p>}
                   </div>
                   <div className="col-span-2 space-y-2">
-                    <Label htmlFor="city">Ville *</Label>
+                    <Label htmlFor="city" className="text-sm font-medium text-gray-700">Ville *</Label>
                     <Input
                       id="city"
                       value={formData.city}
                       onChange={(e) => updateField("city", e.target.value)}
-                      className={`h-12 sm:max-w-sm ${errors.city ? "border-red-300" : ""}`}
+                      className={`h-11 sm:max-w-sm ${errors.city ? "border-red-300" : ""}`}
                     />
                     {errors.city && <p className="text-xs text-red-500">{errors.city}</p>}
                   </div>
@@ -239,31 +239,29 @@ export function BecomeProSection({ user }: BecomeProSectionProps) {
             </div>
 
             {/* Expérience */}
-            <div>
-              <h3 className="font-semibold mb-4 text-gray-900">Votre expérience</h3>
-              <div className="space-y-2">
-                <Label htmlFor="experience">Présentez-vous brièvement (optionnel)</Label>
-                <Textarea
-                  id="experience"
-                  value={formData.experience}
-                  onChange={(e) => updateField("experience", e.target.value)}
-                  placeholder="Années d'expérience, spécialités, certifications..."
-                  rows={3}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="experience" className="text-sm font-medium text-gray-700">Présentez-vous brièvement (optionnel)</Label>
+              <Textarea
+                id="experience"
+                value={formData.experience}
+                onChange={(e) => updateField("experience", e.target.value)}
+                placeholder="Années d'expérience, spécialités, certifications..."
+                rows={3}
+                className="resize-none"
+              />
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 pt-2">
               <Button
                 type="button"
                 variant="outline"
-                className="flex-1 h-12"
+                className="flex-1 h-11 active:scale-95 transition-transform"
                 onClick={() => setShowForm(false)}
               >
                 Annuler
               </Button>
-              <Button type="submit" className="flex-1 h-12" disabled={loading}>
-                {loading ? "Envoi en cours..." : "Envoyer ma demande"}
+              <Button type="submit" className="flex-1 h-11 bg-gray-900 hover:bg-black active:scale-95 transition-all text-white" disabled={loading}>
+                {loading ? "Envoi..." : "Envoyer ma demande"}
               </Button>
             </div>
 
