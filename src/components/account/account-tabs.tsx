@@ -79,20 +79,25 @@ export function AccountTabs({ user, displayName = "Utilisateur" }: AccountTabsPr
                     onTabClick?.()
                   }}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 group relative active:scale-[0.98] touch-manipulation",
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                     isActive
                       ? isDanger
-                        ? "bg-red-50 text-red-700 font-semibold border border-red-100 shadow-sm"
-                        : "bg-gray-100 text-gray-900 font-semibold"
+                        ? "bg-red-50 text-red-600"
+                        : isHighlight
+                          ? "bg-purple-50 text-purple-700"
+                          : "bg-emerald-50 text-emerald-700"
                       : isDanger
-                        ? "text-red-600 hover:bg-red-50 active:bg-red-50 font-medium"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 active:bg-gray-100 font-medium"
+                        ? "text-red-500 hover:bg-red-50"
+                        : isHighlight
+                          ? "text-purple-600 hover:bg-purple-50"
+                          : "text-gray-600 hover:bg-gray-100",
+                    "active:scale-[0.98] touch-manipulation"
                   )}
                 >
-                  <Icon className={cn("w-5 h-5 transition-colors", isActive ? "text-gray-900" : "text-gray-400 group-hover:text-gray-600", isDanger && "text-red-500 group-hover:text-red-600")} />
-                  <span className="flex-1 text-left">{tab.label}</span>
+                  <Icon className="w-4 h-4" />
+                  <span>{tab.label}</span>
                   {isHighlight && !isActive && (
-                    <span className="ml-auto text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-bold">
+                    <span className="ml-auto text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">
                       New
                     </span>
                   )}
@@ -111,16 +116,17 @@ export function AccountTabs({ user, displayName = "Utilisateur" }: AccountTabsPr
                 onTabClick?.()
               }}
               className={cn(
-                "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 group relative active:scale-[0.98] touch-manipulation",
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                 activeTab === becomeProTab.id
-                  ? "bg-purple-50 text-purple-700 font-semibold border border-purple-100 shadow-sm"
-                  : "text-purple-600 hover:bg-purple-50 active:bg-purple-50 font-medium",
+                  ? "bg-purple-50 text-purple-700"
+                  : "text-purple-600 hover:bg-purple-50",
+                "active:scale-[0.98] touch-manipulation border border-purple-100 shadow-sm"
               )}
             >
-              <Briefcase className={cn("w-5 h-5 transition-colors", activeTab === becomeProTab.id ? "text-purple-700" : "text-purple-500 group-hover:text-purple-600")} />
-              <span className="flex-1 text-left">{becomeProTab.label}</span>
+              <Briefcase className="w-4 h-4" />
+              <span>{becomeProTab.label}</span>
               {activeTab !== becomeProTab.id && (
-                <span className="ml-auto text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-bold">
+                <span className="ml-auto text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">
                   New
                 </span>
               )}

@@ -228,7 +228,7 @@ export function ProSidebar({
 
                 {/* Mobile Drawer Header (Logo + Close) */}
                 <div className="md:hidden flex items-center justify-between p-5 pb-2">
-                    <span className="text-xl font-bold text-gray-900">Mon Compte</span>
+                    <span className="text-lg font-bold text-gray-900">Mon Compte</span>
                     <button
                         onClick={() => setMobileOpen(false)}
                         className="p-2 text-gray-400 hover:bg-gray-100 rounded-full active:scale-90 transition-transform duration-200 touch-manipulation"
@@ -238,8 +238,8 @@ export function ProSidebar({
                 </div>
 
                 {/* 2. Bloc Profil (Identité) */}
-                <div className="py-4 md:py-2 md:pt-2">
-                    <div className="px-5 py-3 bg-gray-50/50 border-y border-gray-100 flex items-center gap-3">
+                <div className="px-5 py-4 md:py-2 md:pt-6">
+                    <div className="p-3 bg-gray-50/80 rounded-2xl border border-gray-100 flex items-center gap-3">
                         <div className={cn(
                             "w-10 h-10 rounded-full flex items-center justify-center overflow-hidden border-2 shrink-0",
                             available ? "border-emerald-500" : "border-gray-300"
@@ -253,8 +253,8 @@ export function ProSidebar({
                             )}
                         </div>
                         <div className="min-w-0 flex-1">
-                            <div className="font-semibold text-gray-900 truncate text-lg md:text-base">{firstName}</div>
-                            <div className={cn("font-medium truncate text-sm md:text-xs", available ? "text-emerald-600" : "text-gray-500")}>
+                            <div className="font-semibold text-gray-900 truncate text-sm">{firstName}</div>
+                            <div className={cn("text-xs font-medium truncate", available ? "text-emerald-600" : "text-gray-500")}>
                                 {available ? "Disponible" : "Indisponible"}
                             </div>
                         </div>
@@ -289,12 +289,12 @@ export function ProSidebar({
                             <div className="bg-emerald-100 p-1 rounded-md text-emerald-600">
                                 <MapPin className="w-3 h-3" />
                             </div>
-                            <span className="text-xs font-bold uppercase tracking-wider">Zone</span>
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Zone</span>
                         </div>
-                        <div className="font-semibold text-base text-gray-900 truncate">
+                        <div className="font-semibold text-sm text-gray-900 truncate">
                             {addressCity || "Non définie"}
                         </div>
-                        <div className="text-sm text-gray-500 truncate">
+                        <div className="text-xs text-gray-500 truncate">
                             {interventionRadius ? `${interventionRadius} km autour` : "Rayon non défini"}
                         </div>
                     </Link>
@@ -305,12 +305,12 @@ export function ProSidebar({
                             <div className="bg-blue-100 p-1 rounded-md text-blue-600">
                                 <Building2 className="w-3 h-3" />
                             </div>
-                            <span className="text-xs font-bold uppercase tracking-wider">Infos</span>
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Infos</span>
                         </div>
-                        <div className="font-semibold text-base text-gray-900 truncate">
+                        <div className="font-semibold text-sm text-gray-900 truncate">
                             {companyName || "Non renseignée"}
                         </div>
-                        <div className="text-sm text-gray-500 truncate">
+                        <div className="text-xs text-gray-500 truncate">
                             Voir les détails
                         </div>
                     </Link>
@@ -336,7 +336,7 @@ export function ProSidebar({
                             )}>
                                 <Siren className="w-5 h-5" />
                             </div>
-                            <span className="flex-1 font-semibold text-lg">{URGENCE_ITEM.label}</span>
+                            <span className="flex-1 font-semibold">{URGENCE_ITEM.label}</span>
                             {available && urgentCountState > 0 && (
                                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
                                     {urgentCountState}
@@ -348,7 +348,7 @@ export function ProSidebar({
                     {/* 4. Section MENU (Compte) */}
                     <div>
                         {/* Mobile Label "Compte" */}
-                        <div className="md:hidden px-4 mt-6 mb-2 text-sm font-bold text-gray-400 uppercase tracking-widest">
+                        <div className="md:hidden px-4 mt-6 mb-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
                             Compte
                         </div>
 
@@ -369,7 +369,7 @@ export function ProSidebar({
                                             href={item.href}
                                             onClick={() => setMobileOpen(false)}
                                             className={cn(
-                                                "flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 group relative active:scale-[0.98] touch-manipulation font-medium text-lg md:text-base",
+                                                "flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 group relative active:scale-[0.98] touch-manipulation",
                                                 isActive
                                                     ? "bg-gray-100 text-gray-900 font-semibold"
                                                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 active:bg-gray-100 font-medium"
@@ -387,7 +387,7 @@ export function ProSidebar({
                                                     </span>
                                                 )}
                                             </div>
-                                            <span className="flex-1">{item.label}</span>
+                                            <span className="flex-1 text-sm">{item.label}</span>
 
                                             {isMissions && unreadCount > 0 && (
                                                 <span className="bg-red-500 text-white px-1.5 py-0.5 rounded-full text-[10px] font-bold min-w-[1.25rem] text-center">
@@ -410,13 +410,13 @@ export function ProSidebar({
                 {/* 5. Footer Sidebar (Actions secondaires) */}
                 <div className="p-4 md:border-t md:border-gray-100 flex flex-col gap-1 mt-auto md:mt-0">
                     {/* Mobile Label "Actions" */}
-                    <div className="md:hidden px-4 mb-2 text-sm font-bold text-gray-400 uppercase tracking-widest">
+                    <div className="md:hidden px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
                         Autres
                     </div>
 
                     <Link
                         href="/"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 active:bg-gray-100 transition-all duration-200 active:scale-[0.98] touch-manipulation font-medium text-lg md:text-base"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 active:bg-gray-100 transition-all duration-200 active:scale-[0.98] touch-manipulation text-sm font-medium"
                     >
                         <Store className="w-4 h-4" />
                         <span>Retour au site</span>
@@ -424,7 +424,7 @@ export function ProSidebar({
                     {/* Logout visible only on mobile drawer */}
                     <button
                         onClick={handleLogout}
-                        className="flex md:hidden items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-600 active:bg-red-50 transition-all duration-200 active:scale-[0.98] touch-manipulation font-medium text-lg md:text-base w-full text-left"
+                        className="flex md:hidden items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-600 active:bg-red-50 transition-all duration-200 active:scale-[0.98] touch-manipulation text-sm font-medium w-full text-left"
                     >
                         <LogOut className="w-4 h-4" />
                         <span>Se déconnecter</span>
