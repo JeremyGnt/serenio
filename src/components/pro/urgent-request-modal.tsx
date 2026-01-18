@@ -90,6 +90,7 @@ export function UrgentRequestModal({
     const [successState, setSuccessState] = useState<"accepted" | "refused" | null>(null)
     const [detailedIntervention, setDetailedIntervention] = useState<AnonymizedIntervention>(intervention)
     const [loadingDetails, setLoadingDetails] = useState(false)
+    const [isAccepting, setIsAccepting] = useState(false)
 
     useEffect(() => {
         if (isOpen) {
@@ -116,8 +117,6 @@ export function UrgentRequestModal({
     }, [isOpen, intervention.id])
 
     if (!isOpen) return null
-
-    const [isAccepting, setIsAccepting] = useState(false)
 
     const handleAccept = async () => {
         setLoading(true)
