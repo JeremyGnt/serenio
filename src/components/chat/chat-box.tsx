@@ -95,9 +95,37 @@ export function ChatBox({
                 (payload: RealtimePostgresChangesPayload<MessagePayload>) => {
                     const newMsg = payload.new as MessagePayload
 
+                    // Ignorer les messages envoyés par nous-mêmes via Realtime
+                    // car on les a déjà ajoutés via l'optimistic update
+                    // Cela évite la race condition qui cause les doublons
+                    if (newMsg.sender_id === currentUserId) {
+                        // Simplement mettre à jour l'ID temporaire si besoin
+                        setMessages(prev => {
+                            // Chercher un message temp avec le même contenu
+                            const tempIndex = prev.findIndex(
+                                m => m.id.startsWith('temp-') && m.content === newMsg.content
+                            )
+                            if (tempIndex !== -1) {
+                                // Remplacer le message temp par le vrai
+                                const updated = [...prev]
+                                updated[tempIndex] = {
+                                    ...updated[tempIndex],
+                                    id: newMsg.id,
+                                    createdAt: newMsg.created_at
+                                }
+                                return updated
+                            }
+                            // Si pas de temp trouvé, vérifier les doublons par ID
+                            if (prev.some(m => m.id === newMsg.id)) {
+                                return prev
+                            }
+                            return prev
+                        })
+                        return
+                    }
+
                     // Notifier le parent (ex: pour compteur non lu ou badge)
-                    // Uniquement si le message ne vient pas de nous
-                    if (onMessageReceived && newMsg.sender_id !== currentUserId) {
+                    if (onMessageReceived) {
                         onMessageReceived()
                     }
 
@@ -114,7 +142,7 @@ export function ChatBox({
                         readAt: newMsg.read_at,
                         createdAt: newMsg.created_at,
                         senderRole: participant?.role,
-                        isOwn: newMsg.sender_id === currentUserId
+                        isOwn: false
                     }
 
                     setMessages(prev => {
@@ -125,8 +153,8 @@ export function ChatBox({
                         return [...prev, messageWithSender]
                     })
 
-                    // Si c'est notre message ou qu'on est en bas, scroll
-                    if (messageWithSender.isOwn || isNearBottom()) {
+                    // Si on est en bas, scroll
+                    if (isNearBottom()) {
                         setTimeout(() => scrollToBottom(), 50)
                     } else {
                         setHasNewMessages(true)

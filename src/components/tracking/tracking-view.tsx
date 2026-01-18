@@ -397,7 +397,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                         <div className="grid gap-6 lg:grid-cols-2">
                             {/* Artisan Card */}
                             {artisan && (
-                                <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300 p-5">
+                                <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 p-5">
                                     <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                         <User className="w-5 h-5 text-emerald-600" />
                                         Votre serrurier
@@ -471,7 +471,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                             {/* Timeline - Caché pour annulé */}
                             {!isCancelled && (
                                 <div
-                                    className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300 p-5 cursor-pointer group relative"
+                                    className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 p-5 cursor-pointer group relative"
                                     onClick={() => setShowHistoryDialog(true)}
                                 >
                                     <div className="absolute top-5 right-5 text-gray-300 group-hover:text-emerald-600 transition-colors duration-300">
@@ -508,7 +508,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                     {!isCancelled && (
                         <div className="grid gap-6 lg:grid-cols-2">
                             {/* Adresse */}
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300 p-5">
+                            <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 p-5">
                                 <h2 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                     <Navigation className="w-5 h-5 text-emerald-600" />
                                     Adresse d'intervention
@@ -544,7 +544,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                             </div>
 
                             {/* Contact */}
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300 p-5">
+                            <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 p-5">
                                 <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                     <Contact className="w-5 h-5 text-emerald-600" />
                                     Vos coordonnées
@@ -569,7 +569,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
 
                     {/* Photos uploadées - Visible si non annulé */}
                     {!isCancelled && (
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300 p-5">
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 p-5">
                             <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                 <Camera className="w-5 h-5 text-emerald-600" />
                                 Vos photos
