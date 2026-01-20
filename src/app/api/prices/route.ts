@@ -31,7 +31,7 @@ export async function GET(): Promise<NextResponse<ApiResponse<PriceRange[]>>> {
     })
   } catch (error) {
     console.error("Erreur récupération prix:", error)
-    
+
     return NextResponse.json({
       success: true,
       data: getDefaultPriceRanges(),

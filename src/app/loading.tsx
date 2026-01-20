@@ -18,7 +18,6 @@ export default function Loading() {
                     <div className="max-w-4xl mx-auto text-center space-y-8">
                         {/* Badge */}
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-full">
-                            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                             <Skeleton className="h-4 w-32" />
                         </div>
 

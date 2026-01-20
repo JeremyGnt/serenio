@@ -1,4 +1,4 @@
-export { AccountTabs } from "./account-tabs"
+export { AccountSidebar } from "./account-sidebar"
 export { PersonalInfoSection } from "./personal-info-section"
 export { AddressSection } from "./address-section"
 export { PasswordSection } from "./password-section"

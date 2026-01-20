@@ -324,7 +324,7 @@ export function Hero({ isLoggedIn }: HeroProps) {
             {/* Bouton RDV */}
             <Link
               href="/rdv"
-              className="group flex items-center justify-center gap-2 h-14 sm:h-16 sm:flex-1 px-6 bg-white hover:bg-slate-50 text-slate-900 font-semibold rounded-xl sm:rounded-2xl border-2 border-slate-200 hover:border-emerald-300 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] active:duration-75 touch-manipulation"
+              className="group flex items-center justify-center gap-2 h-12 sm:h-14 sm:flex-1 px-5 bg-white hover:bg-slate-50 text-slate-900 font-bold rounded-lg sm:rounded-xl border-2 border-slate-300 hover:border-emerald-300 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] active:duration-75 touch-manipulation"
             >
               <Calendar className="w-5 h-5 text-emerald-600" />
               <span>Planifier un RDV</span>
@@ -336,7 +336,7 @@ export function Hero({ isLoggedIn }: HeroProps) {
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-full shadow-sm">
               <MapPin className="w-4 h-4 text-emerald-600" />
               <span className="text-sm font-medium text-slate-700">Serruriers vérifiés, disponibles à Lyon</span>
-              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="w-2 h-2 bg-emerald-500 rounded-full" />
             </div>
           </div>
 

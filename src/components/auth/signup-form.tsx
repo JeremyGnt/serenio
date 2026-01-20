@@ -469,7 +469,7 @@ export function SignupForm() {
       <Button
         type="submit"
         size="lg"
-        className="w-full h-12"
+        className="w-full h-12 active:scale-95 transition-all duration-200 touch-manipulation"
         disabled={loading || Object.keys(errors).length > 0}
       >
         {loading ? "Création..." : "Créer mon compte"}

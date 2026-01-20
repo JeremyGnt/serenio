@@ -138,6 +138,9 @@ export function UserMenu({ user, pendingRequestsCount = 0, unreadMessagesCount =
     await logout()
   }
 
+  const [imageError, setImageError] = useState(false)
+  const avatarUrl = user.user_metadata?.custom_avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture
+
   return (
     <div className="relative">
       <button
@@ -145,10 +148,11 @@ export function UserMenu({ user, pendingRequestsCount = 0, unreadMessagesCount =
         className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary active:bg-secondary/80 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:duration-75"
       >
         <div className="relative">
-          {user.user_metadata?.custom_avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture ? (
+          {avatarUrl && !imageError ? (
             <img
-              src={user.user_metadata?.custom_avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture}
+              src={avatarUrl}
               alt={fullName}
+              onError={() => setImageError(true)}
               className="w-8 h-8 rounded-full object-cover border border-gray-200"
             />
           ) : (

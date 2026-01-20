@@ -17,13 +17,16 @@ import { getTotalUnreadCount } from "@/lib/chat/actions"
 
 import { HeaderBackButton } from "./header-back-button"
 
+import { cn } from "@/lib/utils"
+
 interface HeaderProps {
   backHref?: string
   backLabel?: string
   showBackButton?: boolean
+  className?: string
 }
 
-export async function Header({ backHref, backLabel, showBackButton }: HeaderProps = {}) {
+export async function Header({ backHref, backLabel, showBackButton, className }: HeaderProps = {}) {
   const user = await getUser()
   const isAdmin = user && ADMIN_EMAILS.includes(user.email || "")
   const isArtisan = user?.user_metadata?.role === "artisan" || user?.user_metadata?.role === "artisan_pending"
@@ -45,7 +48,7 @@ export async function Header({ backHref, backLabel, showBackButton }: HeaderProp
       {/* Lier automatiquement les interventions anonymes au compte */}
       <InterventionLinker userId={user?.id || null} />
 
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-border">
+      <header className={cn("sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-border", className)}>
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 h-14 flex items-center justify-between">
           {/* Logo & Navigation gauche */}
           <div className="flex items-center gap-4">

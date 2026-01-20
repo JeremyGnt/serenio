@@ -130,7 +130,7 @@ export function SimpleSignupForm() {
           {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
         </div>
 
-        <Button type="submit" size="lg" className="w-full h-12" disabled={loading}>
+        <Button type="submit" size="lg" className="w-full h-12 active:scale-95 transition-all duration-200 touch-manipulation" disabled={loading}>
           {loading ? "Création en cours..." : "Créer mon compte"}
         </Button>
       </form>
