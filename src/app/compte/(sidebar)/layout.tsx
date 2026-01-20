@@ -22,7 +22,7 @@ export default async function AccountLayout({
 
     return (
         <>
-            <Header showBackButton={true} backHref="/" backLabel="Retour" className="hidden lg:block" />
+            <Header backHref="/" backLabel="Retour" className="hidden lg:block" />
             <main className="min-h-screen bg-gray-50 relative">
                 {/* Main Layout */}
                 <div className="lg:flex lg:min-h-[calc(100vh-4rem)]">

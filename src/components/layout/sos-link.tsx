@@ -48,7 +48,7 @@ export function SosLink({ isLoggedIn }: SosLinkProps) {
     return (
         <Link
             href={targetUrl}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 active:bg-red-100 active:scale-95 touch-manipulation transition-all duration-200 ease-out active:duration-75"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-[#C62828] hover:text-[#B71C1C] hover:bg-red-50 active:bg-red-100 active:scale-95 touch-manipulation transition-all duration-200 ease-out active:duration-75"
         >
             <Siren className={`w-5 h-5 ${isChecking ? "animate-pulse" : ""}`} />
             <span>SOS</span>

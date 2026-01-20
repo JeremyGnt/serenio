@@ -144,7 +144,6 @@ export function AddressSection({ user }: AddressSectionProps) {
               Adresse complète
             </Label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 id="street"
                 type="text"
@@ -157,7 +156,7 @@ export function AddressSection({ user }: AddressSectionProps) {
                 }}
                 onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                 placeholder="Ex: 15 Rue de la République..."
-                className="h-11 pl-9 text-sm border-gray-200 focus:border-violet-300 focus:ring-violet-200"
+                className="h-11 text-sm border-gray-200 focus:border-violet-300 focus:ring-violet-200"
                 autoComplete="off"
               />
               {isSearching && (

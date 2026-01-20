@@ -204,7 +204,7 @@ export function AccountSidebar({ user, displayName = "Utilisateur" }: AccountSid
 
             {/* Mobile Header - Fixed top */}
             <header className="lg:hidden fixed top-0 left-0 right-0 h-14 z-40 bg-white/80 backdrop-blur-sm border-b border-gray-100 flex items-center justify-between px-4 transition-all duration-200">
-                <Link href="/" className="p-2 -ml-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors">
+                <Link href="/" scroll={true} className="p-2 -ml-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors">
                     <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </Link>
 
@@ -214,7 +214,7 @@ export function AccountSidebar({ user, displayName = "Utilisateur" }: AccountSid
 
                 <button
                     onClick={() => setSidebarOpen(true)}
-                    className="p-2 -mr-2 rounded-full hover:bg-gray-100 active:bg-gray-200 active:scale-95 transition-all"
+                    className="p-2 -mr-2 rounded-full hover:bg-gray-100 active:bg-gray-200 active:scale-95 active:rotate-180 transition-all touch-manipulation"
                     aria-label="Ouvrir le menu"
                 >
                     <Menu className="w-5 h-5 text-gray-600" />
@@ -235,7 +235,7 @@ export function AccountSidebar({ user, displayName = "Utilisateur" }: AccountSid
                         {/* Close button */}
                         <button
                             onClick={() => setSidebarOpen(false)}
-                            className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100 transition-colors touch-manipulation"
+                            className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100 transition-colors active:scale-75 touch-manipulation"
                             aria-label="Fermer le menu"
                         >
                             <X className="w-5 h-5 text-gray-500" />

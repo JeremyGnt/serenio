@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { LogOut, User, ChevronDown, ClipboardList, LayoutDashboard } from "lucide-react"
 import { logout } from "@/lib/auth/actions"
@@ -139,22 +139,57 @@ export function UserMenu({ user, pendingRequestsCount = 0, unreadMessagesCount =
   }
 
   const [imageError, setImageError] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
   const avatarUrl = user.user_metadata?.custom_avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture
 
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [open])
+
   return (
-    <div className="relative">
+    <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary active:bg-secondary/80 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:duration-75"
       >
         <div className="relative">
           {avatarUrl && !imageError ? (
-            <img
-              src={avatarUrl}
-              alt={fullName}
-              onError={() => setImageError(true)}
-              className="w-8 h-8 rounded-full object-cover border border-gray-200"
-            />
+            <>
+              {/* Hidden img to preload and detect errors */}
+              <img
+                src={avatarUrl}
+                alt=""
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageError(true)}
+                className="hidden"
+              />
+              {/* Show avatar only when loaded */}
+              {imageLoaded ? (
+                <img
+                  src={avatarUrl}
+                  alt={fullName}
+                  className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-700">
+                  {initials}
+                </div>
+              )}
+            </>
           ) : (
             <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-700">
               {initials}
@@ -171,63 +206,54 @@ export function UserMenu({ user, pendingRequestsCount = 0, unreadMessagesCount =
       </button>
 
       {open && (
-        <>
-          {/* Overlay */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setOpen(false)}
-          />
-
-          {/* Menu */}
-          <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-border rounded-lg shadow-lg z-50 py-1">
-            <div className="px-4 py-3 border-b border-border">
-              <p className="text-sm font-medium">{fullName}</p>
-              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-            </div>
-
-            <Link
-              href="/compte"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-secondary transition-all duration-200 ease-out touch-manipulation active:scale-95 active:bg-secondary/80 active:duration-75"
-            >
-              <User className="w-4 h-4" />
-              Mon compte
-            </Link>
-
-            <Link
-              href="/compte/demandes"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-secondary transition-all duration-200 ease-out touch-manipulation active:scale-95 active:bg-secondary/80 active:duration-75"
-            >
-              <ClipboardList className="w-4 h-4" />
-              Mes demandes
-              {unreadCount > 0 && (
-                <span className="ml-auto bg-red-500 text-white rounded-full w-2 h-2" />
-              )}
-            </Link>
-
-            {/* Accès Pro */}
-            {(user.user_metadata?.role === "artisan" || user.user_metadata?.role === "artisan_pending") && (
-              <Link
-                href="/pro"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:bg-emerald-100 active:duration-75"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Espace Pro
-              </Link>
-            )}
-
-            <button
-              onClick={handleLogout}
-              disabled={loading}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:bg-red-100 active:duration-75"
-            >
-              <LogOut className="w-4 h-4" />
-              {loading ? "Déconnexion..." : "Se déconnecter"}
-            </button>
+        <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-border rounded-lg shadow-lg z-50 py-1">
+          <div className="px-4 py-3 border-b border-border">
+            <p className="text-sm font-medium">{fullName}</p>
+            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           </div>
-        </>
+
+          <Link
+            href="/compte"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-secondary transition-all duration-200 ease-out touch-manipulation active:scale-95 active:bg-secondary/80 active:duration-75"
+          >
+            <User className="w-4 h-4" />
+            Mon compte
+          </Link>
+
+          <Link
+            href="/compte/demandes"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-secondary transition-all duration-200 ease-out touch-manipulation active:scale-95 active:bg-secondary/80 active:duration-75"
+          >
+            <ClipboardList className="w-4 h-4" />
+            Mes demandes
+            {unreadCount > 0 && (
+              <span className="ml-auto bg-red-500 text-white rounded-full w-2 h-2" />
+            )}
+          </Link>
+
+          {/* Accès Pro */}
+          {(user.user_metadata?.role === "artisan" || user.user_metadata?.role === "artisan_pending") && (
+            <Link
+              href="/pro"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:bg-emerald-100 active:duration-75"
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              Espace Pro
+            </Link>
+          )}
+
+          <button
+            onClick={handleLogout}
+            disabled={loading}
+            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 ease-out touch-manipulation active:scale-95 active:bg-red-100 active:duration-75"
+          >
+            <LogOut className="w-4 h-4" />
+            {loading ? "Déconnexion..." : "Se déconnecter"}
+          </button>
+        </div>
       )}
     </div>
   )

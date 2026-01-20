@@ -7,6 +7,11 @@ import { cn } from "@/lib/utils"
 export function ScrollToTop() {
     const [isVisible, setIsVisible] = useState(false)
 
+    // Force scroll to top on mount (when navigating to the page)
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [])
+
     useEffect(() => {
         const toggleVisibility = () => {
             // Apparaît uniquement après scroll ≥ 500px

@@ -101,7 +101,8 @@ export async function Header({ backHref, backLabel, showBackButton, className }:
                   /* Bouton Retour statique intégré au header */
                   <Link
                     href={backHref}
-                    className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200 active:scale-95 touch-manipulation"
+                    scroll={true}
+                    className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200 active:scale-75 touch-manipulation"
                   >
                     <div className="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
                       <ArrowLeft className="w-4 h-4" />

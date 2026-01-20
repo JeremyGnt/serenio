@@ -5,6 +5,7 @@ import "./globals.css"
 import { InterventionSubmissionProvider } from "@/components/providers/intervention-submission-provider"
 import { CookieBanner } from "@/components/layout/cookie-banner"
 import { AnalyticsGuard } from "@/components/layout/analytics-guard"
+import { ScrollToTopOnNavigate } from "@/components/ui/scroll-to-top-on-navigate"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -65,6 +66,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
+        <ScrollToTopOnNavigate />
         <InterventionSubmissionProvider>
           {children}
         </InterventionSubmissionProvider>
