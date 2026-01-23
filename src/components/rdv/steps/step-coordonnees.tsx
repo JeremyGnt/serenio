@@ -49,7 +49,7 @@ function PasswordField({ value, onChange }: { value: string; onChange: (value: s
               value={value}
               onChange={(e) => onChange(e.target.value)}
               placeholder="Min. 6 caractères"
-              className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
             />
             <button
               type="button"
@@ -75,7 +75,7 @@ function PasswordField({ value, onChange }: { value: string; onChange: (value: s
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirmer le mot de passe"
               className={cn(
-                "w-full px-4 py-3 pr-12 rounded-xl border focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent",
+                "w-full px-4 py-3 pr-12 rounded-xl border focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white",
                 confirmPassword && !passwordsMatch ? "border-red-300" : "border-gray-200"
               )}
             />
@@ -222,20 +222,20 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
               value={formState.clientFirstName}
               onChange={(e) => onUpdate({ clientFirstName: e.target.value })}
               placeholder="Votre prénom"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
             />
           </div>
 
           <div className="space-y-2">
             <label className="block text-sm text-gray-700">
-              Nom <span className="text-gray-400">(optionnel)</span>
+              Nom <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={formState.clientLastName}
               onChange={(e) => onUpdate({ clientLastName: e.target.value })}
               placeholder="Votre nom"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
             />
           </div>
         </div>
@@ -258,7 +258,7 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
               value={formState.clientEmail}
               onChange={(e) => onUpdate({ clientEmail: e.target.value })}
               placeholder="votre@email.com"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
               disabled={isLoggedIn}
             />
           </div>
@@ -309,7 +309,7 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
                 }}
                 onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                 placeholder="Tapez pour rechercher une adresse..."
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
               />
               {searchLoading && (
                 <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />
@@ -323,7 +323,7 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
                       key={index}
                       type="button"
                       onClick={() => selectSuggestion(suggestion)}
-                      className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0 transition-colors touch-manipulation active:bg-gray-100 active:duration-75"
+                      className="w-full px-3 py-3 text-left hover:bg-emerald-50/50 border-b border-gray-100 last:border-0 transition-colors touch-manipulation active:bg-emerald-50 active:duration-75 group"
                     >
                       <div className="font-medium text-gray-900 text-sm">
                         {suggestion.label}
@@ -361,7 +361,7 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
                 value={formState.addressCity}
                 onChange={(e) => onUpdate({ addressCity: e.target.value })}
                 placeholder="Lyon"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
               />
             </div>
           </div>
@@ -375,7 +375,7 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
               value={formState.addressComplement}
               onChange={(e) => onUpdate({ addressComplement: e.target.value })}
               placeholder="Bâtiment, escalier, étage..."
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+              className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
             />
           </div>
 
@@ -388,46 +388,13 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
               onChange={(e) => onUpdate({ addressInstructions: e.target.value })}
               placeholder="Digicode, interphone, indications..."
               rows={2}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors resize-none bg-white"
             />
           </div>
         </div>
       </div>
 
-      {/* Méthode de contact préférée */}
-      <div className="space-y-3">
-        <label className="block text-sm font-medium text-gray-900">
-          Comment souhaitez-vous être contacté ?
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { value: "phone", label: "Téléphone" },
-            { value: "email", label: "Email" },
-          ].map((method) => {
-            const isSelected = formState.diagnostic.preferredContactMethod === method.value
 
-            return (
-              <button
-                key={method.value}
-                onClick={() => onUpdate({
-                  diagnostic: {
-                    ...formState.diagnostic,
-                    preferredContactMethod: method.value as "phone" | "email"
-                  }
-                })}
-                className={cn(
-                  "py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all touch-manipulation active:scale-[0.98] active:duration-75",
-                  isSelected
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700 active:bg-gray-50"
-                )}
-              >
-                {method.label}
-              </button>
-            )
-          })}
-        </div>
-      </div>
     </div>
   )
 }

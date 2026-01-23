@@ -52,7 +52,7 @@ export function StepService({
               className={cn(
                 "w-full h-full text-left p-5 rounded-xl border-2 transition-all flex flex-col touch-manipulation active:scale-[0.98] active:duration-75",
                 isSelected
-                  ? "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/20"
+                  ? "border-emerald-500 bg-emerald-50"
                   : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm active:bg-gray-50"
               )}
             >
@@ -77,11 +77,6 @@ export function StepService({
                     )}>
                       {service.name}
                     </h3>
-                    {isSelected && (
-                      <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Check className="w-3 h-3 text-white" />
-                      </div>
-                    )}
                   </div>
 
                   <p className="text-sm text-gray-500 mt-1 line-clamp-2 flex-1">

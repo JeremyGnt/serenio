@@ -9,10 +9,11 @@ import {
   CreditCard,
   Edit2,
   CheckCircle2,
-  Shield
+  Shield,
+  Phone
 } from "lucide-react"
 import type { RdvFormState, RdvServiceTypeDisplay } from "@/types/rdv"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 interface StepRecapitulatifProps {
   formState: RdvFormState
@@ -35,184 +36,207 @@ export function StepRecapitulatif({ formState, serviceType, onEdit }: StepRecapi
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Titre */}
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+      <div className="text-center space-y-2">
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
           Récapitulatif
         </h1>
-        <p className="text-gray-500">
-          Vérifiez les informations avant de confirmer
+        <p className="text-gray-500 max-w-md mx-auto">
+          Vérifiez les informations ci-dessous avant de valider votre demande d'intervention.
         </p>
       </div>
 
-      {/* Carte service */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Wrench className="w-5 h-5 text-emerald-600" />
+      <div className="grid lg:grid-cols-2 gap-4 lg:gap-6 items-start">
+        {/* Colonne Gauche : Détails techniques */}
+        <div className="space-y-4 lg:space-y-6">
+
+          {/* Section Détails de l'intervention */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden group hover:shadow-md transition-shadow duration-300">
+            <div className="px-6 py-4 border-b border-gray-50 bg-gray-50/50 flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                <Wrench className="w-5 h-5 text-emerald-600" />
+                Détails de l'intervention
+              </h3>
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">{serviceType.name}</h3>
-              <p className="text-sm text-gray-500 mt-0.5">{serviceType.description}</p>
+
+            <div className="p-6 space-y-6">
+              {/* Service */}
+              <div className="flex items-start justify-between group/item">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center flex-shrink-0 text-emerald-600">
+                    <Wrench className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider text-[10px]">Prestation</p>
+                    <p className="font-semibold text-gray-900">{serviceType.name}</p>
+                    <p className="text-sm text-gray-500 mt-0.5">{serviceType.description}</p>
+                  </div>
+                </div>
+                <button onClick={() => onEdit(0)} className="text-gray-400 hover:text-emerald-600 transition-colors p-2 hover:bg-emerald-50 rounded-full">
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="h-px bg-gray-100 w-full" />
+
+              {/* Date */}
+              <div className="flex items-start justify-between group/item">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0 text-blue-600">
+                    <CalendarDays className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider text-[10px]">Date et Heure</p>
+                    <p className="font-semibold text-gray-900 capitalized">
+                      {formState.selectedDate ? formatDate(formState.selectedDate) : "Non défini"}
+                    </p>
+                    <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-0.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      {formState.selectedTimeStart && formState.selectedTimeEnd
+                        ? formatTime(formState.selectedTimeStart, formState.selectedTimeEnd)
+                        : "Non défini"
+                      }
+                    </div>
+                  </div>
+                </div>
+                <button onClick={() => onEdit(4)} className="text-gray-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-full">
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="h-px bg-gray-100 w-full" />
+
+              {/* Adresse */}
+              <div className="flex items-start justify-between group/item">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0 text-amber-600">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 uppercase tracking-wider text-[10px]">Adresse</p>
+                    <p className="font-semibold text-gray-900">{formState.addressStreet}</p>
+                    <p className="text-sm text-gray-500">
+                      {formState.addressPostalCode} {formState.addressCity}
+                    </p>
+                    {formState.addressComplement && (
+                      <p className="text-xs text-gray-400 mt-1">{formState.addressComplement}</p>
+                    )}
+                  </div>
+                </div>
+                <button onClick={() => onEdit(6)} className="text-gray-400 hover:text-amber-600 transition-colors p-2 hover:bg-amber-50 rounded-full">
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
-          <button
-            onClick={() => onEdit(0)}
-            className="text-emerald-600 hover:text-emerald-700 p-2 rounded-full hover:bg-emerald-50 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 active:bg-emerald-100"
-          >
-            <Edit2 className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
 
-      {/* Date et heure */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <CalendarDays className="w-5 h-5 text-blue-600" />
+          {/* Section Artisan */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center flex-shrink-0 text-purple-600">
+                <User className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Artisan</p>
+                <p className="text-sm text-gray-500">Attribution automatique</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">Date et créneau</h3>
-              <p className="text-gray-700 mt-1">
-                {formState.selectedDate ? formatDate(formState.selectedDate) : "Non défini"}
+            <span className="text-xs font-medium px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full">
+              Auto
+            </span>
+          </div>
+
+        </div>
+
+        {/* Colonne Droite : Infos & Prix */}
+        <div className="space-y-4 lg:space-y-6">
+
+          {/* Section Vos Infos */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5">
+              <User className="w-24 h-24" />
+            </div>
+            <div className="flex justify-between items-start mb-4 relative z-10">
+              <h3 className="font-semibold text-gray-900">Vos coordonnées</h3>
+              <button onClick={() => onEdit(6)} className="text-xs text-emerald-600 font-medium hover:underline flex items-center gap-1">
+                Modifier
+              </button>
+            </div>
+            <div className="space-y-3 relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-xs">
+                  {formState.clientFirstName.charAt(0)}{formState.clientLastName.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{formState.clientFirstName} {formState.clientLastName}</p>
+                  <p className="text-xs text-gray-500">Client</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50/50 p-2 rounded-lg">
+                <Phone className="w-3.5 h-3.5 text-gray-400" />
+                {formState.clientPhone}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50/50 p-2 rounded-lg">
+                <User className="w-3.5 h-3.5 text-gray-400" />
+                {formState.clientEmail}
+              </div>
+            </div>
+          </div>
+
+          {/* Section Prix Hero */}
+          <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <CreditCard className="w-32 h-32 transform rotate-12 translate-x-8 -translate-y-8" />
+            </div>
+
+            <p className="text-emerald-100 text-sm font-medium mb-1">Estimation tarifaire</p>
+            <div className="flex items-baseline gap-2 mb-4">
+              <span className="text-3xl lg:text-4xl font-bold tracking-tight">
+                {formState.estimatedPriceMin}-{formState.estimatedPriceMax}€
+              </span>
+              <span className="text-emerald-200 text-sm">TTC</span>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-sm text-emerald-50 border border-white/10">
+              <p className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-300 mt-0.5 flex-shrink-0" />
+                <span>Le prix final sera confirmé par l'artisan avant toute intervention.</span>
               </p>
-              <p className="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
-                <Clock className="w-3.5 h-3.5" />
-                {formState.selectedTimeStart && formState.selectedTimeEnd
-                  ? formatTime(formState.selectedTimeStart, formState.selectedTimeEnd)
-                  : "Non défini"
-                }
-              </p>
             </div>
           </div>
-          <button
-            onClick={() => onEdit(4)}
-            className="text-emerald-600 hover:text-emerald-700 p-2 rounded-full hover:bg-emerald-50 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 active:bg-emerald-100"
-          >
-            <Edit2 className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
 
-      {/* Artisan */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <User className="w-5 h-5 text-purple-600" />
+          {/* Garanties Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-emerald-100 transition-colors group">
+              <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                <Shield className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-900">Devis Gratuit</p>
+                <p className="text-[10px] text-gray-500">Sans engagement</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">Artisan</h3>
-              <p className="text-gray-700 mt-1">
-                {formState.autoAssign
-                  ? "Attribution automatique"
-                  : "En attente de confirmation"
-                }
-              </p>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Le meilleur artisan disponible sera assigné
-              </p>
+            <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-emerald-100 transition-colors group">
+              <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-900">Annulation</p>
+                <p className="text-[10px] text-gray-500">Gratuite</p>
+              </div>
             </div>
           </div>
-          <button
-            onClick={() => onEdit(5)}
-            className="text-emerald-600 hover:text-emerald-700 p-2 rounded-full hover:bg-emerald-50 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 active:bg-emerald-100"
-          >
-            <Edit2 className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
 
-      {/* Adresse */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <MapPin className="w-5 h-5 text-amber-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">Adresse</h3>
-              <p className="text-gray-700 mt-1">{formState.addressStreet}</p>
-              {formState.addressComplement && (
-                <p className="text-gray-700">{formState.addressComplement}</p>
-              )}
-              <p className="text-gray-700">
-                {formState.addressPostalCode} {formState.addressCity}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => onEdit(6)}
-            className="text-emerald-600 hover:text-emerald-700 p-2 rounded-full hover:bg-emerald-50 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 active:bg-emerald-100"
-          >
-            <Edit2 className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Contact */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-            <User className="w-5 h-5 text-gray-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900">
-              {formState.clientFirstName} {formState.clientLastName}
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">{formState.clientEmail}</p>
-            <p className="text-sm text-gray-500">{formState.clientPhone}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Prix estimé */}
-      <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200 rounded-xl p-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-200 rounded-lg flex items-center justify-center">
-              <CreditCard className="w-5 h-5 text-emerald-700" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-emerald-900">Estimation tarifaire</h3>
-              <p className="text-sm text-emerald-700">Prix confirmé sur place</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-emerald-700">
-              {formState.estimatedPriceMin}€ - {formState.estimatedPriceMax}€
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Garanties */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-3">
-          <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-gray-900">Annulation gratuite</p>
-            <p className="text-xs text-gray-500">Jusqu'à 24h avant</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-3">
-          <Shield className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-gray-900">Devis gratuit</p>
-            <p className="text-xs text-gray-500">Sans engagement</p>
-          </div>
         </div>
       </div>
 
       {/* Conditions */}
-      <p className="text-xs text-center text-gray-500">
+      <p className="text-xs text-center text-gray-400 mt-8">
         En confirmant, vous acceptez nos{" "}
-        <a href="/cgv" className="text-emerald-600 hover:underline">conditions générales</a>
+        <a href="/cgv" className="text-emerald-600 hover:text-emerald-700 font-medium hover:underline">conditions générales</a>
         {" "}et notre{" "}
-        <a href="/confidentialite" className="text-emerald-600 hover:underline">politique de confidentialité</a>
+        <a href="/confidentialite" className="text-emerald-600 hover:text-emerald-700 font-medium hover:underline">politique de confidentialité</a>
       </p>
     </div>
   )

@@ -1,7 +1,7 @@
-import type { 
+import type {
   RdvServiceTypeDisplay,
   DayAvailability,
-  RdvFormState 
+  RdvFormState
 } from "@/types/rdv"
 
 // ============================================
@@ -13,19 +13,19 @@ import type {
 export function generateAvailableDays(): DayAvailability[] {
   const days: DayAvailability[] = []
   const today = new Date()
-  
+
   const dayNames = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"]
   const monthNames = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
-  
-  for (let i = 1; i <= 14; i++) { // Commence à demain
+
+  for (let i = 1; i <= 45; i++) { // Commence à demain
     const date = new Date(today)
     date.setDate(today.getDate() + i)
-    
+
     // Exclure dimanche (0)
     if (date.getDay() === 0) continue
-    
+
     const dateStr = date.toISOString().split("T")[0]
-    
+
     days.push({
       date: dateStr,
       dayName: dayNames[date.getDay()],
@@ -36,7 +36,7 @@ export function generateAvailableDays(): DayAvailability[] {
       isPast: false,
     })
   }
-  
+
   return days
 }
 
@@ -57,16 +57,16 @@ export function calculatePriceEstimate(
 ): PriceEstimate {
   let baseMin = serviceType.priceFrom
   let baseMax = serviceType.priceTo || serviceType.priceFrom * 2
-  
+
   // Ajustements selon le diagnostic
   const includes: string[] = [
     "Déplacement du professionnel",
     "Main d'œuvre",
     "Diagnostic sur place",
   ]
-  
+
   const variables: string[] = []
-  
+
   // Porte blindée = plus cher
   if (diagnostic.doorType === "blindee") {
     baseMin *= 1.3
@@ -74,28 +74,28 @@ export function calculatePriceEstimate(
     variables.push("Type de porte (blindée)")
     includes.push("Matériel compatible porte blindée")
   }
-  
+
   // Serrure multipoints = plus cher
   if (diagnostic.lockType === "multipoint") {
     baseMin *= 1.2
     baseMax *= 1.3
     variables.push("Type de serrure (multipoints)")
   }
-  
+
   // Serrure électronique = plus cher
   if (diagnostic.lockType === "electronique") {
     baseMin *= 1.4
     baseMax *= 1.6
     variables.push("Type de serrure (électronique)")
   }
-  
+
   // Effraction = sécurisation supplémentaire
   if (diagnostic.hasBeenBrokenInto) {
     baseMax *= 1.3
     variables.push("Sécurisation post-effraction")
     includes.push("Conseils sécurité")
   }
-  
+
   // Accès difficile
   if (diagnostic.accessDifficulty === "difficile") {
     baseMin *= 1.1

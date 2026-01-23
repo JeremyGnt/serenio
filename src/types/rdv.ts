@@ -2,6 +2,8 @@
 // SERENIO - Types Système RDV
 // ============================================
 
+import type { PhotoPreview } from "@/components/ui/upload-photos"
+
 // ============================================
 // TYPES DE SERVICES RDV
 // ============================================
@@ -129,8 +131,9 @@ export interface RdvFormState {
   diagnostic: RdvDiagnosticAnswers
 
   // Étape 3: Photos
-  photos: File[]
+  photos: PhotoPreview[]
   photoUrls: string[]
+  rgpdConsent: boolean
 
   // Étape 4: Prix estimé (calculé)
   estimatedPriceMin: number | null
@@ -138,6 +141,7 @@ export interface RdvFormState {
 
   // Étape 5: Planning
   selectedDate: string | null // YYYY-MM-DD
+  selectedPeriod: "morning" | "afternoon" | null
   selectedSlotId: string | null
   selectedTimeStart: string | null
   selectedTimeEnd: string | null
@@ -172,9 +176,11 @@ export const initialRdvFormState: RdvFormState = {
   diagnostic: {},
   photos: [],
   photoUrls: [],
+  rgpdConsent: false,
   estimatedPriceMin: null,
   estimatedPriceMax: null,
   selectedDate: null,
+  selectedPeriod: null,
   selectedSlotId: null,
   selectedTimeStart: null,
   selectedTimeEnd: null,
@@ -206,7 +212,6 @@ export type RdvStepId =
   | "photos"
   | "prix"
   | "planning"
-  | "artisan"
   | "coordonnees"
   | "recapitulatif"
 
@@ -223,9 +228,8 @@ export const RDV_STEPS: RdvStep[] = [
   { id: "photos", title: "Photos", description: "Ajoutez des photos", number: 3 },
   { id: "prix", title: "Estimation", description: "Tarif estimé", number: 4 },
   { id: "planning", title: "Planning", description: "Date et créneau", number: 5 },
-  { id: "artisan", title: "Artisan", description: "Sélection du pro", number: 6 },
-  { id: "coordonnees", title: "Coordonnées", description: "Vos informations", number: 7 },
-  { id: "recapitulatif", title: "Récapitulatif", description: "Confirmation", number: 8 },
+  { id: "coordonnees", title: "Coordonnées", description: "Vos informations", number: 6 },
+  { id: "recapitulatif", title: "Récapitulatif", description: "Confirmation", number: 7 },
 ]
 
 // ============================================

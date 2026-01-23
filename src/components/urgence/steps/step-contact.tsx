@@ -44,23 +44,20 @@ export function StepContact({
           <Label htmlFor="phone" className="text-sm">
             Téléphone <span className="text-red-500">*</span>
           </Label>
-          <div className="relative">
-            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => {
-                // Formatter le numéro avec espaces tous les 2 chiffres
-                const digits = e.target.value.replace(/\D/g, "").slice(0, 10)
-                const formatted = digits.replace(/(\d{2})(?=\d)/g, "$1 ")
-                onUpdate({ clientPhone: formatted })
-              }}
-              placeholder="06 XX XX XX XX"
-              className="h-11 lg:h-12 pl-10"
-              required
-            />
-          </div>
+          <Input
+            id="phone"
+            type="tel"
+            value={phone}
+            onChange={(e) => {
+              // Formatter le numéro avec espaces tous les 2 chiffres
+              const digits = e.target.value.replace(/\D/g, "").slice(0, 10)
+              const formatted = digits.replace(/(\d{2})(?=\d)/g, "$1 ")
+              onUpdate({ clientPhone: formatted })
+            }}
+            placeholder="06 XX XX XX XX"
+            className="h-11 lg:h-12"
+            required
+          />
           <p className="text-xs text-muted-foreground">
             Vous serez contacté sur ce numéro
           </p>
@@ -71,19 +68,16 @@ export function StepContact({
           <Label htmlFor="email" className="text-sm">
             Email <span className="text-red-500">*</span>
           </Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => onUpdate({ clientEmail: e.target.value })}
-              placeholder="vous@exemple.com"
-              className="h-11 lg:h-12 pl-10"
-              required
-              readOnly={isLoggedIn && !!email}
-            />
-          </div>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => onUpdate({ clientEmail: e.target.value })}
+            placeholder="vous@exemple.com"
+            className="h-11 lg:h-12"
+            required
+            readOnly={isLoggedIn && !!email}
+          />
           <p className="text-xs text-muted-foreground">
             {isLoggedIn ? "Email de votre compte" : "Pour le récapitulatif"}
           </p>
@@ -94,17 +88,14 @@ export function StepContact({
           <Label htmlFor="lastName" className="text-sm">
             Nom <span className="text-red-500">*</span>
           </Label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              id="lastName"
-              value={lastName}
-              onChange={(e) => onUpdate({ clientLastName: e.target.value })}
-              placeholder="Dupont"
-              className="h-11 lg:h-12 pl-10"
-              required
-            />
-          </div>
+          <Input
+            id="lastName"
+            value={lastName}
+            onChange={(e) => onUpdate({ clientLastName: e.target.value })}
+            placeholder="Dupont"
+            className="h-11 lg:h-12"
+            required
+          />
         </div>
 
         {/* Prénom */}

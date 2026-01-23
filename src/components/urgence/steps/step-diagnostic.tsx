@@ -108,17 +108,20 @@ export function StepDiagnostic({
                     </div>
                     {/* Champ "Préciser" si "Autre" est sélectionné */}
                     {currentValue === "other" && (
-                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <Label htmlFor={`${question.id}_details`} className="text-sm font-medium">
+                      <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <label htmlFor={`${question.id}_details`} className="block text-sm font-medium text-gray-700 mb-2">
                           Préciser <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
+                        </label>
+                        <textarea
                           id={`${question.id}_details`}
                           value={(answers[`${question.id}_details`] as string) || ""}
-                          onChange={(e) => handleAnswerChange(`${question.id}_details`, e.target.value)}
+                          onChange={(e) => handleAnswerChange(`${question.id}_details`, e.target.value.slice(0, 100))}
                           placeholder="Précisez votre réponse..."
-                          className="mt-2"
+                          rows={2}
+                          maxLength={100}
+                          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
                         />
+                        <p className="text-xs text-gray-400 mt-1 text-right">{((answers[`${question.id}_details`] as string) || "").length}/100</p>
                       </div>
                     )}
                   </div>

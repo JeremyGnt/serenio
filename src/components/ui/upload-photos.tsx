@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
-import { Camera, X, ImagePlus, Loader2, AlertCircle, CheckCircle, Info, Shield } from "lucide-react"
+import { useState, useRef, useCallback, useEffect } from "react"
+import { Camera, X, ImagePlus, Loader2, AlertCircle, CheckCircle, Info, Shield, Upload, ChevronDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import {
@@ -52,7 +52,19 @@ export function UploadPhotos({
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showInfoBox, setShowInfoBox] = useState(true)
+  const [showRgpdDetails, setShowRgpdDetails] = useState(false)
   const dragCounterRef = useRef(0)
+
+  // Initialiser la visibilité de l'info box
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isHidden = sessionStorage.getItem("serenio_hide_photo_info") === "true"
+      if (isHidden) {
+        setShowInfoBox(false)
+      }
+    }
+  }, [])
 
   // CHANGE: Nous ne nettoyons plus les URLs au démontage du composant
   // car cela casse la persistance des images lors de la navigation entre les étapes (ex: UrgenceFlow).
@@ -193,10 +205,10 @@ export function UploadPhotos({
       {/* Header */}
       <div className="text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Photos (optionnel)
+          Ajoutez des photos <span className="font-normal text-gray-500">(optionnel)</span>
         </h1>
-        <p className="text-muted-foreground">
-          Ajoutez des photos pour aider le serrurier à mieux comprendre la situation
+        <p className="text-gray-500">
+          Les photos aident l'artisan à préparer son intervention
         </p>
       </div>
 
@@ -214,7 +226,29 @@ export function UploadPhotos({
         </div>
       )}
 
-      {/* Zone d'upload avec drag & drop */}
+      {/* Info box */}
+      {showInfoBox && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3 relative">
+          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-blue-700 pr-4">
+            <p className="font-medium mb-1">Fortement recommandé</p>
+            <p>Prenez des photos de votre porte, serrure, ou du problème rencontré. Cela permet une estimation plus précise.</p>
+          </div>
+          <button
+            onClick={() => {
+              setShowInfoBox(false)
+              if (typeof window !== "undefined") {
+                sessionStorage.setItem("serenio_hide_photo_info", "true")
+              }
+            }}
+            className="absolute top-2 right-2 text-blue-400 hover:text-blue-600 p-1"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Zone de drop */}
       {canAddMore && (
         <div
           onDragEnter={handleDragEnter}
@@ -223,39 +257,13 @@ export function UploadPhotos({
           onDrop={handleDrop}
           onClick={() => !disabled && inputRef.current?.click()}
           className={cn(
-            "border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ease-out",
+            "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all touch-manipulation active:scale-[0.98] active:duration-75",
             isDragging
-              ? "border-emerald-400 bg-emerald-50 scale-[1.02]"
-              : "border-gray-300 hover:border-gray-400 hover:bg-gray-50",
-            disabled
-              ? "opacity-50 cursor-not-allowed"
-              : "cursor-pointer touch-manipulation active:scale-[0.98] active:bg-gray-100 active:duration-75"
+              ? "border-red-500 bg-red-50"
+              : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100 active:bg-gray-200",
+            disabled && "opacity-50 cursor-not-allowed"
           )}
         >
-          <div className={cn(
-            "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors",
-            isDragging ? "bg-emerald-100" : "bg-gray-100"
-          )}>
-            <Camera className={cn(
-              "w-8 h-8 transition-colors",
-              isDragging ? "text-emerald-500" : "text-gray-400"
-            )} />
-          </div>
-
-          <p className="text-gray-600 mb-2 font-medium">
-            {isDragging ? (
-              "Déposez vos photos ici"
-            ) : (
-              <>
-                <span className="hidden sm:inline">Glissez-déposez ou </span>
-                Cliquez pour ajouter
-              </>
-            )}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            JPG, PNG ou WebP • Max {STORAGE_CONFIG.maxFileSizeMB} Mo • {photos.length}/{maxPhotos} photos
-          </p>
-
           <input
             ref={inputRef}
             type="file"
@@ -265,6 +273,23 @@ export function UploadPhotos({
             onChange={handleFileSelect}
             disabled={disabled}
           />
+
+          <div className="flex flex-col items-center gap-3">
+            <div className={cn(
+              "w-14 h-14 rounded-full flex items-center justify-center",
+              isDragging ? "bg-red-100" : "bg-gray-200"
+            )}>
+              <Upload className={cn("w-6 h-6", isDragging ? "text-red-600" : "text-gray-500")} />
+            </div>
+            <div>
+              <p className="font-medium text-gray-900">
+                Cliquez ou déposez vos photos
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                PNG, JPG jusqu'à {STORAGE_CONFIG.maxFileSizeMB}MB (max {maxPhotos} photos)
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -299,37 +324,48 @@ export function UploadPhotos({
         </div>
       )}
 
-      {/* Conseils */}
-      <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
-        <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm text-blue-800 font-medium mb-1">Conseils photo</p>
-            <p className="text-sm text-blue-700">
-              Prenez des photos de la serrure, de la porte, et de tout élément
-              qui pourrait aider le serrurier à préparer son intervention.
-            </p>
-          </div>
-        </div>
-      </div>
 
-      {/* RGPD Consent */}
+      {/* RGPD Consent - Premium Responsive Design */}
       {showRgpdConsent && photos.length > 0 && (
-        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-          <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <label className="flex items-start gap-3 cursor-pointer">
+        <div className="py-3 px-4 bg-gray-50 rounded-xl border border-gray-200 transition-all duration-300">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-3">
+              <Shield className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+              <label className="flex items-center gap-3 cursor-pointer flex-1 select-none">
                 <Checkbox
                   checked={rgpdConsent}
                   onCheckedChange={(checked) => onRgpdConsentChange?.(checked === true)}
-                  className="mt-0.5"
+                  className="mt-0 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                 />
-                <span className="text-sm text-gray-600 leading-relaxed">
-                  J'accepte que mes photos soient utilisées uniquement dans le cadre
-                  de cette intervention. Elles seront automatiquement supprimées {STORAGE_CONFIG.retentionDays} jours après la fin de l'intervention.
+                <span className="text-sm font-medium text-gray-700">
+                  J'accepte l'utilisation de mes photos
                 </span>
               </label>
+
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  setShowRgpdDetails(!showRgpdDetails)
+                }}
+                className="text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center transition-colors flex-shrink-0"
+                aria-label="Voir les détails RGPD"
+              >
+                <ChevronDown className={cn(
+                  "w-4 h-4 transition-transform duration-200",
+                  showRgpdDetails ? "rotate-180" : ""
+                )} />
+              </button>
+            </div>
+
+            <div className={cn(
+              "grid transition-all duration-200 ease-in-out pl-14",
+              showRgpdDetails ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+            )}>
+              <div className="overflow-hidden">
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  Vos photos sont strictement confidentielles. Elles serviront uniquement à préparer l'intervention et seront <span className="font-semibold text-gray-700">automatiquement supprimées {STORAGE_CONFIG.retentionDays} jours</span> après la fin de la prestation.
+                </p>
+              </div>
             </div>
           </div>
         </div>

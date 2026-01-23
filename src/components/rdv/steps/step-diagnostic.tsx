@@ -217,34 +217,6 @@ export function StepDiagnostic({ serviceType, diagnostic, onUpdate }: StepDiagno
         )}
       </div>
 
-      {/* Accessibilité */}
-      <div className="space-y-3">
-        <label className="block text-sm font-medium text-gray-900">
-          Accessibilité du lieu
-        </label>
-        <div className="grid grid-cols-3 gap-2">
-          {ACCESS_DIFFICULTY.map((level) => {
-            const isSelected = diagnostic.accessDifficulty === level.value
-            const Icon = level.icon
-
-            return (
-              <button
-                key={level.value}
-                onClick={() => onUpdate({ accessDifficulty: level.value as RdvDiagnosticAnswers["accessDifficulty"] })}
-                className={cn(
-                  "flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98] active:duration-75",
-                  isSelected
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                    : "border-gray-200 bg-white hover:border-gray-300 text-gray-700 active:bg-gray-50"
-                )}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="text-sm font-medium">{level.label}</span>
-              </button>
-            )
-          })}
-        </div>
-      </div>
 
       {/* Étage (si appartement) */}
       {diagnostic.propertyType === "appartement" && (
