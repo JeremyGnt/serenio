@@ -156,7 +156,7 @@ export function AddressSection({ user }: AddressSectionProps) {
                 }}
                 onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                 placeholder="Ex: 15 Rue de la République..."
-                className="h-11 text-sm border-gray-200 focus:border-violet-300 focus:ring-violet-200"
+                className="h-11 text-sm border-gray-200 focus:border-violet-300 focus:ring-violet-200 w-full bg-white"
                 autoComplete="off"
               />
               {isSearching && (
@@ -172,7 +172,7 @@ export function AddressSection({ user }: AddressSectionProps) {
                     key={index}
                     type="button"
                     onClick={() => selectSuggestion(suggestion)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-violet-50 transition-all duration-200 border-b border-gray-100 last:border-0 touch-manipulation active:bg-violet-100/50"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-violet-50 transition-all duration-200 border-b border-gray-100 last:border-0 touch-manipulation active:bg-violet-100/50 relative after:absolute after:-inset-1 after:content-['']"
                   >
                     <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center flex-shrink-0">
                       <Navigation className="w-4 h-4 text-violet-600" />
@@ -188,7 +188,7 @@ export function AddressSection({ user }: AddressSectionProps) {
           </div>
 
           {/* Code postal & Ville */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="postalCode" className="text-sm font-medium text-gray-700">Code postal</Label>
               <PostalCodeInput
@@ -196,10 +196,10 @@ export function AddressSection({ user }: AddressSectionProps) {
                 value={postalCode}
                 onChange={(value) => { setPostalCode(value); setSuccess(false) }}
                 placeholder="Ex: 69003"
-                className="h-11 text-sm border-gray-200 bg-gray-50/50"
+                className="h-11 text-sm border-gray-200 bg-white"
               />
             </div>
-            <div className="sm:col-span-2 space-y-2">
+            <div className="space-y-2">
               <Label htmlFor="city" className="text-sm font-medium text-gray-700">Ville</Label>
               <Input
                 id="city"
@@ -207,7 +207,7 @@ export function AddressSection({ user }: AddressSectionProps) {
                 value={city}
                 onChange={(e) => { setCity(e.target.value); setSuccess(false) }}
                 placeholder="Ex: Lyon"
-                className="h-11 text-sm border-gray-200 bg-gray-50/50 sm:max-w-sm"
+                className="h-11 text-sm border-gray-200 bg-white"
               />
             </div>
           </div>
@@ -221,7 +221,7 @@ export function AddressSection({ user }: AddressSectionProps) {
               value={country}
               onChange={(e) => { setCountry(e.target.value); setSuccess(false) }}
               placeholder="France"
-              className="h-11 text-sm border-gray-200 bg-gray-50 sm:max-w-xs"
+              className="h-11 text-sm border-gray-200 bg-white sm:max-w-xs"
             />
           </div>
 

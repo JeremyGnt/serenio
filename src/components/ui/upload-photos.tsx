@@ -1,15 +1,12 @@
 "use client"
 
-import { useState, useRef, useCallback, useEffect } from "react"
-import { Camera, X, ImagePlus, ChevronRight, Loader2, AlertCircle, CheckCircle, Info, Shield } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState, useRef, useCallback } from "react"
+import { Camera, X, ImagePlus, Loader2, AlertCircle, CheckCircle, Info, Shield } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import {
   STORAGE_CONFIG,
   validatePhotoFile,
-  getPhotoErrorMessage,
-  type PhotoErrorCode
 } from "@/lib/storage"
 
 // ============================================

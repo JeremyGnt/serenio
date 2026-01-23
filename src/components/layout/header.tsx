@@ -52,7 +52,7 @@ export async function Header({ backHref, backLabel, showBackButton, className }:
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 h-14 flex items-center justify-between">
           {/* Logo & Navigation gauche */}
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2 font-bold text-lg active:scale-95 transition-all duration-200 ease-out active:duration-75 touch-manipulation">
+            <Link href="/" className="flex items-center gap-2 font-bold text-lg active:scale-95 transition-all duration-200 ease-out active:duration-75 touch-manipulation relative after:absolute after:-inset-1 after:content-['']">
               {hasBack ? (
                 <>
                   <Image

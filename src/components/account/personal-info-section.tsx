@@ -59,22 +59,24 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
       <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 p-6 md:p-8 shadow-lg shadow-gray-200/50 ring-1 ring-gray-900/5">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email (non modifiable) */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full border border-gray-200">
-                Verrouillé
-              </span>
-            </div>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                value={user.email || ""}
-                disabled
-                className="h-11 pl-11 text-sm bg-gray-50/50 border-gray-200 text-gray-500 sm:max-w-md"
-              />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full border border-gray-200">
+                  Verrouillé
+                </span>
+              </div>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={user.email || ""}
+                  disabled
+                  className="h-11 pl-11 text-sm bg-gray-50/50 border-gray-200 text-gray-500 w-full"
+                />
+              </div>
             </div>
           </div>
 
@@ -112,7 +114,7 @@ export function PersonalInfoSection({ user }: PersonalInfoSectionProps) {
               value={phone}
               onChange={(value) => { setPhone(value); setSuccess(false) }}
               placeholder="06 12 34 56 78"
-              className="h-11 text-sm"
+              className="h-11 text-sm border-gray-200 focus:border-violet-300 focus:ring-violet-200"
             />
           </div>
 

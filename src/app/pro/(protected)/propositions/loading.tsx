@@ -16,9 +16,9 @@ export default function Loading() {
                         </div>
                         Opportunités
                     </h1>
-                    <p className="text-muted-foreground mt-1">
+                    <div className="text-muted-foreground mt-1">
                         <Skeleton className="h-4 w-40 inline-block" />
-                    </p>
+                    </div>
                 </div>
                 {/* Actualiser button skeleton */}
                 <Skeleton className="h-10 w-28 rounded-lg" />

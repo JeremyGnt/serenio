@@ -98,7 +98,7 @@ export function AccountSidebar({ user, displayName = "Utilisateur" }: AccountSid
                                         : isHighlight
                                             ? "text-purple-600 hover:bg-purple-50 font-medium"
                                             : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-medium",
-                                    "active:scale-95 touch-manipulation"
+                                    "active:scale-95 touch-manipulation relative after:absolute after:-inset-1 after:content-['']"
                                 )}
                             >
                                 <Icon className={cn("w-[18px] h-[18px]", isActive ? "opacity-100" : "opacity-75")} />

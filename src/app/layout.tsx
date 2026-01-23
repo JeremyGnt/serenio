@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 // import { SpeedInsights } from "@vercel/speed-insights/next" // Moved to AnalyticsGuard
 import "./globals.css"
 import { InterventionSubmissionProvider } from "@/components/providers/intervention-submission-provider"
+import { InactivityProvider } from "@/components/providers/inactivity-provider"
 import { CookieBanner } from "@/components/layout/cookie-banner"
 import { AnalyticsGuard } from "@/components/layout/analytics-guard"
 import { ScrollToTopOnNavigate } from "@/components/ui/scroll-to-top-on-navigate"
@@ -62,14 +63,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
         <ScrollToTopOnNavigate />
-        <InterventionSubmissionProvider>
-          {children}
-        </InterventionSubmissionProvider>
+        <InactivityProvider>
+          <InterventionSubmissionProvider>
+            {children}
+          </InterventionSubmissionProvider>
+        </InactivityProvider>
         <CookieBanner />
         <AnalyticsGuard />
       </body>

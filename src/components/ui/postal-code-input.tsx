@@ -62,7 +62,7 @@ function PostalCodeInput({
                     // Base styles matching Input component
                     "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input w-full min-w-0 rounded-xl border bg-transparent px-4 py-3 text-base shadow-xs transition-all duration-200 outline-none",
                     // Focus styles
-                    "focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent",
+                    "focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-300",
                     // Disabled styles
                     "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
                     className

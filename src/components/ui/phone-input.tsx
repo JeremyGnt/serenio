@@ -69,21 +69,16 @@ function PhoneInput({
                     // Base styles matching Input component
                     "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input w-full min-w-0 rounded-xl border bg-transparent px-4 py-3 text-base shadow-xs transition-all duration-200 outline-none",
                     // Focus styles
-                    "focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent",
+                    "focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-300",
                     // Disabled styles
                     "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-                    // Valid state styling
-                    showValidation && isValid && "border-emerald-400 pr-10",
+                    // Disabled styles
+                    "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
                     className
                 )}
                 {...props}
             />
-            {/* Validation checkmark */}
-            {showValidation && isValid && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <Check className="w-5 h-5 text-emerald-500" />
-                </div>
-            )}
+
         </div>
     )
 }
