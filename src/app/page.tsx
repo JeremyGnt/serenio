@@ -12,6 +12,9 @@ import { ScrollToTop } from "@/components/ui/scroll-to-top"
 import { getLandingPageData } from "@/lib/api/landing"
 import { getUser } from "@/lib/supabase/server"
 
+// ISR: Revalider la page toutes les heures pour améliorer FCP/LCP
+export const revalidate = 3600
+
 export default async function Home() {
   const [{ stats, testimonials, faq, prices, guarantees }, user] = await Promise.all([
     getLandingPageData(),

@@ -226,10 +226,10 @@ export const RDV_STEPS: RdvStep[] = [
   { id: "service", title: "Type de besoin", description: "Choisissez votre intervention", number: 1 },
   { id: "diagnostic", title: "Diagnostic", description: "Décrivez votre situation", number: 2 },
   { id: "photos", title: "Photos", description: "Ajoutez des photos", number: 3 },
-  { id: "prix", title: "Estimation", description: "Tarif estimé", number: 4 },
-  { id: "planning", title: "Planning", description: "Date et créneau", number: 5 },
-  { id: "coordonnees", title: "Coordonnées", description: "Vos informations", number: 6 },
-  { id: "recapitulatif", title: "Récapitulatif", description: "Confirmation", number: 7 },
+  // Étape 4 "prix" supprimée
+  { id: "planning", title: "Planning", description: "Date et créneau", number: 4 },
+  { id: "coordonnees", title: "Coordonnées", description: "Vos informations", number: 5 },
+  { id: "recapitulatif", title: "Récapitulatif", description: "Confirmation", number: 6 },
 ]
 
 // ============================================

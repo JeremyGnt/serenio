@@ -16,7 +16,7 @@ import {
   StepService,
   StepDiagnostic,
   StepPhotos,
-  StepPrix,
+  // StepPrix,
   StepPlanning,
 
   StepCoordonnees,
@@ -320,6 +320,7 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
           />
         )
 
+      /*
       case "prix":
         return (
           <StepPrix
@@ -329,6 +330,7 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
             estimatedMax={formState.estimatedPriceMax || 0}
           />
         )
+      */
 
       case "planning":
         return (
@@ -373,6 +375,7 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
             formState={formState}
             serviceType={serviceTypes.find(s => s.code === formState.serviceType)!}
             onEdit={(stepIndex: number) => updateForm({ currentStep: stepIndex })}
+            onUpdate={handleUpdateForm}
           />
         )
 

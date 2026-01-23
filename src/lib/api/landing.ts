@@ -314,23 +314,30 @@ export async function createLead(payload: CreateLeadPayload): Promise<{ id: stri
   return { id: data.id }
 }
 
+import { unstable_cache } from "next/cache"
+
 /**
  * Récupère toutes les données de la landing page en une seule fois
+ * Données cachées pendant 1 heure pour améliorer FCP/LCP
  */
-export async function getLandingPageData() {
-  const [stats, testimonials, faq, prices, guarantees] = await Promise.all([
-    getStats(),
-    getTestimonials(),
-    getFaq(),
-    getPriceRanges(),
-    getGuarantees(),
-  ])
+export const getLandingPageData = unstable_cache(
+  async () => {
+    const [stats, testimonials, faq, prices, guarantees] = await Promise.all([
+      getStats(),
+      getTestimonials(),
+      getFaq(),
+      getPriceRanges(),
+      getGuarantees(),
+    ])
 
-  return {
-    stats,
-    testimonials,
-    faq,
-    prices,
-    guarantees,
-  }
-}
+    return {
+      stats,
+      testimonials,
+      faq,
+      prices,
+      guarantees,
+    }
+  },
+  ["landing-page-data"],
+  { revalidate: 3600, tags: ["landing"] }
+)

@@ -327,44 +327,52 @@ export function UploadPhotos({
 
       {/* RGPD Consent - Premium Responsive Design */}
       {showRgpdConsent && photos.length > 0 && (
-        <div className="py-3 px-4 bg-gray-50 rounded-xl border border-gray-200 transition-all duration-300">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-3">
-              <Shield className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-              <label className="flex items-center gap-3 cursor-pointer flex-1 select-none">
+        <div className="rounded-xl border border-gray-200 bg-gray-50 transition-all duration-300">
+          <div className="flex flex-col">
+            {/* Header / Main Row */}
+            <div className="flex items-center p-4 gap-3">
+              {/* Shield Icon */}
+              <Shield className="h-5 w-5 text-emerald-600 shrink-0" />
+
+              {/* Label wrapper (Checkbox + Text) */}
+              <label className="flex flex-1 items-center gap-3 cursor-pointer select-none">
                 <Checkbox
                   checked={rgpdConsent}
                   onCheckedChange={(checked) => onRgpdConsentChange?.(checked === true)}
-                  className="mt-0 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                  className="data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500 shrink-0"
                 />
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-gray-700 leading-tight">
                   J'accepte l'utilisation de mes photos
                 </span>
               </label>
 
+              {/* Toggle Button */}
               <button
                 onClick={(e) => {
                   e.preventDefault()
                   setShowRgpdDetails(!showRgpdDetails)
                 }}
-                className="text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center transition-colors flex-shrink-0"
+                className="flex h-6 w-6 shrink-0 items-center justify-center text-gray-400 transition-colors hover:text-gray-600"
                 aria-label="Voir les détails RGPD"
               >
                 <ChevronDown className={cn(
-                  "w-4 h-4 transition-transform duration-200",
+                  "h-4 w-4 transition-transform duration-200",
                   showRgpdDetails ? "rotate-180" : ""
                 )} />
               </button>
             </div>
 
+            {/* Accordion Details */}
             <div className={cn(
-              "grid transition-all duration-200 ease-in-out pl-14",
-              showRgpdDetails ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+              "grid transition-all duration-200 ease-in-out px-4",
+              showRgpdDetails ? "grid-rows-[1fr] pb-4 opacity-100" : "grid-rows-[0fr] pb-0 opacity-0"
             )}>
               <div className="overflow-hidden">
-                <p className="text-xs text-gray-500 leading-relaxed">
-                  Vos photos sont strictement confidentielles. Elles serviront uniquement à préparer l'intervention et seront <span className="font-semibold text-gray-700">automatiquement supprimées {STORAGE_CONFIG.retentionDays} jours</span> après la fin de la prestation.
-                </p>
+                <div className="pl-14"> {/* Indent to align with text start (Shield 20px + Gap 12px + Checkbox 16px + Gap 12px = ~60px, close enough) */}
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Vos photos sont strictement confidentielles. Elles serviront uniquement à préparer l'intervention et seront <span className="font-semibold text-gray-700">automatiquement supprimées {STORAGE_CONFIG.retentionDays} jours</span> après la fin de la prestation.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
