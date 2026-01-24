@@ -536,7 +536,7 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
                 mode="urgence"
                 steps={flowSteps}
                 currentStepIndex={currentStep}
-                estimatedTime="~3 min"
+                estimatedTime="3 min"
                 onBack={currentStep > 0 ? prevStep : undefined}
                 showBack={true}
                 closeHref="/"
@@ -622,20 +622,16 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
                     <StepRecap
                         formState={formState}
                         selectedScenario={selectedScenario}
+                        onUpdate={(updates) => updateForm(updates)}
                     />
                 )}
             </main>
 
             {/* Footer avec bouton */}
-            <footer className="sticky bottom-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-4 pb-6 sm:pb-4 transition-all duration-300">
+            <footer className="sticky bottom-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-4 pb-6 sm:pb-4 transition-all duration-300 z-50">
                 <div className="max-w-2xl mx-auto flex flex-col items-center gap-2">
                     {currentStepId === "recap" ? (
                         <div className="w-full space-y-3">
-                            <p className="text-xs text-center text-gray-500 flex items-center justify-center gap-2">
-                                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Intervention garantie</span>
-                                <span className="w-0.5 h-0.5 bg-gray-300 rounded-full"></span>
-                                <span>Paiement sur place</span>
-                            </p>
                             <Button
                                 onClick={handleSubmit}
                                 disabled={loading}

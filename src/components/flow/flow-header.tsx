@@ -43,6 +43,7 @@ const modeConfig = {
         pillClasses: "bg-red-50 text-red-600 border-red-100",
         iconClasses: "text-red-500",
         progressColor: "bg-red-500",
+        timerClasses: "bg-teal-50 text-teal-700 border-teal-100/50",
     },
     rdv: {
         icon: Calendar,
@@ -50,6 +51,7 @@ const modeConfig = {
         pillClasses: "bg-blue-50 text-blue-600 border-blue-100",
         iconClasses: "text-blue-500",
         progressColor: "bg-blue-500",
+        timerClasses: "bg-amber-50 text-amber-700 border-amber-100/50",
     },
 }
 
@@ -140,8 +142,16 @@ export function FlowHeader({
                 {/* Right: Timer + Close */}
                 <div className="flex items-center gap-2 sm:gap-4 z-10">
                     {estimatedTime && (
-                        <span className="text-xs sm:text-sm text-emerald-600 font-medium flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100/50">
-                            <Clock className="w-3.5 h-3.5" />
+                        <span className={cn(
+                            "text-xs sm:text-sm font-semibold flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-full border shadow-sm",
+                            config.timerClasses
+                        )}>
+                            <span className={cn(
+                                "w-5 h-5 rounded-full flex items-center justify-center",
+                                mode === "rdv" ? "bg-amber-100" : "bg-teal-100"
+                            )}>
+                                <Clock className="w-3 h-3" />
+                            </span>
                             <span>{estimatedTime}</span>
                         </span>
                     )}

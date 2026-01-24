@@ -32,66 +32,73 @@ function PasswordField({ value, onChange }: { value: string; onChange: (value: s
   const isValidLength = value.length >= 6
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-        <Lock className="w-4 h-4 text-gray-500" />
+    <div className="space-y-4 pt-2">
+      <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+        <div className="p-1.5 bg-emerald-100/50 rounded-lg">
+          <Lock className="w-4 h-4 text-emerald-600" />
+        </div>
         Créer votre mot de passe
       </h3>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="block text-sm text-gray-700">
+          <label className="block text-sm font-medium text-slate-700">
             Mot de passe <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
+          <div className="relative group">
             <input
               type={showPassword ? "text" : "password"}
               value={value}
               onChange={(e) => onChange(e.target.value)}
               placeholder="Min. 6 caractères"
-              className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-200"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 p-1 rounded-full hover:bg-gray-100 active:bg-gray-200"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 p-1.5 rounded-full hover:bg-slate-100"
             >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
           {value && !isValidLength && (
-            <p className="text-xs text-red-500">Minimum 6 caractères</p>
+            <p className="text-xs text-red-500 pl-1">Minimum 6 caractères requis</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm text-gray-700">
+          <label className="block text-sm font-medium text-slate-700">
             Confirmer <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
+          <div className="relative group">
             <input
               type={showConfirm ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirmer le mot de passe"
               className={cn(
-                "w-full px-4 py-3 pr-12 rounded-xl border focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white",
-                confirmPassword && !passwordsMatch ? "border-red-300" : "border-gray-200"
+                "w-full px-4 py-3 pr-12 rounded-xl border bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200",
+                confirmPassword && !passwordsMatch
+                  ? "border-red-300 focus:border-red-500"
+                  : "border-slate-200 focus:border-emerald-500"
               )}
             />
             <button
               type="button"
               onClick={() => setShowConfirm(!showConfirm)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 p-1 rounded-full hover:bg-gray-100 active:bg-gray-200"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75 p-1.5 rounded-full hover:bg-slate-100"
             >
-              {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
           {confirmPassword && !passwordsMatch && (
-            <p className="text-xs text-red-500">Les mots de passe ne correspondent pas</p>
+            <p className="text-xs text-red-500 pl-1">Les mots de passe ne correspondent pas</p>
           )}
           {confirmPassword && passwordsMatch && isValidLength && (
-            <p className="text-xs text-emerald-600">✓ Les mots de passe correspondent</p>
+            <p className="text-xs text-emerald-600 font-medium pl-1 flex items-center gap-1.5">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Les mots de passe correspondent
+            </p>
           )}
         </div>
       </div>
@@ -181,220 +188,248 @@ export function StepCoordonnees({ formState, onUpdate, isLoggedIn }: StepCoordon
   }
 
   return (
-    <div className="space-y-6">
-      {/* Titre */}
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="text-center space-y-2 mb-8">
+        <h1 className="text-2xl font-bold text-slate-900">
           Vos coordonnées
         </h1>
-        <p className="text-gray-500">
+        <p className="text-slate-500 text-sm">
           Pour vous contacter et planifier l'intervention
         </p>
       </div>
 
-      {/* Info compte */}
+      {/* Info compte - Uniquement si non connecté */}
       {!isLoggedIn && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
-          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-blue-700">
-            <p className="font-medium mb-1">Création de votre compte</p>
-            <p>
-              Définissez votre mot de passe pour accéder à votre espace et suivre vos rendez-vous.
+        <div className="bg-sky-50/50 border border-sky-100 rounded-2xl p-4 flex gap-4 items-start shadow-sm">
+          <div className="p-2 bg-sky-100 rounded-xl shrink-0 mt-0.5">
+            <Info className="w-5 h-5 text-sky-600" />
+          </div>
+          <div className="text-sm space-y-1">
+            <p className="font-semibold text-sky-900">Création de votre compte</p>
+            <p className="text-sky-700/80 leading-relaxed">
+              Vos identifiants vous permettront de suivre l'arrivée du serrurier et d'accéder à vos documents (devis, facture).
             </p>
           </div>
         </div>
       )}
 
-      {/* Informations personnelles */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-          <User className="w-4 h-4 text-gray-500" />
-          Informations personnelles
-        </h3>
+      {/* Main Card */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-5 sm:p-8 space-y-8">
 
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="block text-sm text-gray-700">
-              Prénom <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formState.clientFirstName}
-              onChange={(e) => onUpdate({ clientFirstName: e.target.value })}
-              placeholder="Votre prénom"
-              className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
-            />
-          </div>
+          {/* Informations personnelles */}
+          <section className="space-y-4">
+            <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+              <div className="p-1.5 bg-emerald-100/50 rounded-lg">
+                <User className="w-4 h-4 text-emerald-600" />
+              </div>
+              Informations personnelles
+            </h3>
 
-          <div className="space-y-2">
-            <label className="block text-sm text-gray-700">
-              Nom <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formState.clientLastName}
-              onChange={(e) => onUpdate({ clientLastName: e.target.value })}
-              placeholder="Votre nom"
-              className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
-            />
-          </div>
-        </div>
-      </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Prénom <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formState.clientFirstName}
+                  onChange={(e) => onUpdate({ clientFirstName: e.target.value })}
+                  placeholder="Votre prénom"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-200 placeholder:text-slate-400"
+                />
+              </div>
 
-      {/* Contact */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-          <Phone className="w-4 h-4 text-gray-500" />
-          Contact
-        </h3>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Nom <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formState.clientLastName}
+                  onChange={(e) => onUpdate({ clientLastName: e.target.value })}
+                  placeholder="Votre nom"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-200 placeholder:text-slate-400"
+                />
+              </div>
+            </div>
+          </section>
 
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="block text-sm text-gray-700">
-              Email <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              value={formState.clientEmail}
-              onChange={(e) => onUpdate({ clientEmail: e.target.value })}
-              placeholder="votre@email.com"
-              className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
-              disabled={isLoggedIn}
-            />
-          </div>
+          <div className="h-px bg-slate-100" />
 
-          <div className="space-y-2">
-            <label className="block text-sm text-gray-700">
-              Téléphone <span className="text-red-500">*</span>
-            </label>
-            <PhoneInput
-              value={formState.clientPhone}
-              onChange={(value) => onUpdate({ clientPhone: value })}
-              placeholder="06 12 34 56 78"
-            />
-          </div>
-        </div>
-      </div>
+          {/* Contact */}
+          <section className="space-y-4">
+            <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+              <div className="p-1.5 bg-emerald-100/50 rounded-lg">
+                <Phone className="w-4 h-4 text-emerald-600" />
+              </div>
+              Contact
+            </h3>
 
-      {/* Mot de passe (seulement si non connecté) */}
-      {!isLoggedIn && (
-        <PasswordField
-          value={formState.clientPassword}
-          onChange={(value) => onUpdate({ clientPassword: value })}
-        />
-      )}
-
-
-      {/* Adresse */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-gray-500" />
-          Adresse de l'intervention
-        </h3>
-
-        <div className="space-y-4">
-          {/* Champ adresse unifié avec autocomplétion */}
-          <div className="space-y-2" ref={searchRef}>
-            <label className="block text-sm text-gray-700">
-              Adresse <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={formState.addressStreet || searchQuery}
-                onChange={(e) => {
-                  const value = e.target.value
-                  setSearchQuery(value)
-                  onUpdate({ addressStreet: value })
-                }}
-                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                placeholder="Tapez pour rechercher une adresse..."
-                className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
-              />
-              {searchLoading && (
-                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />
-              )}
-
-              {/* Suggestions */}
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
-                  {suggestions.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => selectSuggestion(suggestion)}
-                      className="w-full px-3 py-3 text-left hover:bg-emerald-50/50 border-b border-gray-100 last:border-0 transition-colors touch-manipulation active:bg-emerald-50 active:duration-75 group"
-                    >
-                      <div className="font-medium text-gray-900 text-sm">
-                        {suggestion.label}
-                      </div>
-                      {suggestion.context && (
-                        <div className="text-xs text-gray-500 mt-0.5">
-                          {suggestion.context}
-                        </div>
-                      )}
-                    </button>
-                  ))}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={formState.clientEmail}
+                    onChange={(e) => onUpdate({ clientEmail: e.target.value })}
+                    placeholder="votre@email.com"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-200 placeholder:text-slate-400 disabled:opacity-60 disabled:cursor-not-allowed"
+                    disabled={isLoggedIn}
+                  />
+                  {!isLoggedIn && (
+                    <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label className="block text-sm text-gray-700">
-                Code postal <span className="text-red-500">*</span>
-              </label>
-              <PostalCodeInput
-                value={formState.addressPostalCode}
-                onChange={(value) => onUpdate({ addressPostalCode: value })}
-                placeholder="69001"
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Téléphone <span className="text-red-500">*</span>
+                </label>
+                <PhoneInput
+                  value={formState.clientPhone}
+                  onChange={(value) => onUpdate({ clientPhone: value })}
+                  placeholder="06 12 34 56 78"
+                  className="bg-slate-50 border-slate-200 focus-within:bg-white focus-within:border-emerald-500 rounded-xl"
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Mot de passe (seulement si non connecté) */}
+          {!isLoggedIn && (
+            <>
+              <div className="h-px bg-slate-100" />
+              <PasswordField
+                value={formState.clientPassword}
+                onChange={(value) => onUpdate({ clientPassword: value })}
               />
+            </>
+          )}
+
+          <div className="h-px bg-slate-100" />
+
+          {/* Adresse */}
+          <section className="space-y-4">
+            <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+              <div className="p-1.5 bg-emerald-100/50 rounded-lg">
+                <MapPin className="w-4 h-4 text-emerald-600" />
+              </div>
+              Adresse de l'intervention
+            </h3>
+
+            <div className="space-y-4">
+              {/* Champ adresse unifié avec autocomplétion */}
+              <div className="space-y-2" ref={searchRef}>
+                <label className="block text-sm font-medium text-slate-700">
+                  Adresse <span className="text-red-500">*</span>
+                </label>
+                <div className="relative group">
+                  <input
+                    type="text"
+                    value={formState.addressStreet || searchQuery}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setSearchQuery(value)
+                      onUpdate({ addressStreet: value })
+                    }}
+                    onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                    placeholder="Tapez pour rechercher une adresse..."
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-200 placeholder:text-slate-400"
+                  />
+                  {searchLoading && (
+                    <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500 animate-spin" />
+                  )}
+
+                  {/* Suggestions */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute z-10 w-full mt-2 bg-white border border-slate-100 rounded-xl shadow-xl overflow-hidden ring-1 ring-slate-900/5">
+                      {suggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => selectSuggestion(suggestion)}
+                          className="w-full px-4 py-3 text-left hover:bg-emerald-50/50 border-b border-slate-50 last:border-0 transition-colors touch-manipulation active:bg-emerald-50 active:duration-75 group/item"
+                        >
+                          <div className="font-medium text-slate-900 text-sm group-hover/item:text-emerald-700 transition-colors">
+                            {suggestion.label}
+                          </div>
+                          {suggestion.context && (
+                            <div className="text-xs text-slate-500 mt-0.5">
+                              {suggestion.context}
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-slate-700">
+                    Code postal <span className="text-red-500">*</span>
+                  </label>
+                  <PostalCodeInput
+                    value={formState.addressPostalCode}
+                    onChange={(value) => onUpdate({ addressPostalCode: value })}
+                    placeholder="69001"
+                    className="bg-slate-50 border-slate-200 focus-within:bg-white focus-within:border-emerald-500 rounded-xl"
+                  />
+                </div>
+
+                <div className="col-span-2 space-y-2">
+                  <label className="block text-sm font-medium text-slate-700">
+                    Ville <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formState.addressCity}
+                    onChange={(e) => onUpdate({ addressCity: e.target.value })}
+                    placeholder="Lyon"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-200 placeholder:text-slate-400"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-slate-700 flex justify-between items-end">
+                  Complément d'adresse
+                  <span className="text-xs text-slate-400 font-normal">Optionnel</span>
+                </label>
+                <input
+                  type="text"
+                  value={formState.addressComplement}
+                  onChange={(e) => onUpdate({ addressComplement: e.target.value })}
+                  placeholder="Bâtiment, escalier, étage..."
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-200 placeholder:text-slate-400"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-slate-700 flex justify-between items-end">
+                  Instructions d'accès
+                  <span className="text-xs text-slate-400 font-normal">Optionnel</span>
+                </label>
+                <textarea
+                  value={formState.addressInstructions}
+                  onChange={(e) => onUpdate({ addressInstructions: e.target.value })}
+                  placeholder="Digicode, interphone, indications..."
+                  rows={2}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-200 placeholder:text-slate-400 resize-none"
+                />
+              </div>
             </div>
+          </section>
 
-            <div className="col-span-2 space-y-2">
-              <label className="block text-sm text-gray-700">
-                Ville <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={formState.addressCity}
-                onChange={(e) => onUpdate({ addressCity: e.target.value })}
-                placeholder="Lyon"
-                className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm text-gray-700">
-              Complément d'adresse <span className="text-gray-400">(optionnel)</span>
-            </label>
-            <input
-              type="text"
-              value={formState.addressComplement}
-              onChange={(e) => onUpdate({ addressComplement: e.target.value })}
-              placeholder="Bâtiment, escalier, étage..."
-              className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors bg-white"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm text-gray-700">
-              Instructions d'accès <span className="text-gray-400">(optionnel)</span>
-            </label>
-            <textarea
-              value={formState.addressInstructions}
-              onChange={(e) => onUpdate({ addressInstructions: e.target.value })}
-              placeholder="Digicode, interphone, indications..."
-              rows={2}
-              className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-0 focus:border-emerald-500 transition-colors resize-none bg-white"
-            />
-          </div>
         </div>
       </div>
-
-
     </div>
   )
 }

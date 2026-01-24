@@ -9,7 +9,22 @@ export function ScrollToTop() {
 
     // Force scroll to top on mount (when navigating to the page)
     useEffect(() => {
+        // Immediate scroll attempt
         window.scrollTo(0, 0)
+        document.documentElement.scrollTop = 0
+        document.body.scrollTop = 0
+
+        // RAF for after render
+        requestAnimationFrame(() => {
+            window.scrollTo(0, 0)
+        })
+
+        // Fallback with small delay for mobile browsers
+        const timeout = setTimeout(() => {
+            window.scrollTo(0, 0)
+        }, 50)
+
+        return () => clearTimeout(timeout)
     }, [])
 
     useEffect(() => {

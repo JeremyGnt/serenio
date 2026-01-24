@@ -55,7 +55,7 @@ export function Hero({ isLoggedIn }: HeroProps) {
             {/* Bouton RDV */}
             <Link
               href="/rdv"
-              className="group flex items-center justify-center gap-2 h-12 sm:h-14 sm:flex-1 px-5 bg-white hover:bg-slate-50 text-slate-900 font-bold rounded-lg sm:rounded-xl border-2 border-slate-300 hover:border-emerald-300 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] active:duration-75 touch-manipulation relative after:absolute after:-inset-1 after:content-['']"
+              className="group flex items-center justify-center gap-2 h-12 sm:h-14 sm:flex-1 px-5 bg-white hover:bg-emerald-50 text-slate-900 hover:text-emerald-900 font-bold rounded-lg sm:rounded-xl border-2 border-slate-300 hover:border-emerald-600 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] active:duration-75 touch-manipulation relative after:absolute after:-inset-1 after:content-['']"
             >
               <Calendar className="w-5 h-5 text-emerald-600" />
               <span>Planifier un RDV</span>
@@ -64,10 +64,9 @@ export function Hero({ isLoggedIn }: HeroProps) {
 
           {/* Badge localisation */}
           <div className="flex justify-center mb-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-full shadow-sm">
-              <MapPin className="w-4 h-4 text-emerald-600" />
-              <span className="text-sm font-medium text-slate-700">Serruriers vérifiés, disponibles à Lyon</span>
-              <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+            <div className="inline-flex items-center gap-1.5 text-sm text-slate-400">
+              <MapPin className="w-3.5 h-3.5" />
+              <span className="font-medium">Lyon – métropole</span>
             </div>
           </div>
 
