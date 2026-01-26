@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Compression gzip/brotli pour réduire la taille des assets
+  compress: true,
+
   images: {
     remotePatterns: [
       {
@@ -20,6 +23,14 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
+    // Optimise les imports pour tree-shaking agressif
+    optimizePackageImports: [
+      "lucide-react",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-alert-dialog",
+      "@radix-ui/react-toast",
+    ],
     serverActions: {
       bodySizeLimit: '5mb',
     },

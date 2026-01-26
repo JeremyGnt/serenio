@@ -1,16 +1,16 @@
 /**
- * Client API pour les données de la landing page
- * Appelle directement Supabase côté serveur (pas de fetch vers /api)
+ * Server API pour les données de la landing page
+ * Utilise le client Supabase serveur pour un vrai SSR
  */
 
-import { supabase } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/server"
+import { unstable_cache } from "next/cache"
 import type {
   PlatformStats,
   Testimonial,
   FaqItem,
   PriceRange,
   Guarantee,
-  CreateLeadPayload,
 } from "@/types/landing"
 
 // ============================================
@@ -182,14 +182,15 @@ function getDefaultGuarantees(): Guarantee[] {
 }
 
 // ============================================
-// FONCTIONS D'ACCÈS AUX DONNÉES
+// FONCTIONS D'ACCÈS AUX DONNÉES (SERVER-SIDE)
 // ============================================
 
 /**
  * Récupère les statistiques de la plateforme
  */
-export async function getStats(): Promise<PlatformStats> {
+async function getStats(): Promise<PlatformStats> {
   try {
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from("platform_stats")
       .select("*")
@@ -208,8 +209,9 @@ export async function getStats(): Promise<PlatformStats> {
 /**
  * Récupère les témoignages clients
  */
-export async function getTestimonials(): Promise<Testimonial[]> {
+async function getTestimonials(): Promise<Testimonial[]> {
   try {
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from("testimonials")
       .select("*")
@@ -230,8 +232,9 @@ export async function getTestimonials(): Promise<Testimonial[]> {
 /**
  * Récupère les questions fréquentes
  */
-export async function getFaq(): Promise<FaqItem[]> {
+async function getFaq(): Promise<FaqItem[]> {
   try {
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from("faq_items")
       .select("*")
@@ -250,8 +253,9 @@ export async function getFaq(): Promise<FaqItem[]> {
 /**
  * Récupère les fourchettes de prix
  */
-export async function getPriceRanges(): Promise<PriceRange[]> {
+async function getPriceRanges(): Promise<PriceRange[]> {
   try {
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from("price_ranges")
       .select("*")
@@ -270,8 +274,9 @@ export async function getPriceRanges(): Promise<PriceRange[]> {
 /**
  * Récupère les garanties de la plateforme
  */
-export async function getGuarantees(): Promise<Guarantee[]> {
+async function getGuarantees(): Promise<Guarantee[]> {
   try {
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from("guarantees")
       .select("*")
@@ -286,35 +291,6 @@ export async function getGuarantees(): Promise<Guarantee[]> {
     return getDefaultGuarantees()
   }
 }
-
-/**
- * Envoie une demande de contact/rappel (côté client uniquement)
- */
-export async function createLead(payload: CreateLeadPayload): Promise<{ id: string }> {
-  const { data, error } = await supabase
-    .from("leads")
-    .insert({
-      name: payload.name.trim(),
-      phone: payload.phone.trim(),
-      email: payload.email?.trim() || null,
-      message: payload.message?.trim() || null,
-      source: payload.source || "landing",
-      contacted: false,
-      created_at: new Date().toISOString(),
-    })
-    .select("id")
-    .single()
-
-  if (error) {
-    // Fallback si table n'existe pas
-    console.warn("Lead non enregistré:", error)
-    return { id: `temp-${Date.now()}` }
-  }
-
-  return { id: data.id }
-}
-
-import { unstable_cache } from "next/cache"
 
 /**
  * Récupère toutes les données de la landing page en une seule fois

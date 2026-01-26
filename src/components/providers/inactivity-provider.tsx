@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/browser"
 import { useInactivityTimeout } from "@/hooks/useInactivityTimeout"
+import { deleteDraft } from "@/lib/db"
 
 interface InactivityProviderProps {
     children: React.ReactNode
@@ -38,9 +39,22 @@ export function InactivityProvider({ children }: InactivityProviderProps) {
         }
     }, [])
 
+    const handleBeforeLogout = async () => {
+        try {
+            // Nettoyer les brouillons potentiels comme lors d'une déconnexion manuelle
+            await deleteDraft("serenio_draft_urgence_form")
+            if (typeof window !== "undefined") {
+                window.localStorage.removeItem("serenio_pending_urgence_form")
+            }
+        } catch (e) {
+            console.error("Failed to clear drafts on auto-logout:", e)
+        }
+    }
+
     // Activer le hook d'inactivité uniquement si authentifié
     useInactivityTimeout({
         enabled: isAuthenticated,
+        onBeforeLogout: handleBeforeLogout,
     })
 
     return <>{children}</>

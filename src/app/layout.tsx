@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
-// import { SpeedInsights } from "@vercel/speed-insights/next" // Moved to AnalyticsGuard
 import "./globals.css"
 import { InterventionSubmissionProvider } from "@/components/providers/intervention-submission-provider"
 import { InactivityProvider } from "@/components/providers/inactivity-provider"
@@ -79,4 +78,3 @@ export default function RootLayout({
     </html>
   )
 }
-

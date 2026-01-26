@@ -22,7 +22,7 @@ export function Hero({ isLoggedIn }: HeroProps) {
       <div className="relative px-4 pb-12 md:pb-20 pt-2 md:pt-4 transition-all duration-300">
         <div className="max-w-4xl mx-auto">
           {/* Active Tracking Banner - Lazy loaded client component */}
-          <Suspense fallback={null}>
+          <Suspense fallback={<div className="mb-6 h-0" aria-hidden="true" />}>
             <HeroTrackingBanner isLoggedIn={isLoggedIn} />
           </Suspense>
 
