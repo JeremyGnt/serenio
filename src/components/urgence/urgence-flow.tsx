@@ -294,46 +294,6 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
                 showError("Veuillez entrer un numéro de téléphone valide")
                 return
             }
-
-            // Créer l'intervention
-            setLoading(true)
-            const result = await createIntervention({
-                interventionType: "urgence",
-                clientEmail: formState.clientEmail,
-                clientPhone: formState.clientPhone,
-                clientFirstName: formState.clientFirstName,
-                clientLastName: formState.clientLastName,
-                addressStreet: formState.addressStreet,
-                addressPostalCode: formState.addressPostalCode,
-                addressCity: formState.addressCity,
-                addressComplement: formState.addressComplement,
-                addressInstructions: formState.addressInstructions,
-                latitude: formState.latitude || undefined,
-                longitude: formState.longitude || undefined,
-                situationType: formState.situationType!,
-            })
-            setLoading(false)
-
-            if (!result.success) {
-                showError(result.error || "Erreur lors de la création")
-                return
-            }
-
-            updateForm({
-                interventionId: result.intervention?.id || null,
-                trackingNumber: result.trackingNumber || null,
-            })
-
-            // Mettre à jour le diagnostic
-            if (result.intervention?.id) {
-                await updateDiagnostic(result.intervention.id, {
-                    situationType: formState.situationType || undefined,
-                    situationDetails: formState.situationDetails,
-                    diagnosticAnswers: formState.diagnosticAnswers,
-                    doorType: formState.doorType as "standard" | "blindee" | "cave" | "garage" | "other" | undefined,
-                    lockType: formState.lockType as "standard" | "multipoint" | "electronique" | "other" | undefined,
-                })
-            }
         }
 
         if (currentStep < URGENCE_STEPS.length - 1) {
@@ -420,21 +380,72 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
 
     // Soumettre la demande
     const handleSubmit = async () => {
-        if (!formState.interventionId) {
-            showError("Erreur: intervention non créée")
+        setLoading(true)
+
+        let interventionId = formState.interventionId
+        let trackingNumber = formState.trackingNumber
+
+        if (!interventionId) {
+            // 1. Créer l'intervention
+            const result = await createIntervention({
+                interventionType: "urgence",
+                clientEmail: formState.clientEmail,
+                clientPhone: formState.clientPhone,
+                clientFirstName: formState.clientFirstName,
+                clientLastName: formState.clientLastName,
+                addressStreet: formState.addressStreet,
+                addressPostalCode: formState.addressPostalCode,
+                addressCity: formState.addressCity,
+                addressComplement: formState.addressComplement,
+                addressInstructions: formState.addressInstructions,
+                latitude: formState.latitude || undefined,
+                longitude: formState.longitude || undefined,
+                situationType: formState.situationType!,
+            })
+
+            if (!result.success || !result.intervention?.id || !result.trackingNumber) {
+                showError(result.error || "Erreur lors de la création")
+                setLoading(false)
+                return
+            }
+
+            interventionId = result.intervention.id
+            trackingNumber = result.trackingNumber
+
+            updateForm({
+                interventionId: interventionId,
+                trackingNumber: trackingNumber,
+            })
+
+            // 2. Mettre à jour le diagnostic
+            await updateDiagnostic(interventionId, {
+                situationType: formState.situationType || undefined,
+                situationDetails: formState.situationDetails,
+                diagnosticAnswers: formState.diagnosticAnswers,
+                doorType: formState.doorType as "standard" | "blindee" | "cave" | "garage" | "other" | undefined,
+                lockType: formState.lockType as "standard" | "multipoint" | "electronique" | "other" | undefined,
+            })
+        }
+
+        // 3. Soumettre l'intervention (passage en pending)
+        const submitResult = await submitIntervention(interventionId!)
+
+        if (!submitResult.success) {
+            showError(submitResult.error || "Erreur lors de la soumission")
+            setLoading(false)
             return
         }
 
-        const trackingNumber = formState.trackingNumber
         if (!trackingNumber) {
             showError("Erreur: numéro de suivi manquant")
+            setLoading(false)
             return
         }
 
         // Create a snapshot for instant loading
         const snapshot = {
             intervention: {
-                id: formState.interventionId,
+                id: interventionId,
                 trackingNumber: trackingNumber,
 
                 clientEmail: formState.clientEmail,
@@ -488,7 +499,7 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
 
         // Trigger background submission (don't await)
         submitInBackground({
-            interventionId: formState.interventionId,
+            interventionId: interventionId!,
             trackingNumber: trackingNumber,
             photos: formState.photos,
             rgpdConsent: formState.rgpdConsent

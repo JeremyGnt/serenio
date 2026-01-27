@@ -449,19 +449,35 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
 
                             {/* Waiting for artisan - Pas affiché pour les brouillons */}
                             {!artisan && !isCancelled && !isCompleted && intervention.status !== "draft" && (
-                                <div className="bg-amber-50/50 rounded-2xl border border-amber-100/50 p-5 shadow-[0_2px_8px_rgba(251,191,36,0.1)]">
-                                    <h2 className="font-semibold text-amber-900 mb-4 flex items-center gap-2">
-                                        <User className="w-5 h-5 text-amber-600" />
+                                <div className="bg-white rounded-2xl border border-amber-100 shadow-[0_4px_20px_-4px_rgba(251,191,36,0.15)] p-5 relative overflow-hidden group">
+                                    {/* Background decoration */}
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-60" />
+
+                                    <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2 relative z-10">
+                                        <User className="w-5 h-5 text-amber-500" />
                                         Votre serrurier
                                     </h2>
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse">
-                                            <Loader2 className="w-6 h-6 text-amber-600 animate-spin" />
+
+                                    <div className="flex items-center gap-4 relative z-10">
+                                        {/* Pulsing Avatar Placeholder */}
+                                        <div className="relative">
+                                            <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center relative z-10 border border-amber-100 shadow-sm">
+                                                <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
+                                            </div>
+                                            {/* Pulse Rings */}
+                                            <div className="absolute inset-0 bg-amber-100 rounded-full animate-ping opacity-20" />
                                         </div>
-                                        <div>
-                                            <p className="font-bold text-amber-900">Recherche en cours...</p>
-                                            <p className="text-sm text-amber-700/80">
-                                                Nous recherchons le meilleur serrurier disponible
+
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                                <p className="text-lg font-bold text-gray-900">Recherche en cours...</p>
+                                                <span className="relative flex h-2 w-2">
+                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-gray-500 leading-relaxed">
+                                                Nous contactons les serruriers disponibles
                                             </p>
                                         </div>
                                     </div>

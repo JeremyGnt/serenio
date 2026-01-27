@@ -20,7 +20,8 @@ import {
   StepPlanning,
 
   StepCoordonnees,
-  StepRecapitulatif
+  StepRecapitulatif,
+  StepCreationLoader
 } from "./steps"
 
 // État du formulaire avec step inclus pour persistence
@@ -370,6 +371,7 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
         )
 
       case "recapitulatif":
+        if (loading) return <StepCreationLoader />
         return (
           <StepRecapitulatif
             formState={formState}
@@ -419,41 +421,43 @@ export function RdvFlow({ serviceTypes, userEmail, userName, userPhone }: RdvFlo
       </main>
 
       {/* Footer Actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
-        <div className="max-w-2xl mx-auto">
-          {currentStepId === "recapitulatif" ? (
-            <Button
-              onClick={handleSubmit}
-              disabled={loading}
-              size="lg"
-              className="w-full h-[56px] sm:h-[52px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-emerald-500/25 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group ring-4 ring-emerald-50"
-            >
-              {loading ? (
-                "Confirmation..."
-              ) : (
-                <>
-                  <span>Confirmer le rendez-vous</span>
-                  <div className="bg-white/20 p-1 rounded-full group-hover:bg-white/30 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="transform group-hover:translate-x-0.5 transition-transform text-white">
-                      <path d="M5 12h14" />
-                      <path d="m12 5 7 7-7 7" />
-                    </svg>
-                  </div>
-                </>
-              )}
-            </Button>
-          ) : (
-            <Button
-              onClick={nextStep}
-              size="lg"
-              className="w-full h-[56px] sm:h-[52px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all duration-200 active:scale-[0.98]"
-              disabled={loading}
-            >
-              Continuer
-            </Button>
-          )}
+      {!loading && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
+          <div className="max-w-2xl mx-auto">
+            {currentStepId === "recapitulatif" ? (
+              <Button
+                onClick={handleSubmit}
+                disabled={loading}
+                size="lg"
+                className="w-full h-[56px] sm:h-[52px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-emerald-500/25 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group ring-4 ring-emerald-50"
+              >
+                {loading ? (
+                  "Confirmation..."
+                ) : (
+                  <>
+                    <span>Confirmer le rendez-vous</span>
+                    <div className="bg-white/20 p-1 rounded-full group-hover:bg-white/30 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="transform group-hover:translate-x-0.5 transition-transform text-white">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                      </svg>
+                    </div>
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={nextStep}
+                size="lg"
+                className="w-full h-[56px] sm:h-[52px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all duration-200 active:scale-[0.98]"
+                disabled={loading}
+              >
+                Continuer
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </>
   )
 }

@@ -6,3 +6,4 @@ export { StepPlanning } from "./step-planning"
 
 export { StepCoordonnees } from "./step-coordonnees"
 export { StepRecapitulatif } from "./step-recapitulatif"
+export { StepCreationLoader } from "./step-creation-loader"

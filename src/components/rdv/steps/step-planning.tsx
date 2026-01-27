@@ -210,7 +210,7 @@ export function StepPlanning({
       {selectedDate && (
         <div className="animate-in fade-in duration-700 pt-2">
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-100 rounded-xl p-4 flex gap-4 shadow-sm">
-            <div className="bg-white p-2 rounded-full shadow-sm border border-blue-50 h-fit">
+            <div className="p-2 bg-blue-100 rounded-lg h-fit">
               <Info className="w-5 h-5 text-blue-600" />
             </div>
             <div className="text-sm text-blue-900/80">

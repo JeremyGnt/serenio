@@ -269,110 +269,106 @@ export function StepLocalisation({
           <p className="text-sm text-red-600 text-center bg-red-50 p-3 rounded-lg border border-red-100">{geoError}</p>
         )}
 
-        <div className="relative">
+        {/* Séparateur visuel */}
+        <div className="relative py-2">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-100" />
+            <span className="w-full border-t border-gray-200" />
           </div>
-          <div className="relative flex justify-center text-xs uppercase tracking-wide font-medium">
-            <span className="px-4 bg-white text-gray-400">ou saisie manuelle</span>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white px-2 text-gray-400">Ou</span>
           </div>
         </div>
 
-        {/* Recherche d'adresse avec autocomplétion */}
-        <div ref={searchRef} className="relative">
-          <div className="relative">
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tapez votre adresse..."
-              className="h-14 pl-4 pr-10 rounded-xl border-gray-200 focus:ring-red-500 focus:border-red-500 text-base shadow-sm"
-            />
-            {searchLoading && (
-              <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />
-            )}
-          </div>
-
-          {/* Suggestions */}
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute z-20 w-full mt-2 bg-white rounded-xl border border-gray-100 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-              {suggestions.map((suggestion, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => selectSuggestion(suggestion)}
-                  className="w-full text-left px-5 py-3 hover:bg-gray-50 border-b border-gray-50 last:border-0 transition-colors"
-                >
-                  <p className="font-medium text-gray-900 text-sm">{suggestion.label}</p>
-                  {suggestion.context && (
-                    <p className="text-xs text-gray-500 mt-0.5">{suggestion.context}</p>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Formulaire adresse (toujours visible ou presque) */}
-        {(street || postalCode || city) && (
-          <div className="space-y-5 animate-in fade-in slide-in-from-top-4 duration-500 pt-2">
-            <div className="space-y-2">
-              <Label htmlFor="street" className="text-gray-700">Numéro et voie</Label>
+        {/* Formulaire adresse unifié */}
+        <div className="space-y-5 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="space-y-2" ref={searchRef}>
+            <Label htmlFor="street" className="text-gray-700">Adresse</Label>
+            <div className="relative">
               <Input
                 id="street"
                 value={street}
-                onChange={(e) => handleManualAddressChange({ addressStreet: e.target.value })}
-                placeholder="Ex: 12 Rue de la République"
+                onChange={(e) => {
+                  handleManualAddressChange({ addressStreet: e.target.value })
+                  setSearchQuery(e.target.value)
+                  setShowSuggestions(true)
+                }}
+                onFocus={() => {
+                  if (suggestions.length > 0) setShowSuggestions(true)
+                }}
+                placeholder="Tapez votre adresse..."
+                className="h-12 rounded-xl focus:ring-red-500 focus:border-red-500"
+              />
+              {searchLoading && (
+                <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />
+              )}
+
+              {/* Suggestions */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute z-20 w-full mt-2 bg-white rounded-xl border border-gray-100 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => selectSuggestion(suggestion)}
+                      className="w-full text-left px-5 py-3 hover:bg-gray-50 border-b border-gray-50 last:border-0 transition-colors"
+                    >
+                      <p className="font-medium text-gray-900 text-sm">{suggestion.label}</p>
+                      {suggestion.context && (
+                        <p className="text-xs text-gray-500 mt-0.5">{suggestion.context}</p>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="postalCode" className="text-gray-700">Code postal</Label>
+              <PostalCodeInput
+                id="postalCode"
+                value={postalCode}
+                onChange={(value) => handleManualAddressChange({ addressPostalCode: value })}
+                placeholder="69000"
                 className="h-12 rounded-xl focus:ring-red-500 focus:border-red-500"
               />
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="postalCode" className="text-gray-700">Code postal</Label>
-                <PostalCodeInput
-                  id="postalCode"
-                  value={postalCode}
-                  onChange={(value) => handleManualAddressChange({ addressPostalCode: value })}
-                  placeholder="69000"
-                  className="h-12 rounded-xl focus:ring-red-500 focus:border-red-500"
-                />
-              </div>
-              <div className="sm:col-span-2 space-y-2">
-                <Label htmlFor="city" className="text-gray-700">Ville</Label>
-                <Input
-                  id="city"
-                  value={city}
-                  onChange={(e) => handleManualAddressChange({ addressCity: e.target.value })}
-                  placeholder="Lyon"
-                  className="h-12 rounded-xl focus:ring-red-500 focus:border-red-500"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="complement" className="text-gray-700">Complément d'adresse <span className="text-gray-400 font-normal">(optionnel)</span></Label>
+            <div className="sm:col-span-2 space-y-2">
+              <Label htmlFor="city" className="text-gray-700">Ville</Label>
               <Input
-                id="complement"
-                value={complement}
-                onChange={(e) => onUpdate({ addressComplement: e.target.value })}
-                placeholder="Bâtiment, étage, appartement..."
+                id="city"
+                value={city}
+                onChange={(e) => handleManualAddressChange({ addressCity: e.target.value })}
+                placeholder="Lyon"
                 className="h-12 rounded-xl focus:ring-red-500 focus:border-red-500"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="instructions" className="text-gray-700">Instructions d'accès <span className="text-gray-400 font-normal">(optionnel)</span></Label>
-              <Textarea
-                id="instructions"
-                value={instructions}
-                onChange={(e) => onUpdate({ addressInstructions: e.target.value })}
-                placeholder="Digicode, interphone, accès particulier..."
-                rows={3}
-                className="rounded-xl focus:ring-red-500 focus:border-red-500 resize-none"
               />
             </div>
           </div>
-        )}
+
+          <div className="space-y-2">
+            <Label htmlFor="complement" className="text-gray-700">Complément d'adresse <span className="text-gray-400 font-normal">(optionnel)</span></Label>
+            <Input
+              id="complement"
+              value={complement}
+              onChange={(e) => onUpdate({ addressComplement: e.target.value })}
+              placeholder="Bâtiment, étage, appartement..."
+              className="h-12 rounded-xl focus:ring-red-500 focus:border-red-500"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="instructions" className="text-gray-700">Instructions d'accès <span className="text-gray-400 font-normal">(optionnel)</span></Label>
+            <Textarea
+              id="instructions"
+              value={instructions}
+              onChange={(e) => onUpdate({ addressInstructions: e.target.value })}
+              placeholder="Digicode, interphone, accès particulier..."
+              rows={3}
+              className="rounded-xl focus:ring-red-500 focus:border-red-500 resize-none"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Zone couverte */}
