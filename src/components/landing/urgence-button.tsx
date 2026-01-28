@@ -71,9 +71,6 @@ export function UrgenceButton({ isLoggedIn }: UrgenceButtonProps) {
             href={targetUrl}
             className="group relative flex items-center justify-center gap-2 h-12 sm:h-14 sm:flex-1 px-5 bg-[#C62828] hover:bg-[#B71C1C] text-white font-bold rounded-lg sm:rounded-xl shadow-lg shadow-red-900/10 hover:shadow-xl hover:shadow-red-900/20 transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] active:duration-75 touch-manipulation after:absolute after:-inset-1 after:content-['']"
         >
-            {/* Effet de brillance */}
-            <span className="absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity" />
-
             <Siren className={`w-6 h-6 ${isChecking ? "animate-pulse" : ""}`} />
             <span>Urgence 24/7</span>
         </Link>

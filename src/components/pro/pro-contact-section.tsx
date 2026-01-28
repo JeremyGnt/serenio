@@ -62,14 +62,14 @@ export function ProContactSection({ user }: ProContactSectionProps) {
             <div className="space-y-2">
               <Label htmlFor="email">Email de connexion</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                 <Input
                   id="email"
                   value={user.email || ""}
                   disabled
-                  className="pl-9 h-11 bg-gray-50/50 text-gray-500"
+                  className="pl-8 h-11 bg-gray-50/50 text-gray-500"
                 />
-                <Lock className="absolute right-3 top-3 h-4 w-4 text-gray-300" />
+                <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
               </div>
               <p className="text-[11px] text-muted-foreground">
                 Votre email sert d'identifiant unique. Contactez le support pour le changer.
@@ -80,12 +80,12 @@ export function ProContactSection({ user }: ProContactSectionProps) {
               <div className="space-y-2">
                 <Label htmlFor="lastName">Nom</Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                   <Input
                     id="lastName"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="pl-9 h-11"
+                    className="pl-8 h-11"
                     placeholder="Votre nom"
                   />
                 </div>
@@ -93,12 +93,12 @@ export function ProContactSection({ user }: ProContactSectionProps) {
               <div className="space-y-2">
                 <Label htmlFor="firstName">Prénom</Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                   <Input
                     id="firstName"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="pl-9 h-11"
+                    className="pl-8 h-11"
                     placeholder="Votre prénom"
                   />
                 </div>
@@ -108,10 +108,10 @@ export function ProContactSection({ user }: ProContactSectionProps) {
             <div className="space-y-2">
               <Label htmlFor="phone">Téléphone mobile</Label>
               <div className="relative">
-                <div className="absolute left-3 top-3 z-10 pointer-events-none">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
                   <Phone className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <div className="[&_input]:pl-9">
+                <div className="[&_input]:pl-8">
                   <PhoneInput
                     id="phone"
                     value={phone}

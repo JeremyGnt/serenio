@@ -60,12 +60,19 @@ export function StepDiagnostic({
   const steps = DIAGNOSTIC_QUESTIONS[situationType] || []
 
   const handleAnswerChange = (questionId: string, value: string | boolean | string[]) => {
-    onUpdate({
+    const updates: Partial<Parameters<typeof onUpdate>[0]> = {
       diagnosticAnswers: { ...answers, [questionId]: value },
-      // Extraire doorType et lockType si présents
-      doorType: questionId === "door_type" ? (value as string) : undefined,
-      lockType: questionId === "lock_type" ? (value as string) : undefined,
-    })
+    }
+
+    // Only update specific fields if they sort being changed
+    if (questionId === "door_type") {
+      updates.doorType = value as string
+    }
+    if (questionId === "lock_type") {
+      updates.lockType = value as string
+    }
+
+    onUpdate(updates)
   }
 
   if (steps.length === 0) {

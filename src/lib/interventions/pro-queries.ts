@@ -193,6 +193,96 @@ export async function getPendingInterventions(): Promise<AnonymizedIntervention[
 }
 
 // ============================================
+// RÉCUPÉRER UNE INTERVENTION PAR ID (REALTIME)
+// ============================================
+
+/**
+ * Récupère une intervention spécifique par son ID
+ * Utilisé pour les mises à jour temps réel optimistes
+ */
+export async function getInterventionById(interventionId: string): Promise<AnonymizedIntervention | null> {
+    const supabase = await createClient()
+    const adminClient = createAdminClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return null
+    }
+
+    try {
+        // Récupérer les coordonnées de l'artisan pour le calcul de distance
+        const { data: artisan } = await adminClient
+            .from("artisans")
+            .select("base_latitude, base_longitude, availability_radius_km")
+            .eq("id", user.id)
+            .single()
+
+        // Récupérer l'intervention avec son diagnostic
+        const { data: intervention, error } = await adminClient
+            .from("intervention_requests")
+            .select(`
+                id,
+                tracking_number,
+                latitude,
+                longitude,
+                address_city,
+                address_postal_code,
+                is_urgent,
+                urgency_level,
+                created_at,
+                submitted_at,
+                intervention_diagnostics (
+                    situation_type,
+                    situation_details,
+                    door_type,
+                    lock_type
+                )
+            `)
+            .eq("id", interventionId)
+            .single()
+
+        if (error || !intervention) {
+            console.error("Erreur getInterventionById:", error)
+            return null
+        }
+
+        const diagnostic = Array.isArray(intervention.intervention_diagnostics)
+            ? intervention.intervention_diagnostics[0]
+            : intervention.intervention_diagnostics
+
+        // Calculer la distance si les coordonnées de l'artisan sont disponibles
+        const distance = calculateDistance(
+            artisan?.base_latitude,
+            artisan?.base_longitude,
+            intervention.latitude,
+            intervention.longitude
+        )
+
+        return {
+            id: intervention.id,
+            trackingNumber: intervention.tracking_number,
+            latitude: intervention.latitude,
+            longitude: intervention.longitude,
+            city: intervention.address_city,
+            postalCode: intervention.address_postal_code,
+            situationType: diagnostic?.situation_type || "other",
+            situationDetails: diagnostic?.situation_details,
+            doorType: diagnostic?.door_type,
+            lockType: diagnostic?.lock_type,
+            isUrgent: intervention.is_urgent,
+            urgencyLevel: intervention.urgency_level || 2,
+            createdAt: intervention.created_at,
+            submittedAt: intervention.submitted_at,
+            distance: distance ?? undefined,
+        }
+    } catch (error) {
+        console.error("Erreur getInterventionById:", error)
+        return null
+    }
+}
+
+// ============================================
 // DÉTAILS COMPLETS (APRÈS ACCEPTATION)
 // ============================================
 

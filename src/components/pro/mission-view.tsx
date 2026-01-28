@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import dynamic from "next/dynamic"
@@ -48,6 +48,7 @@ import { MissionStepper } from "@/components/pro/mission-stepper"
 import { MissionClientChatButton } from "@/components/pro/mission-client-chat-button"
 import { MissionQuickAction } from "@/components/pro/mission-quick-action"
 import { cn } from "@/lib/utils"
+import { useLoading } from "@/components/providers/loading-provider"
 
 // Import MissionMap dynamically to avoid SSR issues with Leaflet
 const MissionMap = dynamic(
@@ -90,6 +91,11 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: str
 
 export function MissionView({ mission, currentUserId }: MissionViewProps) {
     const [isChatOpen, setIsChatOpen] = useState(false)
+    const { hideLoader } = useLoading()
+
+    useEffect(() => {
+        hideLoader()
+    }, [hideLoader])
 
     const SituationIcon = SITUATION_CONFIG[mission.situationType]?.icon || HelpCircle
     const situationConfig = SITUATION_CONFIG[mission.situationType] || SITUATION_CONFIG.other
@@ -102,6 +108,8 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
 
     return (
         <div className="min-h-screen bg-secondary/30 pb-20">
+
+
             {/* Header Sticky */}
             <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
                 <div className="w-full px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -126,7 +134,7 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                         {/* Back Button */}
                         <Link
                             href="/pro/missions"
-                            className="p-2 -ml-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 active:scale-95 transition-all touch-manipulation"
+                            className="p-2 -ml-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 active:scale-75 transition-all touch-manipulation"
                         >
                             <ArrowLeft className="w-5 h-5" />
                         </Link>

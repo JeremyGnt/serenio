@@ -264,6 +264,34 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
                 showError("Le code postal doit contenir 5 chiffres")
                 return
             }
+
+            // Si les coordonnées sont manquantes (saisie manuelle sans autocomplétion), on tente de géocoder
+            if (!formState.latitude || !formState.longitude) {
+                setLoading(true)
+                try {
+                    const searchAddress = `${formState.addressStreet} ${formState.addressPostalCode} ${formState.addressCity}`
+                    const response = await fetch(
+                        `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(searchAddress)}&limit=1`
+                    )
+                    const data = await response.json()
+
+                    if (data.features && data.features.length > 0) {
+                        const [lon, lat] = data.features[0].geometry.coordinates
+                        // Mise à jour silencieuse des coordonnées
+                        updateForm({
+                            latitude: lat,
+                            longitude: lon
+                        })
+                    } else {
+                        // On continue même sans coordonées si pas trouvé, mais on aura essayé
+                        console.warn("Adresse non trouvée pour géocodage")
+                    }
+                } catch (error) {
+                    console.error("Erreur géocodage:", error)
+                } finally {
+                    setLoading(false)
+                }
+            }
         }
 
         if (currentStepId === "contact") {
@@ -693,9 +721,9 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
             {loading && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-md animate-in fade-in duration-300">
                     <div className="flex flex-col items-center gap-4 p-8 bg-white/80 rounded-2xl shadow-2xl border border-white/50 backdrop-blur-xl">
-                        <div className="relative">
+                        <div className="relative flex-shrink-0">
                             <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full animate-pulse" />
-                            <Loader2 className="w-12 h-12 text-blue-600 animate-spin relative z-10" />
+                            <Loader2 className="w-12 h-12 text-blue-600 animate-spin relative z-10 flex-shrink-0" />
                         </div>
                         <div className="text-center space-y-1">
                             <p className="text-lg font-semibold text-gray-900">

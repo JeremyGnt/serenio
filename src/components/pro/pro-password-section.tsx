@@ -57,8 +57,8 @@ export function ProPasswordSection() {
               <div className="space-y-2">
                 <Label htmlFor="newPassword">Nouveau mot de passe</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
-                  <div className="[&_input]:pl-9">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                  <div className="[&_input]:pl-8">
                     <PasswordInput
                       id="newPassword"
                       value={newPassword}
@@ -73,8 +73,8 @@ export function ProPasswordSection() {
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
                 <div className="relative">
-                  <ShieldCheck className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
-                  <div className="[&_input]:pl-9">
+                  <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                  <div className="[&_input]:pl-8">
                     <PasswordInput
                       id="confirmPassword"
                       value={confirmPassword}

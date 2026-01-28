@@ -278,13 +278,13 @@ export function ProAddressSection({ user }: ProAddressSectionProps) {
                   <div ref={searchRef} className="relative space-y-2">
                     <Label htmlFor="street">Adresse</Label>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
                       <Input
                         id="street"
                         value={street}
                         onChange={(e) => setStreet(e.target.value)}
                         placeholder="Tapez votre adresse..."
-                        className="h-11 pl-10 pr-10 bg-white"
+                        className="h-11 pl-9 pr-10 bg-white"
                         autoComplete="off"
                       />
                       {searchLoading && (

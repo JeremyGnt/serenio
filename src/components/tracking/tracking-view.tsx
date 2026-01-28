@@ -172,6 +172,19 @@ interface InterventionPayload {
 export function TrackingView({ data, currentUserId, isSnapshot = false }: TrackingViewProps) {
     const router = useRouter()
 
+    // Track if user came from /compte/demandes for smart back navigation
+    const [cameFromDemandes, setCameFromDemandes] = useState(false)
+
+    // Check referrer on mount
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const referrer = document.referrer
+            if (referrer.includes('/compte/demandes')) {
+                setCameFromDemandes(true)
+            }
+        }
+    }, [])
+
     // Local state for realtime updates - initialized with server data
     const [liveData, setLiveData] = useState<LiveTrackingData>(data)
 
@@ -348,7 +361,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
 
                         {/* Bouton Retour intégré au header */}
                         <button
-                            onClick={() => router.back()}
+                            onClick={() => router.push(cameFromDemandes ? '/compte/demandes' : '/')}
                             className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200 active:scale-90 touch-manipulation"
                         >
                             <div className="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
@@ -392,8 +405,8 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                 {/* Contenu principal */}
                 <div className="space-y-6">
                     {/* Première ligne : Serrurier + Historique */}
-                    {/* Masquer la grille si annulé sans artisan pour éviter une marge vide */}
-                    {(!isCancelled || artisan) && (
+                    {/* Masquer la grille si annulé */}
+                    {!isCancelled && (
                         <div className="grid gap-6 lg:grid-cols-2">
                             {/* Artisan Card */}
                             {artisan && (

@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import {
     MapPin,
     AlertTriangle,
@@ -37,6 +38,8 @@ const UrgentRequestModal = dynamic(
     { ssr: false }
 )
 
+
+
 // Labels des situations
 const SITUATION_LABELS: Record<SituationType, string> = {
     door_locked: "Porte claquée",
@@ -67,31 +70,34 @@ const LOCK_LABELS: Record<string, string> = {
 
 // Icônes des situations
 const SITUATION_ICONS: Record<SituationType, React.ReactNode> = {
-    door_locked: <DoorClosed className="w-8 h-8" />,
-    broken_key: <KeyRound className="w-8 h-8" />,
-    blocked_lock: <Lock className="w-8 h-8" />,
-    break_in: <ShieldAlert className="w-8 h-8" />,
-    lost_keys: <KeySquare className="w-8 h-8" />,
-    lock_change: <Lock className="w-8 h-8" />,
-    cylinder_change: <Lock className="w-8 h-8" />,
-    reinforced_door: <DoorClosed className="w-8 h-8" />,
-    other: <AlertTriangle className="w-8 h-8" />,
+    door_locked: <DoorClosed className="w-5 h-5 text-red-500" />,
+    broken_key: <KeyRound className="w-5 h-5 text-red-500" />,
+    blocked_lock: <Lock className="w-5 h-5 text-red-500" />,
+    break_in: <ShieldAlert className="w-5 h-5 text-red-500" />,
+    lost_keys: <KeySquare className="w-5 h-5 text-red-500" />,
+    lock_change: <Lock className="w-5 h-5 text-red-500" />,
+    cylinder_change: <Lock className="w-5 h-5 text-red-500" />,
+    reinforced_door: <DoorClosed className="w-5 h-5 text-red-500" />,
+    other: <AlertTriangle className="w-5 h-5 text-red-500" />,
 }
 
 interface UrgentRequestCardProps {
     intervention: AnonymizedIntervention
     onAccept: () => void
+    onAcceptStart?: () => void
     onRefuse: () => void
 }
 
 
-export function UrgentRequestCard({ intervention, onAccept, onRefuse }: UrgentRequestCardProps) {
+export function UrgentRequestCard({ intervention, onAccept, onAcceptStart, onRefuse }: UrgentRequestCardProps) {
+    const router = useRouter()
     const [showModal, setShowModal] = useState(false)
     const [viewed, setViewed] = useState(false)
     const [showRefuseDialog, setShowRefuseDialog] = useState(false)
     const [showAcceptDialog, setShowAcceptDialog] = useState(false)
     const [isRefusing, setIsRefusing] = useState(false)
     const [isAccepting, setIsAccepting] = useState(false)
+
 
     // Check if viewed on mount/update
     useEffect(() => {
@@ -145,25 +151,38 @@ export function UrgentRequestCard({ intervention, onAccept, onRefuse }: UrgentRe
 
     const handleAcceptConfirm = async () => {
         setIsAccepting(true)
+        setShowAcceptDialog(false) // Close dialog immediately
+        // Notify parent to show global loader (prevents flash when card unmounts)
+        if (onAcceptStart) {
+            onAcceptStart()
+        }
+
         try {
-            await acceptMission(intervention.id)
-            onAccept() // Update parent state
+            const result = await acceptMission(intervention.id)
+            if (result.success && result.trackingNumber) {
+                onAccept()
+                router.push(`/pro/mission/${result.trackingNumber}`)
+            } else {
+                // On error, show error
+                console.error("Erreur acceptation:", result.error)
+            }
         } catch (error) {
             console.error("Erreur acceptation:", error)
         } finally {
             setIsAccepting(false)
-            setShowAcceptDialog(false)
         }
     }
 
     return (
         <>
+
+
             <div className={`group relative flex flex-col w-full bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-300 hover:shadow-md ${viewed ? 'opacity-90' : 'opacity-100'}`}>
 
                 {/* Header - Dark Blue */}
                 <div className="bg-slate-900 px-5 py-2.5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <AlertTriangle className="w-5 h-5 text-red-500" />
+                        {SITUATION_ICONS[intervention.situationType] || SITUATION_ICONS.other}
                         <h3 className="text-white font-bold text-base uppercase tracking-wide">
                             {SITUATION_LABELS[intervention.situationType] || "Intervention"}
                         </h3>

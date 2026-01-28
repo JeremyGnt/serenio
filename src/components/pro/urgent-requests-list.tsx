@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { RefreshCw, Wifi, WifiOff, Bell, Activity, Radar, Zap } from "lucide-react"
+import { RefreshCw, Wifi, WifiOff, Bell, Radar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { UrgentRequestCard } from "./urgent-request-card"
 import { AvailabilityControl } from "./availability-control"
@@ -11,6 +11,7 @@ import { supabase } from "@/lib/supabase/client"
 import { calculateDistance } from "@/lib/utils/distance"
 import type { AnonymizedIntervention, ArtisanSettings } from "@/lib/interventions"
 import type { RealtimePostgresChangesPayload, RealtimeChannel } from "@supabase/supabase-js"
+import { useLoading } from "@/components/providers/loading-provider"
 
 interface UrgentRequestsListProps {
     initialInterventions: AnonymizedIntervention[]
@@ -37,6 +38,7 @@ interface InterventionPayload {
 
 export function UrgentRequestsList({ initialInterventions, isAvailable, userId, artisanSettings }: UrgentRequestsListProps) {
     const router = useRouter()
+    const { showLoader } = useLoading()
     const [interventions, setInterventions] = useState(initialInterventions)
     const [refreshing, setRefreshing] = useState(false)
 
@@ -109,6 +111,10 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
         setInterventions(prev => prev.filter(i => i.id !== interventionId))
     }
 
+    const handleAcceptStart = () => {
+        showLoader()
+    }
+
     // Supabase Realtime subscription pour les nouvelles urgences
     useEffect(() => {
         if (!localIsAvailable) {
@@ -153,7 +159,9 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                             }
                         }
 
+                        // Small delay to ensure database has completed the INSERT
                         setNewUrgenceAlert(true)
+                        await new Promise(resolve => setTimeout(resolve, 500))
                         await handleRefresh()
                     }
                 }
@@ -326,6 +334,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                                 <UrgentRequestCard
                                     intervention={intervention}
                                     onAccept={() => handleAccept(intervention.id)}
+                                    onAcceptStart={handleAcceptStart}
                                     onRefuse={() => handleRefuse(intervention.id)}
                                 />
                             </div>

@@ -53,12 +53,12 @@ export function ProCompanySection({ user }: ProCompanySectionProps) {
               <div className="space-y-2">
                 <Label htmlFor="companyName">Nom commercial</Label>
                 <div className="relative">
-                  <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                   <Input
                     id="companyName"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
-                    className="pl-9 h-11"
+                    className="pl-8 h-11"
                     placeholder="Ex: Serrurerie Durand"
                   />
                 </div>
