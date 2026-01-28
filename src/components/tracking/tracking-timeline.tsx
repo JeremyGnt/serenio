@@ -2,6 +2,7 @@
 
 import type { StatusHistoryEntry } from "@/types/intervention"
 import { STATUS_LABELS } from "@/lib/interventions/config"
+import { cn } from "@/lib/utils"
 
 interface TrackingTimelineProps {
   history: StatusHistoryEntry[]
@@ -68,8 +69,17 @@ export function TrackingTimeline({ history, compact = false }: TrackingTimelineP
               {/* Timeline dot */}
               <div className="flex flex-col items-center mt-1.5 z-10">
                 <div
-                  className={`w-3 h-3 rounded-full border-2 border-white box-content shadow-sm flex-shrink-0 ${index === 0 && !compact ? `bg-${statusInfo.color}-500` : "bg-gray-400"
-                    } ${index === 0 && compact ? `bg-${statusInfo.color}-500` : ""}`}
+                  className={cn(
+                    "w-3 h-3 rounded-full border-2 border-white box-content shadow-sm flex-shrink-0",
+                    index === 0 ? [
+                      statusInfo.color === "emerald" && "bg-emerald-600",
+                      statusInfo.color === "blue" && "bg-blue-600",
+                      statusInfo.color === "amber" && "bg-amber-600",
+                      statusInfo.color === "purple" && "bg-purple-600",
+                      statusInfo.color === "red" && "bg-red-600",
+                      statusInfo.color === "gray" && "bg-gray-400"
+                    ] : "bg-gray-400"
+                  )}
                 />
               </div>
 

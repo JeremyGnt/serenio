@@ -4,6 +4,7 @@ import {
     MapPin,
     User,
     Edit2,
+    Check,
     CheckCircle2,
     Phone,
     Mail,
@@ -75,7 +76,26 @@ export function StepRecap({ formState, selectedScenario, onUpdate }: StepRecapPr
         email: formState.clientEmail
     })
 
+    const formatPhoneNumber = (value: string) => {
+        // Garder uniquement les chiffres
+        const cleaned = value.replace(/\D/g, '')
+        // Limiter à 10 chiffres
+        const truncated = cleaned.slice(0, 10)
+        // Formater par groupes de 2
+        const matches = truncated.match(/.{1,2}/g)
+        return matches ? matches.join(' ') : truncated
+    }
+
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formatted = formatPhoneNumber(e.target.value)
+        setEditForm({ ...editForm, phone: formatted })
+    }
+
     const handleSaveContact = () => {
+        // Validation stricte du téléphone (10 chiffres)
+        const digits = editForm.phone.replace(/\D/g, '')
+        if (digits.length !== 10) return
+
         onUpdate({
             clientFirstName: editForm.firstName,
             clientLastName: editForm.lastName,
@@ -96,7 +116,7 @@ export function StepRecap({ formState, selectedScenario, onUpdate }: StepRecapPr
     }
 
     return (
-        <div className="space-y-6 lg:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-6 lg:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-200">
             {/* Titre */}
             <div className="text-center space-y-2">
                 <h1 className="text-2xl font-bold text-gray-900">
@@ -199,17 +219,17 @@ export function StepRecap({ formState, selectedScenario, onUpdate }: StepRecapPr
                                         <div className="flex items-center gap-1 animate-in fade-in zoom-in-95 duration-200 h-full">
                                             <button
                                                 onClick={handleCancelContact}
-                                                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent"
+                                                className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-600 hover:scale-110 transition-all duration-200 touch-manipulation group"
                                                 title="Annuler"
                                             >
-                                                <X className="w-4 h-4" />
+                                                <X className="w-5 h-5 transition-transform duration-200 active:scale-75 ease-out" />
                                             </button>
                                             <button
                                                 onClick={handleSaveContact}
-                                                className="w-8 h-8 flex items-center justify-center text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-emerald-100/50 bg-white"
+                                                className="w-8 h-8 flex items-center justify-center text-emerald-600 hover:text-emerald-700 hover:scale-110 transition-all duration-200 bg-white touch-manipulation group"
                                                 title="Enregistrer"
                                             >
-                                                <CheckCircle2 className="w-4 h-4" />
+                                                <Check className="w-5 h-5 transition-transform duration-200 active:scale-75 ease-out" />
                                             </button>
                                         </div>
                                     ) : (
@@ -252,7 +272,7 @@ export function StepRecap({ formState, selectedScenario, onUpdate }: StepRecapPr
                                                 {isEditingContact ? (
                                                     <Input
                                                         value={editForm.phone}
-                                                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                                                        onChange={handlePhoneChange}
                                                         className="h-8 text-sm focus-visible:ring-emerald-500 border-emerald-100 bg-white -ml-2 px-2"
                                                         placeholder="Téléphone"
                                                         autoFocus
@@ -416,9 +436,9 @@ export function StepRecap({ formState, selectedScenario, onUpdate }: StepRecapPr
             {/* Conditions */}
             <p className="text-xs text-center text-gray-400 mt-8">
                 En confirmant, vous acceptez nos{" "}
-                <a href="/cgu" className="text-emerald-600 hover:text-emerald-700 font-medium hover:underline">conditions générales</a>
+                <a href="/cgu" className="text-emerald-600 hover:text-emerald-700 font-medium hover:underline inline-block transition-transform duration-200 active:scale-95 touch-manipulation">conditions générales</a>
                 {" "}et notre{" "}
-                <a href="/politique-de-confidentialite" className="text-emerald-600 hover:text-emerald-700 font-medium hover:underline">politique de confidentialité</a>
+                <a href="/politique-de-confidentialite" className="text-emerald-600 hover:text-emerald-700 font-medium hover:underline inline-block transition-transform duration-200 active:scale-95 touch-manipulation">politique de confidentialité</a>
             </p>
         </div>
     )

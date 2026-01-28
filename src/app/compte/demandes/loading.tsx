@@ -38,30 +38,38 @@ export default function Loading() {
                         </div>
 
                         {/* Request Cards Skeleton - Enhanced with subtle animations */}
-                        <div className="space-y-3">
+                        <div className="space-y-3 sm:space-y-4">
                             {[1, 2, 3].map((i) => (
                                 <div
                                     key={i}
                                     className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow"
                                     style={{ animationDelay: `${i * 100}ms` }}
                                 >
-                                    <div className="flex gap-4 sm:gap-5">
-                                        {/* Icon with gradient background */}
-                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse shrink-0" />
+                                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
+                                        {/* Header Row on Mobile */}
+                                        <div className="flex items-center justify-between sm:hidden w-full">
+                                            {/* Icon */}
+                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse shrink-0" />
+                                            {/* Status Badge */}
+                                            <div className="h-6 w-24 bg-gradient-to-r from-emerald-100 to-emerald-50 rounded-full animate-pulse" />
+                                        </div>
 
-                                        <div className="flex-1 min-w-0">
-                                            {/* Header */}
-                                            <div className="flex justify-between items-start mb-3">
+                                        {/* Icon Desktop */}
+                                        <div className="hidden sm:block w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse shrink-0" />
+
+                                        <div className="flex-1 min-w-0 space-y-3 sm:space-y-1">
+                                            {/* Header Desktop / Title Mobile */}
+                                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-1">
                                                 <div className="space-y-2">
                                                     <Skeleton className="h-5 w-48" />
-                                                    <Skeleton className="h-3 w-24" />
+                                                    <Skeleton className="h-3 w-24 hidden sm:block" />
                                                 </div>
-                                                {/* Status Badge */}
-                                                <div className="h-6 w-24 bg-gradient-to-r from-emerald-100 to-emerald-50 rounded-full animate-pulse" />
+                                                {/* Status Badge Desktop */}
+                                                <div className="hidden sm:block h-6 w-24 bg-gradient-to-r from-emerald-100 to-emerald-50 rounded-full animate-pulse" />
                                             </div>
 
                                             {/* Details - Horizontal Flow */}
-                                            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-3">
+                                            <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mb-3">
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-3.5 h-3.5 rounded-full bg-gray-200 animate-pulse" />
                                                     <Skeleton className="h-3 w-28" />
@@ -73,7 +81,7 @@ export default function Loading() {
                                             </div>
 
                                             {/* Artisan Pill */}
-                                            <div className="h-6 w-44 bg-gradient-to-r from-blue-50 to-blue-100 rounded-full animate-pulse" />
+                                            <div className="h-8 sm:h-6 w-full sm:w-44 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl sm:rounded-full animate-pulse" />
                                         </div>
                                     </div>
                                 </div>

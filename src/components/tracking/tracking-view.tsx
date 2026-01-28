@@ -77,7 +77,7 @@ const STATUS_CONFIG: Record<string, {
 }> = {
     pending: {
         icon: Loader2,
-        color: "text-amber-500", // Softened from 600
+        color: "text-amber-500",
         bgColor: "bg-amber-50/50",
         borderColor: "border-amber-100",
         iconBg: "bg-amber-50"
@@ -91,73 +91,73 @@ const STATUS_CONFIG: Record<string, {
     },
     assigned: {
         icon: CheckCircle,
-        color: "text-slate-600",
-        bgColor: "bg-slate-50",
-        borderColor: "border-slate-100",
-        iconBg: "bg-slate-100"
+        color: "text-emerald-600",
+        bgColor: "bg-emerald-50/50",
+        borderColor: "border-emerald-100",
+        iconBg: "bg-emerald-100"
     },
     accepted: {
         icon: CheckCircle,
-        color: "text-slate-600",
-        bgColor: "bg-slate-50",
-        borderColor: "border-slate-100",
-        iconBg: "bg-slate-100"
+        color: "text-emerald-600",
+        bgColor: "bg-emerald-50/50",
+        borderColor: "border-emerald-100",
+        iconBg: "bg-emerald-100"
     },
     en_route: {
         icon: Truck,
-        color: "text-blue-500", // Softened
+        color: "text-blue-600",
         bgColor: "bg-blue-50/50",
         borderColor: "border-blue-100",
-        iconBg: "bg-blue-50"
+        iconBg: "bg-blue-100"
     },
     arrived: {
         icon: MapPin,
-        color: "text-indigo-500", // Softened
-        bgColor: "bg-indigo-50/50",
-        borderColor: "border-indigo-100",
-        iconBg: "bg-indigo-50"
+        color: "text-purple-600",
+        bgColor: "bg-purple-50/50",
+        borderColor: "border-purple-100",
+        iconBg: "bg-purple-100"
     },
     diagnosing: {
         icon: Wrench,
-        color: "text-violet-500", // Softened
-        bgColor: "bg-violet-50/50",
-        borderColor: "border-violet-100",
-        iconBg: "bg-violet-50"
+        color: "text-emerald-600",
+        bgColor: "bg-emerald-50/50",
+        borderColor: "border-emerald-100",
+        iconBg: "bg-emerald-100"
     },
     quote_sent: {
         icon: FileText,
-        color: "text-orange-500", // Softened
-        bgColor: "bg-orange-50/50",
-        borderColor: "border-orange-100",
-        iconBg: "bg-orange-50"
+        color: "text-emerald-600",
+        bgColor: "bg-emerald-50/50",
+        borderColor: "border-emerald-100",
+        iconBg: "bg-emerald-100"
     },
     quote_accepted: {
         icon: CheckCircle,
-        color: "text-teal-500", // Softened
-        bgColor: "bg-teal-50/50",
-        borderColor: "border-teal-100",
-        iconBg: "bg-teal-50"
+        color: "text-emerald-600",
+        bgColor: "bg-emerald-50/50",
+        borderColor: "border-emerald-100",
+        iconBg: "bg-emerald-100"
     },
     in_progress: {
         icon: Wrench,
-        color: "text-blue-500", // Softened
+        color: "text-blue-600",
         bgColor: "bg-blue-50/50",
         borderColor: "border-blue-100",
-        iconBg: "bg-blue-50"
+        iconBg: "bg-blue-100"
     },
     completed: {
         icon: CheckCircle,
-        color: "text-indigo-500", // Softened Indigo (Complementary to Green/Amber range)
-        bgColor: "bg-indigo-50/50",
-        borderColor: "border-indigo-100",
-        iconBg: "bg-indigo-50"
+        color: "text-emerald-600",
+        bgColor: "bg-emerald-50/50",
+        borderColor: "border-emerald-100",
+        iconBg: "bg-emerald-100"
     },
     cancelled: {
         icon: AlertCircle,
-        color: "text-red-500", // Softened
-        bgColor: "bg-red-50/50",
-        borderColor: "border-red-100",
-        iconBg: "bg-red-50"
+        color: "text-gray-500",
+        bgColor: "bg-gray-50/50",
+        borderColor: "border-gray-100",
+        iconBg: "bg-gray-50"
     }
 }
 
@@ -322,12 +322,18 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
     const statusConfig = STATUS_CONFIG[intervention.status] || STATUS_CONFIG.pending
     const StatusIcon = statusConfig.icon
 
+    // Gérer l'état de chargement lors de l'annulation
+    useEffect(() => {
+        if (intervention.status === "cancelled") {
+            setCancelling(false)
+            setShowCancelDialog(false)
+        }
+    }, [intervention.status])
+
     const handleCancel = async () => {
         setCancelling(true)
         await cancelIntervention(intervention.id, "Annulé par le client")
-        setCancelling(false)
-        setShowCancelDialog(false)
-        window.location.reload()
+        router.refresh()
     }
 
     const copyTrackingNumber = async () => {
@@ -362,12 +368,14 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                         {/* Bouton Retour intégré au header */}
                         <button
                             onClick={() => router.push(cameFromDemandes ? '/compte/demandes' : '/')}
-                            className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200 active:scale-90 touch-manipulation"
+                            className="group flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200 touch-manipulation p-2 -ml-2 rounded-lg"
                         >
-                            <div className="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
-                                <ArrowLeft className="w-4 h-4" />
-                            </div>
-                            <span className="hidden sm:inline">Retour</span>
+                            <span className="flex items-center gap-2 transition-transform duration-200 group-active:scale-75 ease-out group-active:duration-75">
+                                <span className="p-1.5 rounded-full hover:bg-gray-100 transition-colors bg-gray-50/50 block">
+                                    <ArrowLeft className="w-4 h-4" />
+                                </span>
+                                <span className="hidden sm:inline">Retour</span>
+                            </span>
                         </button>
                     </div>
 
@@ -376,23 +384,27 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
 
                         <button
                             onClick={copyTrackingNumber}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all duration-200 touch-manipulation active:scale-95 active:duration-75 text-sm"
+                            className="group flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all duration-200 touch-manipulation text-sm"
                         >
-                            <span className="font-mono text-gray-600">{intervention.trackingNumber}</span>
-                            {copied ? (
-                                <Check className="w-4 h-4 text-emerald-500" />
-                            ) : (
-                                <Copy className="w-4 h-4 text-gray-400" />
-                            )}
+                            <span className="flex items-center gap-2 transition-transform duration-200 group-active:scale-95 ease-out group-active:duration-75">
+                                <span className="font-mono text-gray-600">{intervention.trackingNumber}</span>
+                                {copied ? (
+                                    <Check className="w-4 h-4 text-emerald-500" />
+                                ) : (
+                                    <Copy className="w-4 h-4 text-gray-400" />
+                                )}
+                            </span>
                         </button>
 
                         <button
                             onClick={handleRefresh}
                             disabled={refreshing}
-                            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all duration-200 touch-manipulation active:scale-90 active:duration-75"
+                            className="group p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all duration-200 touch-manipulation"
                             title="Rafraîchir manuellement"
                         >
-                            <RefreshCw className={cn("w-5 h-5", refreshing && "animate-spin")} />
+                            <div className="transition-transform duration-200 group-active:scale-75 ease-out group-active:duration-75">
+                                <RefreshCw className={cn("w-5 h-5", refreshing && "animate-spin")} />
+                            </div>
                         </button>
                     </div>
                 </div>
@@ -416,7 +428,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                                         Votre serrurier
                                     </h2>
                                     <div className="flex items-center gap-4">
-                                        <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-emerald-100 shadow-sm">
+                                        <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-emerald-200 shadow-sm">
                                             {artisan.avatarUrl ? (
                                                 <Image
                                                     src={artisan.avatarUrl}
@@ -442,7 +454,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                                             )}
                                         </div>
                                         <div className="flex flex-col gap-2">
-                                            <Button asChild variant="outline" className="border-blue-100 text-blue-600 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-all duration-200 w-full sm:w-auto shadow-sm">
+                                            <Button asChild variant="outline" className="border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all duration-200 w-full sm:w-auto shadow-sm">
                                                 <a href={`tel:${artisan.phone}`}>
                                                     <Phone className="w-4 h-4 mr-2" />
                                                     Appeler
@@ -474,7 +486,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                                     <div className="flex items-center gap-4 relative z-10">
                                         {/* Pulsing Avatar Placeholder */}
                                         <div className="relative">
-                                            <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center relative z-10 border border-amber-100 shadow-sm">
+                                            <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center relative z-10 border border-amber-200 shadow-sm">
                                                 <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
                                             </div>
                                             {/* Pulse Rings */}
@@ -521,8 +533,8 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                     {/* Devis (pleine largeur si présent) */}
                     {quote && <TrackingQuote quote={quote} interventionId={intervention.id} />}
 
-                    {/* Chat Flottant - visible quand utilisateur connecté */}
-                    {currentUserId && !isCancelled && !isCompleted && intervention.status !== "draft" && (
+                    {/* Chat Flottant - visible quand utilisateur connecté et artisan trouvé */}
+                    {currentUserId && !isCancelled && !isCompleted && intervention.status !== "draft" && artisan && (
                         <div id="chat-section">
                             <ClientChatWrapper
                                 interventionId={intervention.id}
@@ -596,8 +608,8 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                         </div>
                     )}
 
-                    {/* Photos uploadées - Visible si non annulé */}
-                    {!isCancelled && (
+                    {/* Photos uploadées - Visible si non annulé et s'il y a des photos */}
+                    {!isCancelled && intervention.photos && intervention.photos.length > 0 && (
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 p-5">
                             <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                 <Camera className="w-5 h-5 text-emerald-600" />
@@ -619,7 +631,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
 
                     {/* Actions - Centered below grid */}
                     {canCancel && !isCompleted && !isCancelled && (
-                        <div className="flex justify-center mt-6">
+                        <div className="flex justify-center mt-2">
                             <Button
                                 variant="outline"
                                 className="h-12 px-8 text-red-600 border-red-200 hover:bg-red-50"
@@ -688,7 +700,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                     )}
 
                     {/* Support */}
-                    <div className="text-center py-6">
+                    <div className="text-center py-2">
                         <p className="text-sm text-gray-500">
                             Une question ?{" "}
                             <a

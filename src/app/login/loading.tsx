@@ -1,6 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton"
 import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
 
 export default function Loading() {
     return (
@@ -13,19 +12,19 @@ export default function Loading() {
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col items-center justify-center">
+            <div className="flex-1 flex flex-col items-center justify-center -mt-8">
                 <div className="w-full max-w-sm space-y-8">
                     {/* Logo / Titre */}
-                    <div className="flex flex-col items-center gap-2">
-                        <Skeleton className="w-8 h-8 rounded-lg" />
-                        <Skeleton className="h-8 w-32" />
-                        <Skeleton className="h-4 w-48 mt-2" />
+                    <div className="flex flex-col items-center gap-3">
+                        <Skeleton className="w-10 h-10 rounded-xl" />
+                        <Skeleton className="h-8 w-40" />
+                        <Skeleton className="h-4 w-56 max-w-full" />
                     </div>
 
                     {/* Formulaire */}
-                    <div className="space-y-6">
+                    <div className="space-y-6 bg-white/50 p-1 sm:bg-transparent sm:p-0">
                         {/* Google Button */}
-                        <Skeleton className="h-11 w-full rounded-md" />
+                        <Skeleton className="h-11 w-full rounded-xl" />
 
                         <div className="relative py-2">
                             <div className="absolute inset-0 flex items-center">
@@ -39,7 +38,7 @@ export default function Loading() {
                         {/* Email */}
                         <div className="space-y-2">
                             <Skeleton className="h-4 w-16" />
-                            <Skeleton className="h-12 w-full rounded-xl" />
+                            <Skeleton className="h-11 w-full rounded-xl" />
                         </div>
 
                         {/* Password */}
@@ -48,14 +47,14 @@ export default function Loading() {
                                 <Skeleton className="h-4 w-24" />
                                 <Skeleton className="h-3 w-32" />
                             </div>
-                            <Skeleton className="h-12 w-full rounded-xl" />
+                            <Skeleton className="h-11 w-full rounded-xl" />
                         </div>
 
-                        <Skeleton className="h-12 w-full rounded-md" />
+                        <Skeleton className="h-11 w-full rounded-xl mt-8" />
                     </div>
 
                     {/* Footer */}
-                    <div className="flex justify-center gap-2">
+                    <div className="flex justify-center gap-2 pt-2">
                         <Skeleton className="h-4 w-32" />
                         <Skeleton className="h-4 w-24" />
                     </div>

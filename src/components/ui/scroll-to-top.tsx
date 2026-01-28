@@ -4,7 +4,11 @@ import { useState, useEffect } from "react"
 import { ArrowUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export function ScrollToTop() {
+interface ScrollToTopProps {
+    className?: string
+}
+
+export function ScrollToTop({ className }: ScrollToTopProps) {
     const [isVisible, setIsVisible] = useState(false)
 
     // Force scroll to top on mount (when navigating to the page)
@@ -55,6 +59,7 @@ export function ScrollToTop() {
                 "fixed z-40 transition-all duration-300 ease-in-out touch-manipulation",
                 // Position : bas à droite, décalage 16-24px
                 "right-4 sm:right-6 bottom-20 sm:bottom-6", // Bottom-20 sur mobile pour ne pas masquer le CTA sticky
+                className,
                 // Taille : 44-48px sur desktop, 40-44px sur mobile
                 "w-10 h-10 sm:w-12 sm:h-12 rounded-full",
                 // Style discret : Serenio green (emerald-600), opacité 0.85

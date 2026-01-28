@@ -133,8 +133,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                 {
                     event: "INSERT",
                     schema: "public",
-                    table: "intervention_requests",
-                    filter: "intervention_type=eq.urgence"
+                    table: "intervention_requests"
                 },
                 async (payload: RealtimePostgresChangesPayload<InterventionPayload>) => {
                     const newIntervention = payload.new as InterventionPayload

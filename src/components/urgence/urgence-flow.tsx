@@ -736,7 +736,7 @@ export function UrgenceFlow({ priceScenarios, userEmail, userName }: UrgenceFlow
                     </div>
                 </div>
             )}
-            <ScrollToTop />
+            <ScrollToTop className="bottom-32 sm:bottom-6" />
         </div>
     )
 }

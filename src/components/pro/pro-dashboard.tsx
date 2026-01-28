@@ -40,12 +40,12 @@ export function ProDashboard({
                 {
                     event: "INSERT",
                     schema: "public",
-                    table: "intervention_requests",
-                    filter: "intervention_type=eq.urgence"
+                    table: "intervention_requests"
                 },
                 (payload) => {
                     // Nouvelle urgence → redirection
-                    if (payload.new) {
+                    const newRecord = payload.new as { intervention_type: string }
+                    if (newRecord && newRecord.intervention_type === 'urgence') {
                         // router.push("/pro/urgences")
                         // Notification sonore ou visuelle simple à la place ?
                     }

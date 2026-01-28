@@ -86,6 +86,7 @@ export async function getLiveTrackingData(
     .select(`
       *,
       intervention_diagnostics(*),
+      intervention_photos(*),
       price_scenarios(*),
       artisan_assignments(
         *,

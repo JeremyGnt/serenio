@@ -28,70 +28,79 @@ export function TrackingSkeleton() {
 
             <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12 space-y-6">
                 {/* Back Button */}
-                <div className="w-full py-4">
+                <div className="w-full py-4 -ml-2">
                     <div className="w-20 h-9 bg-gray-100 rounded-lg animate-pulse" />
                 </div>
 
-                {/* Status Banner Skeleton - Premium gradient */}
+                {/* Status Banner Skeleton - Responsive */}
                 <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl border border-emerald-100 p-5">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-white shadow-sm animate-pulse flex items-center justify-center">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-white shadow-sm animate-pulse flex items-center justify-center shrink-0">
                             <div className="w-6 h-6 bg-emerald-200 rounded-full" />
                         </div>
-                        <div className="flex-1 space-y-2">
+                        <div className="flex-1 space-y-2 w-full">
                             <div className="h-5 w-48 bg-white/60 rounded animate-pulse" />
-                            <div className="h-3 w-64 bg-white/40 rounded animate-pulse" />
+                            <div className="h-3 w-full sm:w-64 bg-white/40 rounded animate-pulse" />
                         </div>
                     </div>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
+                <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
                     {/* Artisan Card Skeleton */}
                     <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
                         <div className="flex items-center gap-2 mb-4">
                             <div className="w-5 h-5 bg-blue-100 rounded animate-pulse" />
                             <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
                             {/* Avatar with ring */}
-                            <div className="relative">
-                                <div className="w-14 h-14 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full animate-pulse" />
-                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-100 rounded-full border-2 border-white" />
-                            </div>
-                            <div className="flex-1 space-y-2">
-                                <div className="h-5 w-36 bg-gray-200 rounded animate-pulse" />
-                                <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
-                                <div className="flex items-center gap-1">
-                                    {[1, 2, 3, 4, 5].map((i) => (
-                                        <div key={i} className="w-3 h-3 bg-amber-200 rounded-sm animate-pulse" />
-                                    ))}
+                            <div className="flex items-center gap-4 sm:block">
+                                <div className="relative shrink-0">
+                                    <div className="w-14 h-14 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full animate-pulse" />
+                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-100 rounded-full border-2 border-white" />
+                                </div>
+                                <div className="space-y-2 sm:hidden flex-1">
+                                    <div className="h-5 w-36 bg-gray-200 rounded animate-pulse" />
+                                    <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
                                 </div>
                             </div>
-                            {/* Contact buttons */}
-                            <div className="flex gap-2">
-                                <div className="w-10 h-10 bg-gray-100 rounded-xl animate-pulse" />
-                                <div className="w-10 h-10 bg-emerald-100 rounded-xl animate-pulse" />
+
+                            <div className="flex-1 space-y-4">
+                                <div className="space-y-2 hidden sm:block">
+                                    <div className="h-5 w-36 bg-gray-200 rounded animate-pulse" />
+                                    <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
+                                    <div className="flex items-center gap-1">
+                                        {[1, 2, 3, 4, 5].map((i) => (
+                                            <div key={i} className="w-3 h-3 bg-amber-200 rounded-sm animate-pulse" />
+                                        ))}
+                                    </div>
+                                </div>
+                                {/* Contact buttons - Full width on mobile */}
+                                <div className="flex gap-2">
+                                    <div className="flex-1 sm:flex-none sm:w-12 h-10 bg-gray-100 rounded-xl animate-pulse" />
+                                    <div className="flex-1 sm:flex-none sm:w-12 h-10 bg-emerald-100 rounded-xl animate-pulse" />
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Timeline Skeleton */}
                     <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-                        <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-2">
                                 <div className="w-5 h-5 bg-purple-100 rounded animate-pulse" />
                                 <div className="h-5 w-24 bg-gray-200 rounded animate-pulse" />
                             </div>
                             <div className="h-5 w-16 bg-emerald-100 rounded-full animate-pulse" />
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-6 pl-2">
                             {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="flex gap-4">
+                                <div key={i} className="flex gap-4 relative">
                                     <div className="flex flex-col items-center">
-                                        <div className={`w-3 h-3 rounded-full ${i === 1 ? 'bg-emerald-400' : 'bg-gray-200'} animate-pulse`} />
-                                        {i < 4 && <div className="w-0.5 h-8 bg-gray-100" />}
+                                        <div className={`w-3 h-3 rounded-full ${i === 1 ? 'bg-emerald-400 box-content border-4 border-white shadow-sm -ml-1 mt-0.5' : 'bg-gray-200 mt-1'} animate-pulse z-10`} />
+                                        {i < 4 && <div className="absolute top-4 bottom-[-16px] w-0.5 bg-gray-100" />}
                                     </div>
-                                    <div className="flex-1 space-y-1 pb-4">
+                                    <div className="flex-1 space-y-1.5">
                                         <div className={`h-4 w-32 ${i === 1 ? 'bg-gray-200' : 'bg-gray-100'} rounded animate-pulse`} />
                                         <div className="h-3 w-24 bg-gray-50 rounded animate-pulse" />
                                     </div>
@@ -101,7 +110,7 @@ export function TrackingSkeleton() {
                     </div>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
+                <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
                     {/* Address Card Skeleton */}
                     <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm space-y-3">
                         <div className="flex items-center gap-2 mb-4">
