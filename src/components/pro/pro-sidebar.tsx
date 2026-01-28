@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import {
-    Siren,
+    Bell,
     Inbox,
     ListChecks,
     CalendarDays,
@@ -42,7 +42,7 @@ interface NavItem {
 
 // Item Urgences
 const URGENCE_ITEM: NavItem = {
-    icon: Siren,
+    icon: Bell,
     label: "Urgences",
     href: "/pro/urgences",
     badge: true,
@@ -327,14 +327,14 @@ export function ProSidebar({
                             className={cn(
                                 "group flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-200 border active:scale-[0.98] touch-manipulation",
                                 (pathname === URGENCE_ITEM.href || pathname.startsWith(URGENCE_ITEM.href + "/"))
-                                    ? "bg-red-50 border-red-100 text-red-700 shadow-sm"
-                                    : "bg-white border-transparent hover:bg-red-50 hover:text-red-700 hover:border-red-100 active:bg-red-50"
+                                    ? "bg-gray-100 border-transparent text-gray-900"
+                                    : "bg-white border-transparent hover:bg-gray-50 hover:text-gray-900 active:bg-gray-100"
                             )}
                         >
                             <div className={cn(
                                 "p-1.5 rounded-lg transition-colors bg-red-100 text-red-600"
                             )}>
-                                <Siren className="w-5 h-5" />
+                                <Bell className="w-5 h-5" />
                             </div>
                             <span className="flex-1 font-semibold">{URGENCE_ITEM.label}</span>
                             {available && urgentCountState > 0 && (
@@ -439,12 +439,12 @@ export function ProSidebar({
                     <Link
                         href="/pro/urgences"
                         className={cn(
-                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-90 transition-all duration-150 active:duration-75 touch-manipulation active:bg-gray-100 active:text-red-700 rounded-lg",
-                            (pathname === "/pro/urgences") ? "text-red-600" : "text-gray-400"
+                            "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-90 transition-all duration-150 active:duration-75 touch-manipulation active:bg-gray-100 active:text-gray-900 rounded-lg",
+                            (pathname === "/pro/urgences") ? "text-gray-900" : "text-gray-400"
                         )}
                     >
                         <div className="relative">
-                            <Siren className={cn("w-6 h-6", (pathname === "/pro/urgences") && "fill-current/10")} />
+                            <Bell className={cn("w-6 h-6", (pathname === "/pro/urgences") && "fill-current/10")} />
                             {available && urgentCountState > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
                                     {urgentCountState}

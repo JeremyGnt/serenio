@@ -39,6 +39,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
     const router = useRouter()
     const [interventions, setInterventions] = useState(initialInterventions)
     const [refreshing, setRefreshing] = useState(false)
+
     const [isConnected, setIsConnected] = useState(false)
     const [newUrgenceAlert, setNewUrgenceAlert] = useState(false)
     const [localIsAvailable, setLocalIsAvailable] = useState(isAvailable)
@@ -97,6 +98,16 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
             }
         }
     }, [userId, handleRefresh])
+
+    const handleAccept = async (interventionId: string) => {
+        // Remove from UI immediately (optimistic update)
+        setInterventions(prev => prev.filter(i => i.id !== interventionId))
+    }
+
+    const handleRefuse = async (interventionId: string) => {
+        // Remove from UI immediately (optimistic update)
+        setInterventions(prev => prev.filter(i => i.id !== interventionId))
+    }
 
     // Supabase Realtime subscription pour les nouvelles urgences
     useEffect(() => {
@@ -212,16 +223,6 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
         }
     }, [handleRefresh, localIsAvailable, artisanSettings])
 
-    const handleAccept = (interventionId: string) => {
-        setInterventions(prev => prev.filter(i => i.id !== interventionId))
-        handleRefresh()
-    }
-
-    const handleRefuse = (interventionId: string) => {
-        setInterventions(prev => prev.filter(i => i.id !== interventionId))
-        handleRefresh()
-    }
-
     const handleAvailabilityToggle = (newStatus: boolean) => {
         setLocalIsAvailable(newStatus)
         if (newStatus) {
@@ -244,6 +245,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                 </div>
 
                 <div className="flex items-center gap-3 self-end md:self-auto">
+
                     {localIsAvailable && (
                         <Button
                             variant="ghost"
@@ -318,7 +320,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                     </div>
                 ) : (
                     /* Intervention Cards Grid */
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
                         {interventions.map((intervention) => (
                             <div key={intervention.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <UrgentRequestCard
