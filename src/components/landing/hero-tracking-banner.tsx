@@ -9,22 +9,24 @@ import { supabase } from "@/lib/supabase/client"
 import type { LiveTrackingData } from "@/types/intervention"
 import { cn } from "@/lib/utils"
 
-interface HeroTrackingBannerProps {
-    isLoggedIn: boolean
-}
-
-export function HeroTrackingBanner({ isLoggedIn }: HeroTrackingBannerProps) {
+/**
+ * Hero Tracking Banner - Gère son propre état d'authentification côté client
+ * Ne dépend plus de props serveur pour un rendu instantané
+ */
+export function HeroTrackingBanner() {
     const [activeTrackingNumber, setActiveTrackingNumber] = useState<string | null>(null)
     const [trackingData, setTrackingData] = useState<LiveTrackingData | null>(null)
-    const [isUserConnected, setIsUserConnected] = useState(isLoggedIn)
+    const [isUserConnected, setIsUserConnected] = useState(false)
 
-    // Synchroniser avec la prop (pour le SSR initial)
+    // Vérifier l'état d'authentification au montage
     useEffect(() => {
-        setIsUserConnected(isLoggedIn)
-    }, [isLoggedIn])
+        const checkAuth = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            setIsUserConnected(!!session)
+        }
+        checkAuth()
 
-    // Écouter les changements d'auth côté client (pour le login sans refresh)
-    useEffect(() => {
+        // Écouter les changements d'auth côté client
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setIsUserConnected(!!session)
         })
@@ -75,7 +77,7 @@ export function HeroTrackingBanner({ isLoggedIn }: HeroTrackingBannerProps) {
 
             if (data) {
                 // Si l'intervention appartient à un utilisateur et qu'on n'est pas connecté, on nettoie
-                if (data.intervention.clientId && !isLoggedIn) {
+                if (data.intervention.clientId && !isUserConnected) {
                     clearActiveTracking()
                     setActiveTrackingNumber(null)
                     setTrackingData(null)

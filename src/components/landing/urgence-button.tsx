@@ -6,34 +6,23 @@ import { Siren } from "lucide-react"
 import { getActiveTracking, setActiveTracking } from "@/lib/active-tracking"
 import { supabase } from "@/lib/supabase/client"
 
-interface UrgenceButtonProps {
-    isLoggedIn: boolean
-}
-
-export function UrgenceButton({ isLoggedIn }: UrgenceButtonProps) {
+/**
+ * Bouton Urgence - Gère son propre état d'authentification côté client
+ * Ne dépend plus de props serveur pour un rendu instantané
+ */
+export function UrgenceButton() {
     const [targetUrl, setTargetUrl] = useState("/urgence")
     const [isChecking, setIsChecking] = useState(true)
-    const [isUserConnected, setIsUserConnected] = useState(isLoggedIn)
-
-    // Synchroniser avec la prop
-    useEffect(() => {
-        setIsUserConnected(isLoggedIn)
-    }, [isLoggedIn])
-
-    // Écouter les changements d'auth
-    useEffect(() => {
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setIsUserConnected(!!session)
-        })
-        return () => subscription.unsubscribe()
-    }, [])
 
     useEffect(() => {
         async function checkActiveTracking() {
+            // Récupérer la session côté client
+            const { data: { session } } = await supabase.auth.getSession()
+            const isUserConnected = !!session
+
             // Si l'utilisateur est connecté, vérifier son compte en priorité
             if (isUserConnected) {
                 try {
-                    const { data: { session } } = await supabase.auth.getSession()
                     const headers: HeadersInit = {}
                     if (session?.access_token) {
                         headers["Authorization"] = `Bearer ${session.access_token}`
@@ -64,7 +53,15 @@ export function UrgenceButton({ isLoggedIn }: UrgenceButtonProps) {
         }
 
         checkActiveTracking()
-    }, [isUserConnected])
+
+        // Écouter les changements d'auth pour re-vérifier
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+            setIsChecking(true)
+            checkActiveTracking()
+        })
+
+        return () => subscription.unsubscribe()
+    }, [])
 
     return (
         <Link

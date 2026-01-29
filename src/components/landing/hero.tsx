@@ -4,11 +4,11 @@ import { Calendar, MapPin, Clock, Shield, CheckCircle } from "lucide-react"
 import { UrgenceButton } from "./urgence-button"
 import { HeroTrackingBanner } from "./hero-tracking-banner"
 
-interface HeroProps {
-  isLoggedIn: boolean
-}
-
-export function Hero({ isLoggedIn }: HeroProps) {
+/**
+ * Hero Section - 100% statique pour un FCP ultra-rapide
+ * Les composants dynamiques (tracking, bouton urgence) gèrent leur état côté client
+ */
+export function Hero() {
   return (
     <section className="relative overflow-hidden">
       {/* Background avec gradient subtil */}
@@ -21,9 +21,9 @@ export function Hero({ isLoggedIn }: HeroProps) {
 
       <div className="relative px-4 pb-12 md:pb-20 pt-2 md:pt-4 transition-all duration-300">
         <div className="max-w-4xl mx-auto">
-          {/* Active Tracking Banner - Lazy loaded client component */}
+          {/* Active Tracking Banner - Client component, gère son propre état */}
           <Suspense fallback={<div className="mb-6 h-0" aria-hidden="true" />}>
-            <HeroTrackingBanner isLoggedIn={isLoggedIn} />
+            <HeroTrackingBanner />
           </Suspense>
 
           {/* Titre principal */}
@@ -49,8 +49,8 @@ export function Hero({ isLoggedIn }: HeroProps) {
 
           {/* 2 CTA principaux */}
           <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-6 px-4 sm:px-0">
-            {/* Bouton Urgence - plus visible */}
-            <UrgenceButton isLoggedIn={isLoggedIn} />
+            {/* Bouton Urgence - Client component, gère son propre état */}
+            <UrgenceButton />
 
             {/* Bouton RDV */}
             <Link

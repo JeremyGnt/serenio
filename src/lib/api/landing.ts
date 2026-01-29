@@ -183,114 +183,140 @@ function getDefaultGuarantees(): Guarantee[] {
 
 // ============================================
 // FONCTIONS D'ACCÈS AUX DONNÉES (SERVER-SIDE)
+// Chaque fonction est cachée individuellement pour Suspense streaming
 // ============================================
 
 /**
  * Récupère les statistiques de la plateforme
+ * Cachée pendant 1h pour FCP optimal
  */
-async function getStats(): Promise<PlatformStats> {
-  try {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from("platform_stats")
-      .select("*")
-      .single()
+export const getStats = unstable_cache(
+  async (): Promise<PlatformStats> => {
+    try {
+      const supabase = await createClient()
+      const { data, error } = await supabase
+        .from("platform_stats")
+        .select("*")
+        .single()
 
-    if (error || !data) {
+      if (error || !data) {
+        return getDefaultStats()
+      }
+
+      return data as PlatformStats
+    } catch {
       return getDefaultStats()
     }
-
-    return data as PlatformStats
-  } catch {
-    return getDefaultStats()
-  }
-}
+  },
+  ["landing-stats"],
+  { revalidate: 3600, tags: ["landing"] }
+)
 
 /**
  * Récupère les témoignages clients
+ * Cachée pendant 1h pour FCP optimal
  */
-async function getTestimonials(): Promise<Testimonial[]> {
-  try {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from("testimonials")
-      .select("*")
-      .eq("is_featured", true)
-      .order("created_at", { ascending: false })
-      .limit(6)
+export const getTestimonials = unstable_cache(
+  async (): Promise<Testimonial[]> => {
+    try {
+      const supabase = await createClient()
+      const { data, error } = await supabase
+        .from("testimonials")
+        .select("*")
+        .eq("is_featured", true)
+        .order("created_at", { ascending: false })
+        .limit(6)
 
-    if (error || !data || data.length === 0) {
+      if (error || !data || data.length === 0) {
+        return getDefaultTestimonials()
+      }
+
+      return data as Testimonial[]
+    } catch {
       return getDefaultTestimonials()
     }
-
-    return data as Testimonial[]
-  } catch {
-    return getDefaultTestimonials()
-  }
-}
+  },
+  ["landing-testimonials"],
+  { revalidate: 3600, tags: ["landing"] }
+)
 
 /**
  * Récupère les questions fréquentes
+ * Cachée pendant 1h pour FCP optimal
  */
-async function getFaq(): Promise<FaqItem[]> {
-  try {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from("faq_items")
-      .select("*")
-      .order("order", { ascending: true })
+export const getFaq = unstable_cache(
+  async (): Promise<FaqItem[]> => {
+    try {
+      const supabase = await createClient()
+      const { data, error } = await supabase
+        .from("faq_items")
+        .select("*")
+        .order("order", { ascending: true })
 
-    if (error || !data || data.length === 0) {
+      if (error || !data || data.length === 0) {
+        return getDefaultFaq()
+      }
+
+      return data as FaqItem[]
+    } catch {
       return getDefaultFaq()
     }
-
-    return data as FaqItem[]
-  } catch {
-    return getDefaultFaq()
-  }
-}
+  },
+  ["landing-faq"],
+  { revalidate: 3600, tags: ["landing"] }
+)
 
 /**
  * Récupère les fourchettes de prix
+ * Cachée pendant 1h pour FCP optimal
  */
-async function getPriceRanges(): Promise<PriceRange[]> {
-  try {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from("price_ranges")
-      .select("*")
-      .order("price_min", { ascending: true })
+export const getPriceRanges = unstable_cache(
+  async (): Promise<PriceRange[]> => {
+    try {
+      const supabase = await createClient()
+      const { data, error } = await supabase
+        .from("price_ranges")
+        .select("*")
+        .order("price_min", { ascending: true })
 
-    if (error || !data || data.length === 0) {
+      if (error || !data || data.length === 0) {
+        return getDefaultPriceRanges()
+      }
+
+      return data as PriceRange[]
+    } catch {
       return getDefaultPriceRanges()
     }
-
-    return data as PriceRange[]
-  } catch {
-    return getDefaultPriceRanges()
-  }
-}
+  },
+  ["landing-prices"],
+  { revalidate: 3600, tags: ["landing"] }
+)
 
 /**
  * Récupère les garanties de la plateforme
+ * Cachée pendant 1h pour FCP optimal
  */
-async function getGuarantees(): Promise<Guarantee[]> {
-  try {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from("guarantees")
-      .select("*")
-      .order("order", { ascending: true })
+export const getGuarantees = unstable_cache(
+  async (): Promise<Guarantee[]> => {
+    try {
+      const supabase = await createClient()
+      const { data, error } = await supabase
+        .from("guarantees")
+        .select("*")
+        .order("order", { ascending: true })
 
-    if (error || !data || data.length === 0) {
+      if (error || !data || data.length === 0) {
+        return getDefaultGuarantees()
+      }
+
+      return data as Guarantee[]
+    } catch {
       return getDefaultGuarantees()
     }
-
-    return data as Guarantee[]
-  } catch {
-    return getDefaultGuarantees()
-  }
-}
+  },
+  ["landing-guarantees"],
+  { revalidate: 3600, tags: ["landing"] }
+)
 
 /**
  * Récupère toutes les données de la landing page en une seule fois
