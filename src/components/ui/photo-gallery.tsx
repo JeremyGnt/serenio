@@ -177,7 +177,7 @@ export function PhotoGallery({
               onClick={() => openLightbox(index)}
               className={cn(
                 "relative aspect-square rounded-lg overflow-hidden bg-gray-100 group",
-                "hover:ring-2 hover:ring-emerald-400 transition-all"
+                "hover:ring-2 hover:ring-[#009966] transition-all"
               )}
             >
               {photo.url && !imageLoadErrors.has(photo.id) ? (

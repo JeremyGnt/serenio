@@ -41,7 +41,7 @@ export function ApproximateMap({
         <div className={`relative ${className}`}>
             <MapContainer
                 center={[latitude, longitude]}
-                zoom={14} // Zoom un peu plus large pour voir le rayon de 500m
+                zoom={13} // Zoom un peu plus large pour voir le rayon de 500m
                 scrollWheelZoom={false} // Désactivé pour ne pas gêner le scroll de la page
                 dragging={true} // Réactivé pour permettre d'explorer
                 zoomControl={true} // Réactivé pour zoomer/dézoomer

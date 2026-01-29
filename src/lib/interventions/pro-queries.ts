@@ -41,6 +41,9 @@ export interface AnonymizedIntervention {
 
     // Distance du pro (calculée)
     distance?: number // en km
+
+    // Photos (URLs signées pre-fetched)
+    photos?: { url: string; path: string }[]
 }
 
 /**
@@ -1367,23 +1370,9 @@ export async function getInterventionDetailsForModal(interventionId: string): Pr
         const { data: intervention, error } = await adminClient
             .from("intervention_requests")
             .select(`
-                id,
-                tracking_number,
-                latitude,
-                longitude,
-                address_city,
-                address_postal_code,
-                is_urgent,
-                urgency_level,
-                created_at,
-                submitted_at,
-                intervention_diagnostics (
-                    situation_type,
-                    situation_details,
-                    door_type,
-                    lock_type,
-                    diagnostic_answers
-                )
+                *,
+                intervention_diagnostics (*),
+                intervention_photos (*)
             `)
             .eq("id", interventionId)
             .single()
@@ -1393,6 +1382,29 @@ export async function getInterventionDetailsForModal(interventionId: string): Pr
         const diagnostic = Array.isArray(intervention.intervention_diagnostics)
             ? intervention.intervention_diagnostics[0]
             : intervention.intervention_diagnostics
+
+        // 🟢 Generate Signed URLs for Photos
+        let signedPhotos: { url: string; path: string }[] = []
+        if (intervention.intervention_photos && intervention.intervention_photos.length > 0) {
+            const photos = intervention.intervention_photos as { storage_path: string }[]
+            const { data: signedUrls } = await adminClient.storage
+                .from(STORAGE_CONFIG.bucket)
+                .createSignedUrls(photos.map(p => p.storage_path), STORAGE_CONFIG.signedUrlExpiry)
+
+            if (signedUrls) {
+                signedPhotos = signedUrls
+                    .map((item, index) => {
+                        if (item.signedUrl) {
+                            return {
+                                url: item.signedUrl,
+                                path: photos[index].storage_path
+                            }
+                        }
+                        return null
+                    })
+                    .filter(Boolean) as { url: string; path: string }[]
+            }
+        }
 
         return {
             id: intervention.id,
@@ -1410,6 +1422,7 @@ export async function getInterventionDetailsForModal(interventionId: string): Pr
             urgencyLevel: intervention.urgency_level || 2,
             createdAt: intervention.created_at,
             submittedAt: intervention.submitted_at,
+            photos: signedPhotos
         }
     } catch (e) {
         console.error("Error modal details", e)

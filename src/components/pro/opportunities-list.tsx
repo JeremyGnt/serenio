@@ -178,7 +178,7 @@ export function OpportunitiesList({ opportunities, onAccept, onRefuse }: Opportu
                                 {/* Prix estimé */}
                                 {(opp.estimatedPriceMin || opp.estimatedPriceMax) && (
                                     <div className="text-right flex-shrink-0 hidden sm:block">
-                                        <div className="flex items-center gap-1 text-emerald-600 font-semibold">
+                                        <div className="flex items-center gap-1 text-[#009966] font-semibold">
                                             <Euro className="w-4 h-4" />
                                             {opp.estimatedPriceMin && opp.estimatedPriceMax
                                                 ? `${opp.estimatedPriceMin} - ${opp.estimatedPriceMax}€`
@@ -291,10 +291,10 @@ export function OpportunitiesList({ opportunities, onAccept, onRefuse }: Opportu
 
                                 {/* Prix mobile */}
                                 {(opp.estimatedPriceMin || opp.estimatedPriceMax) && (
-                                    <div className="p-4 bg-emerald-50 border-b border-emerald-100 sm:hidden">
+                                    <div className="p-4 bg-[#009966]/10 border-b border-[#009966]/20 sm:hidden">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-sm text-emerald-700">Estimation client</span>
-                                            <span className="font-semibold text-emerald-700">
+                                            <span className="text-sm text-[#009966]">Estimation client</span>
+                                            <span className="font-semibold text-[#009966]">
                                                 {opp.estimatedPriceMin && opp.estimatedPriceMax
                                                     ? `${opp.estimatedPriceMin} - ${opp.estimatedPriceMax}€`
                                                     : `${opp.estimatedPriceMin || opp.estimatedPriceMax}€`
@@ -316,7 +316,7 @@ export function OpportunitiesList({ opportunities, onAccept, onRefuse }: Opportu
                                         Refuser
                                     </Button>
                                     <Button
-                                        className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                                        className="flex-1 bg-[#009966] hover:bg-[#007a52]"
                                         onClick={() => handleAccept(opp.id)}
                                         disabled={isLoading}
                                     >

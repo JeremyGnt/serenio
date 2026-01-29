@@ -89,14 +89,14 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
 
     if (isCompleted) {
         return (
-            <div className="bg-emerald-50/50 rounded-xl border border-emerald-100 p-4">
+            <div className="bg-[#009966]/10 rounded-xl border border-[#009966]/20 p-4">
                 <div className="flex items-center gap-3">
                     <div className="w-9 h-9 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <CheckCircle2 className="w-4 h-4 text-[#009966]" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h2 className="font-semibold text-sm text-emerald-900">Mission terminée</h2>
-                        <p className="text-xs text-emerald-600/80">
+                        <h2 className="font-semibold text-sm text-[#009966]">Mission terminée</h2>
+                        <p className="text-xs text-[#009966]/80">
                             Intervention complétée avec succès
                         </p>
                     </div>
@@ -163,7 +163,7 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                 {/* 3. Bouton "Démarrer l'intervention" */}
                 {["arrived"].includes(status) && (
                     <Button
-                        className="w-full h-11 bg-white hover:bg-emerald-50 active:bg-emerald-100 border border-emerald-300 hover:border-emerald-400 text-emerald-700 shadow-sm transition-all duration-200 rounded-lg active:scale-[0.97] touch-manipulation"
+                        className="w-full h-11 bg-white hover:bg-[#009966]/10 active:bg-[#009966]/20 border border-[#009966]/50 hover:border-[#009966] text-[#009966] shadow-sm transition-all duration-200 rounded-lg active:scale-[0.97] touch-manipulation"
                         onClick={handleStartIntervention}
                         disabled={isPending}
                     >
@@ -177,7 +177,7 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                 {/* 4. Bouton "Terminer" */}
                 {["in_progress", "diagnosing", "quote_sent", "quote_accepted"].includes(status) && (
                     <Button
-                        className="w-full h-11 bg-white hover:bg-gray-50 active:bg-emerald-50 border border-gray-200 text-gray-700 hover:text-emerald-700 hover:border-emerald-200 active:border-emerald-300 shadow-sm transition-all duration-200 rounded-lg active:scale-[0.97] touch-manipulation"
+                        className="w-full h-11 bg-white hover:bg-gray-50 active:bg-[#009966]/10 border border-gray-200 text-gray-700 hover:text-[#009966] hover:border-[#009966]/30 active:border-[#009966]/50 shadow-sm transition-all duration-200 rounded-lg active:scale-[0.97] touch-manipulation"
                         onClick={() => setShowCompleteDialog(true)}
                         disabled={isPending}
                     >
@@ -203,7 +203,7 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                         <AlertDialogCancel>Annuler</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleCompleteIntervention}
-                            className="bg-emerald-600 hover:bg-emerald-700"
+                            className="bg-[#009966] hover:bg-[#007a52]"
                         >
                             {isPending ? (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -228,8 +228,8 @@ function StatusBadge({ status }: { status: string }) {
         diagnosing: { label: "Diagnostic", color: "bg-indigo-100 text-indigo-700" },
         quote_sent: { label: "Devis envoyé", color: "bg-orange-100 text-orange-700" },
         quote_accepted: { label: "Devis accepté", color: "bg-teal-100 text-teal-700" },
-        in_progress: { label: "En intervention", color: "bg-emerald-100 text-emerald-700" },
-        completed: { label: "Terminée", color: "bg-green-100 text-green-700" },
+        in_progress: { label: "En intervention", color: "bg-[#009966]/10 text-[#009966]" },
+        completed: { label: "Terminée", color: "bg-[#009966]/10 text-[#009966]" },
         cancelled: { label: "Annulée", color: "bg-red-100 text-red-700" },
         pending: { label: "En attente", color: "bg-gray-100 text-gray-700" },
     }

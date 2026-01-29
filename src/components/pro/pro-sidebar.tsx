@@ -183,12 +183,12 @@ export function ProSidebar({
             {/* Header Mobile (Top Bar) */}
             <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-gray-200/50 z-50 flex items-center justify-between px-4 transition-all duration-300">
                 <Link href="/pro" className="flex items-center gap-2.5 active:scale-95 transition-transform duration-200 touch-manipulation">
-                    <div className="relative w-8 h-8">
+                    <div className="relative w-9 h-9">
                         <Image src="/logo.svg" alt="Serenio" fill className="object-contain" />
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-bold text-lg tracking-tight text-gray-900 leading-none">Serenio</span>
-                        <span className="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-[1px] rounded-full font-bold uppercase tracking-wider w-fit mt-0.5">Pro</span>
+                        <span className="font-bold text-xl tracking-tight text-gray-900 leading-none">Serenio</span>
+                        <span className="text-[10px] bg-[#009966]/10 text-[#009966] px-1.5 py-[1px] rounded-full font-bold uppercase tracking-wider w-fit mt-0.5">Pro</span>
                     </div>
                 </Link>
             </header>
@@ -216,12 +216,12 @@ export function ProSidebar({
                         href="/pro"
                         className="flex items-center gap-2.5 group active:scale-95 transition-transform duration-200 touch-manipulation"
                     >
-                        <div className="relative w-7 h-7 transition-transform duration-300 group-hover:scale-105">
+                        <div className="relative w-8 h-8 transition-transform duration-300 group-hover:scale-105">
                             <Image src="/logo.svg" alt="Serenio" fill className="object-contain" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="font-bold text-lg tracking-tight text-gray-900 leading-none">Serenio</span>
-                            <span className="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-[1px] rounded-full font-bold uppercase tracking-wider w-fit mt-0.5">Pro</span>
+                            <span className="font-bold text-xl tracking-tight text-gray-900 leading-none">Serenio</span>
+                            <span className="text-[10px] bg-[#009966]/10 text-[#009966] px-1.5 py-[1px] rounded-full font-bold uppercase tracking-wider w-fit mt-0.5">Pro</span>
                         </div>
                     </Link>
                 </div>
@@ -242,7 +242,7 @@ export function ProSidebar({
                     <div className="px-5 py-4 bg-gray-50/80 border-y border-gray-100 flex items-center gap-3">
                         <div className={cn(
                             "w-10 h-10 rounded-full flex items-center justify-center overflow-hidden border-2 shrink-0",
-                            available ? "border-emerald-500" : "border-gray-300"
+                            available ? "border-[#009966]" : "border-gray-300"
                         )}>
                             {avatarUrl ? (
                                 <img src={avatarUrl} alt={firstName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -254,7 +254,7 @@ export function ProSidebar({
                         </div>
                         <div className="min-w-0 flex-1">
                             <div className="font-semibold text-gray-900 truncate text-sm">{firstName}</div>
-                            <div className={cn("text-xs font-medium truncate", available ? "text-emerald-600" : "text-gray-500")}>
+                            <div className={cn("text-xs font-medium truncate", available ? "text-[#009966]" : "text-gray-500")}>
                                 {available ? "Disponible" : "Indisponible"}
                             </div>
                         </div>
@@ -267,9 +267,9 @@ export function ProSidebar({
                             title={available ? "Passer indisponible" : "Passer disponible"}
                         >
                             <div className={cn(
-                                "w-10 h-5 rounded-full relative transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20",
+                                "w-10 h-5 rounded-full relative transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#009966]/20",
                                 available
-                                    ? "bg-emerald-500"
+                                    ? "bg-[#009966]"
                                     : "bg-gray-300"
                             )}>
                                 <div className={cn(
@@ -286,7 +286,7 @@ export function ProSidebar({
                     {/* Zone d'intervention */}
                     <Link href="/pro/compte/zone" onClick={() => setMobileOpen(false)} className="bg-gray-50 p-3 rounded-xl border border-gray-100 active:scale-95 transition-transform touch-manipulation">
                         <div className="flex items-center gap-2 mb-1.5 text-gray-500">
-                            <div className="bg-emerald-100 p-1 rounded-md text-emerald-600">
+                            <div className="bg-[#009966]/10 p-1 rounded-md text-[#009966]">
                                 <MapPin className="w-3 h-3" />
                             </div>
                             <span className="text-[10px] font-bold uppercase tracking-wider">Zone</span>
@@ -338,7 +338,7 @@ export function ProSidebar({
                             </div>
                             <span className="flex-1 font-semibold">{URGENCE_ITEM.label}</span>
                             {available && urgentCountState > 0 && (
-                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
+                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
                                     {urgentCountState}
                                 </span>
                             )}
@@ -446,7 +446,7 @@ export function ProSidebar({
                         <div className="relative">
                             <Bell className={cn("w-6 h-6", (pathname === "/pro/urgences") && "fill-current/10")} />
                             {available && urgentCountState > 0 && (
-                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
                                     {urgentCountState}
                                 </span>
                             )}
@@ -459,18 +459,18 @@ export function ProSidebar({
                         href="/pro/missions"
                         className={cn(
                             "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-90 transition-all duration-150 active:duration-75 touch-manipulation active:bg-gray-100 active:text-gray-900 rounded-lg",
-                            (pathname.startsWith("/pro/missions")) ? "text-emerald-600" : "text-gray-400"
+                            (pathname.startsWith("/pro/missions")) ? "text-[#009966]" : "text-gray-400"
                         )}
                     >
                         <div className="relative">
                             <ListChecks className={cn("w-6 h-6", (pathname.startsWith("/pro/missions")) && "stroke-2")} />
                             {unreadCount > 0 && (
-                                <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500 ring-2 ring-white" />
+                                <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500" />
                             )}
                             {activeMissionsCountState > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5 translate-x-1 -translate-y-1">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500 ring-2 ring-white"></span>
+                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span>
                                 </span>
                             )}
                         </div>
@@ -482,7 +482,7 @@ export function ProSidebar({
                         href="/pro/rendez-vous"
                         className={cn(
                             "flex flex-col items-center justify-center w-full h-full gap-1 active:scale-90 transition-all duration-150 active:duration-75 touch-manipulation active:bg-gray-100 active:text-gray-900 rounded-lg",
-                            (pathname.startsWith("/pro/rendez-vous")) ? "text-emerald-600" : "text-gray-400"
+                            (pathname.startsWith("/pro/rendez-vous")) ? "text-[#009966]" : "text-gray-400"
                         )}
                     >
                         <CalendarDays className={cn("w-6 h-6", (pathname.startsWith("/pro/rendez-vous")) && "stroke-2")} />

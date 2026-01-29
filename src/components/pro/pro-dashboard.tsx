@@ -104,13 +104,13 @@ export function ProDashboard({
                 <div className={cn(
                     "flex items-center gap-3 p-1.5 pl-4 pr-1.5 rounded-full border shadow-sm transition-all duration-100", // Reduced transition
                     available
-                        ? "bg-white border-emerald-100 ring-4 ring-emerald-50/50"
+                        ? "bg-white border-[#009966]/20 ring-4 ring-[#009966]/10"
                         : "bg-white border-gray-200"
                 )}>
                     <div className="flex flex-col">
                         <span className={cn(
                             "text-sm font-bold leading-none",
-                            available ? "text-emerald-700" : "text-gray-600"
+                            available ? "text-[#009966]" : "text-gray-600"
                         )}>
                             {available ? "Vous êtes disponible" : "Vous êtes indisponible"}
                         </span>
@@ -124,7 +124,7 @@ export function ProDashboard({
                         className={cn(
                             "rounded-full px-4 h-9 font-semibold transition-all duration-100 shadow-sm active:scale-95",
                             available
-                                ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                                ? "bg-[#009966] hover:bg-[#007a52] text-white"
                                 : "bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-200"
                         )}
                     >
@@ -183,7 +183,7 @@ export function ProDashboard({
                             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 border border-gray-100 text-xs text-gray-400">
                                 <span className={cn(
                                     "w-1.5 h-1.5 rounded-full transition-colors duration-500",
-                                    isConnected ? "bg-emerald-400" : "bg-gray-300"
+                                    isConnected ? "bg-[#009966]" : "bg-gray-300"
                                 )} />
                                 {isConnected ? "En direct" : "Connexion"}
                             </div>
@@ -209,11 +209,11 @@ export function ProDashboard({
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:border-emerald-100 transition-colors cursor-default relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50/50 rounded-full -mr-8 -mt-8" />
+                        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:border-[#009966]/20 transition-colors cursor-default relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-[#009966]/10 rounded-full -mr-8 -mt-8" />
                             <div className="relative z-10 flex flex-col h-full justify-between">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                                    <div className="p-2 bg-[#009966]/10 text-[#009966] rounded-lg">
                                         <Bell className="w-4 h-4" />
                                     </div>
                                     <span className="text-gray-600 text-sm font-medium">Missions terminées</span>

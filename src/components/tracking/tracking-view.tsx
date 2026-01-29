@@ -31,7 +31,7 @@ import {
     ArrowUpRight,
     Navigation
 } from "lucide-react"
-import { supabase } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/browser"
 import type { RealtimePostgresChangesPayload, RealtimeChannel } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 import {
@@ -171,6 +171,7 @@ interface InterventionPayload {
 
 export function TrackingView({ data, currentUserId, isSnapshot = false }: TrackingViewProps) {
     const router = useRouter()
+    const supabase = createClient()
 
     // Track if user came from /compte/demandes for smart back navigation
     const [cameFromDemandes, setCameFromDemandes] = useState(false)
@@ -238,6 +239,25 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
         refreshData()
     }, [refreshData])
 
+    // Initial refresh after short delay to catch photos uploaded during navigation
+    useEffect(() => {
+        if (isSnapshot) return
+
+        // If intervention was just created (within last 30 seconds), refresh after a short delay
+        // to catch any photos still being uploaded in the background
+        const createdAt = new Date(intervention.createdAt).getTime()
+        const now = Date.now()
+        const isRecentlyCreated = (now - createdAt) < 30000 // 30 seconds
+
+        if (isRecentlyCreated) {
+            const timer = setTimeout(() => {
+                refreshData()
+            }, 2000) // Refresh after 2 seconds to catch uploaded photos
+
+            return () => clearTimeout(timer)
+        }
+    }, [intervention.createdAt, isSnapshot, refreshData])
+
     // Polling de secours : Uniquement si PAS connecté en realtime
     useEffect(() => {
         if (isSnapshot || isConnected) return
@@ -297,10 +317,25 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
             )
             .subscribe()
 
+        // Canal pour les photos
+        const photosChannel = supabase.channel(`tracking-photos-${intervention.id}`)
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "intervention_photos",
+                    filter: `intervention_id=eq.${intervention.id}`
+                },
+                () => refreshData()
+            )
+            .subscribe()
+
         return () => {
             supabase.removeChannel(interventionChannel)
             supabase.removeChannel(historyChannel)
             supabase.removeChannel(assignmentChannel)
+            supabase.removeChannel(photosChannel)
             setIsConnected(false)
         }
     }, [intervention.id, refreshData, isSnapshot])

@@ -27,7 +27,7 @@ export function MissionContactActions({ clientPhone, interventionId, currentUser
 
                 {isChatEnabled && (
                     <Button
-                        className="w-full bg-emerald-600 hover:bg-emerald-700"
+                        className="w-full bg-[#009966] hover:bg-[#007a52]"
                         onClick={() => setIsChatOpen(true)}
                     >
                         <MessageCircle className="w-4 h-4 mr-2" />

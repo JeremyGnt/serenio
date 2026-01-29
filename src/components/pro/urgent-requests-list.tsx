@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { UrgentRequestCard } from "./urgent-request-card"
 import { AvailabilityControl } from "./availability-control"
 import { getPendingInterventions } from "@/lib/interventions/pro-queries"
-import { supabase } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/browser"
 import { calculateDistance } from "@/lib/utils/distance"
 import type { AnonymizedIntervention, ArtisanSettings } from "@/lib/interventions"
 import type { RealtimePostgresChangesPayload, RealtimeChannel } from "@supabase/supabase-js"
@@ -39,6 +39,7 @@ interface InterventionPayload {
 export function UrgentRequestsList({ initialInterventions, isAvailable, userId, artisanSettings }: UrgentRequestsListProps) {
     const router = useRouter()
     const { showLoader } = useLoading()
+    const supabase = createClient()
     const [interventions, setInterventions] = useState(initialInterventions)
     const [refreshing, setRefreshing] = useState(false)
 
@@ -80,7 +81,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                     table: "artisans",
                     filter: `id=eq.${userId}`
                 },
-                (payload) => {
+                (payload: RealtimePostgresChangesPayload<{ is_available: boolean }>) => {
                     const newAvailability = (payload.new as { is_available: boolean }).is_available
                     setLocalIsAvailable(newAvailability)
 
@@ -217,7 +218,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                     )
                 }
             )
-            .subscribe((status) => {
+            .subscribe((status: string) => {
                 setIsConnected(status === "SUBSCRIBED")
             })
 

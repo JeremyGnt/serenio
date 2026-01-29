@@ -23,7 +23,7 @@ export default async function UrgencesPage() {
     ])
 
     return (
-        <div className="p-4 md:p-6 lg:p-8 space-y-6">
+        <div className="p-4 md:p-6 lg:p-8 space-y-6 bg-[#F8FAFC] min-h-screen">
             {/* Dashboard des urgences */}
             <UrgentRequestsList
                 initialInterventions={pendingInterventions}

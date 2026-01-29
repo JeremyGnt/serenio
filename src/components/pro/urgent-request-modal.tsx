@@ -5,31 +5,36 @@ import { useRouter } from "next/navigation"
 import {
     X,
     MapPin,
-    Clock,
     DoorClosed,
-    Lock,
+    KeyRound,
     Check,
-    XCircle,
+    Coins,
+    CircleDot,
     Loader2,
     AlertTriangle,
-    ChevronDown,
-    ChevronUp,
-    Navigation,
-    Timer,
-    Euro,
     Eye,
-    Key,
-    ShieldAlert,
-    Wrench,
-    CircleDot,
     HelpCircle,
     FileText,
-    Camera
+    Camera,
+    Lock,
+    ShieldAlert,
+    KeySquare,
+    Wrench,
+    Grid2X2,
+    Building2,
+    Home,
+    Briefcase,
+    Unlock,
+    AlertOctagon,
+    XCircle,
+    Shield,
+    CheckCircle2,
+    HelpCircle as QuestionMark
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { InterventionPhotos } from "@/components/ui/intervention-photos"
 import type { AnonymizedIntervention } from "@/lib/interventions"
-import { acceptMission, refuseMission } from "@/lib/interventions"
+import { acceptMission } from "@/lib/interventions"
 import { getInterventionDetailsForModal } from "@/lib/interventions/pro-queries"
 import { markAsViewed } from "@/lib/interventions/view-tracking"
 import type { SituationType, DoorType, LockType } from "@/types/intervention"
@@ -37,20 +42,20 @@ import type { SituationType, DoorType, LockType } from "@/types/intervention"
 // Lazy load de la carte
 const ApproximateMap = lazy(() => import("./approximate-map").then(m => ({ default: m.ApproximateMap })))
 
-// Labels et icônes
-const SITUATION_CONFIG: Record<SituationType, { label: string; icon: typeof DoorClosed }> = {
+// Labels et icônes (alignés avec UrgentRequestCard)
+const SITUATION_CONFIG: Record<SituationType, { label: string; icon: any }> = {
     door_locked: { label: "Porte claquée", icon: DoorClosed },
-    broken_key: { label: "Clé cassée", icon: Key },
+    broken_key: { label: "Clé cassée", icon: KeyRound },
     blocked_lock: { label: "Serrure bloquée", icon: Lock },
-    break_in: { label: "Effraction / Cambriolage", icon: ShieldAlert },
-    lost_keys: { label: "Perte de clés", icon: Key },
-    lock_change: { label: "Changement de serrure", icon: Wrench },
-    cylinder_change: { label: "Changement de cylindre", icon: CircleDot },
+    break_in: { label: "Effraction", icon: ShieldAlert },
+    lost_keys: { label: "Perte de clés", icon: KeySquare },
+    lock_change: { label: "Changement de serrure", icon: Lock },
+    cylinder_change: { label: "Changement de cylindre", icon: Lock },
     reinforced_door: { label: "Porte blindée", icon: DoorClosed },
-    other: { label: "Autre situation", icon: HelpCircle },
+    other: { label: "Autre situation", icon: AlertTriangle },
 }
 
-const DOOR_LABELS: Record<DoorType, string> = {
+const DOOR_LABELS: Record<string, string> = {
     standard: "Porte standard",
     blindee: "Porte blindée",
     cave: "Porte de cave",
@@ -58,14 +63,12 @@ const DOOR_LABELS: Record<DoorType, string> = {
     other: "Autre",
 }
 
-const LOCK_LABELS: Record<LockType, string> = {
-    standard: "Serrure simple (1 point)",
-    multipoint: "Multipoints (3 ou 5 points)",
-    electronique: "Électronique / connectée",
+const LOCK_LABELS: Record<string, string> = {
+    standard: "Standard",
+    multipoint: "Multipoints",
+    electronique: "Électronique",
     other: "Non spécifié",
 }
-
-
 
 interface UrgentRequestModalProps {
     intervention: AnonymizedIntervention
@@ -85,7 +88,6 @@ export function UrgentRequestModal({
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const [showMobileDetails, setShowMobileDetails] = useState(false)
     const [isViewed, setIsViewed] = useState(false)
     const [successState, setSuccessState] = useState<"accepted" | "refused" | null>(null)
     const [detailedIntervention, setDetailedIntervention] = useState<AnonymizedIntervention>(intervention)
@@ -96,11 +98,9 @@ export function UrgentRequestModal({
         if (isOpen) {
             markAsViewed(intervention.id)
             setIsViewed(true)
-            // Reset states when modal opens
             setSuccessState(null)
             setError(null)
 
-            // Si pas de diagnosticAnswers, on va les chercher
             if (!detailedIntervention.diagnosticAnswers) {
                 setLoadingDetails(true)
                 getInterventionDetailsForModal(intervention.id)
@@ -125,7 +125,6 @@ export function UrgentRequestModal({
         const result = await acceptMission(intervention.id)
 
         if (result.success) {
-            // Keep loading/accepting true during redirect
             router.push(`/pro/mission/${intervention.trackingNumber}`)
         } else {
             setLoading(false)
@@ -134,40 +133,31 @@ export function UrgentRequestModal({
         }
     }
 
-    const handleRefuse = async () => {
-        setLoading(true)
-        setError(null)
-        const result = await refuseMission(intervention.id)
-        setLoading(false)
-
-        if (result.success) {
-            setSuccessState("refused")
-            // Attendre 1.5 secondes pour montrer le message puis fermer
-            setTimeout(() => {
-                onRefuse()
-            }, 1500)
-        } else {
-            setError(result.error || "Erreur")
-        }
+    const handleRefuse = () => {
+        // Just delegate to parent - the Card will show confirmation dialog
+        onRefuse()
     }
 
     const SituationIcon = SITUATION_CONFIG[intervention.situationType]?.icon || HelpCircle
-    const situationLabel = SITUATION_CONFIG[intervention.situationType]?.label || "Urgence"
+    const situationLabel = SITUATION_CONFIG[intervention.situationType]?.label || "Intervention"
 
-    const getTimeAgo = (dateString: string) => {
-        const diff = Math.floor((Date.now() - new Date(dateString).getTime()) / 60000)
-        if (diff < 1) return "À l'instant"
-        if (diff < 60) return `Il y a ${diff} min`
-        const hours = Math.floor(diff / 60)
-        if (hours < 24) return `Il y a ${hours}h`
-        return `Il y a ${Math.floor(hours / 24)}j`
+    const getCompactTimeAgo = (dateString: string): string => {
+        const date = new Date(dateString)
+        const now = new Date()
+        const diffMs = now.getTime() - date.getTime()
+        const diffMins = Math.floor(diffMs / 60000)
+
+        if (diffMins < 1) return "Il y a 1 min"
+        if (diffMins < 60) return `Il y a ${diffMins} min`
+
+        const diffHours = Math.floor(diffMins / 60)
+        if (diffHours < 24) return `Il y a ${diffHours} h`
+
+        const diffDays = Math.floor(diffHours / 24)
+        return `Il y a ${diffDays} j`
     }
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString("fr-FR", {
-            day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit"
-        })
-    }
+    const timeAgo = getCompactTimeAgo(intervention.createdAt)
 
     // Section détails techniques - affiche les réponses du diagnostic de manière dynamique
     const TechnicalDetails = () => {
@@ -201,11 +191,11 @@ export function UrgentRequestModal({
             cave: "Cave",
             garage: "Garage",
             other: "Autre / Je ne sais pas",
-            multipoint: "Multipoints (3 ou 5 points)",
+            multipoint: "Multipoints",
             electronique: "Électronique / Connectée",
-            yes: "Oui, mais la porte ne s'ouvre pas",
-            partially: "Partiellement, elle bloque",
-            no: "Non, impossible de tourner",
+            yes: "Oui",
+            partially: "Partiellement",
+            no: "Non",
             door_broken: "Porte forcée / cassée",
             lock_broken: "Serrure endommagée",
             frame_damaged: "Cadre de porte endommagé",
@@ -226,7 +216,22 @@ export function UrgentRequestModal({
         }
 
         const answers = detailedIntervention.diagnosticAnswers || {}
-        const answerEntries = Object.entries(answers)
+
+        // Split keys into Critical and Contextual
+        const CRITICAL_KEYS = ['door_type', 'lock_type', 'can_enter', 'location_type']
+        const CONTEXTUAL_KEYS = Object.keys(answers).filter(k =>
+            !CRITICAL_KEYS.includes(k) && k !== 'situation_description'
+        )
+
+        const renderRow = (key: string, label: string) => {
+            if (!answers[key]) return null
+            return (
+                <div key={key} className="flex justify-between items-center py-2.5 border-b border-gray-50 last:border-0">
+                    <span className="text-gray-500 text-sm font-medium">{label || QUESTION_LABELS[key] || key}</span>
+                    <span className="font-semibold text-gray-900 text-sm">{formatValue(answers[key])}</span>
+                </div>
+            )
+        }
 
         if (loadingDetails) {
             return (
@@ -238,120 +243,40 @@ export function UrgentRequestModal({
         }
 
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Type de situation - toujours affiché */}
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <SituationIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                    <div className="min-w-0">
-                        <div className="text-xs text-gray-500">Type de problème</div>
-                        <div className="font-medium text-gray-900 truncate">{situationLabel}</div>
+            <div className="flex flex-col gap-6 h-full">
+                {/* Critical Info */}
+                <div className={`bg-gray-50/50 rounded-2xl p-5 border border-gray-100 ${CONTEXTUAL_KEYS.length === 0 ? "flex-1" : ""}`}>
+                    <h4 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <KeyRound className="w-4 h-4 text-[#009966]" />
+                        Infos Critiques
+                    </h4>
+                    <div className="flex flex-col">
+                        {CRITICAL_KEYS.map(key => renderRow(key, QUESTION_LABELS[key]))}
                     </div>
                 </div>
 
-                {/* Type de porte depuis le diagnostic (si présent) */}
-                {detailedIntervention.doorType && (
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        <DoorClosed className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                        <div className="min-w-0">
-                            <div className="text-xs text-gray-500">Type de porte</div>
-                            <div className="font-medium text-gray-900 truncate">{DOOR_LABELS[detailedIntervention.doorType]}</div>
+                {/* Context Info */}
+                {CONTEXTUAL_KEYS.length > 0 && (
+                    <div className="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 flex-1">
+                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-[#009966]" />
+                            Contexte
+                        </h4>
+                        <div className="flex flex-col">
+                            {CONTEXTUAL_KEYS.map(key => renderRow(key, QUESTION_LABELS[key]))}
                         </div>
                     </div>
                 )}
-
-                {/* Type de serrure depuis le diagnostic (si présent) */}
-                {detailedIntervention.lockType && (
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        <Lock className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                        <div className="min-w-0">
-                            <div className="text-xs text-gray-500">Type de serrure</div>
-                            <div className="font-medium text-gray-900 truncate">{LOCK_LABELS[detailedIntervention.lockType]}</div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Affichage dynamique des autres réponses du diagnostic */}
-                {answerEntries
-                    .filter(([key]) => key !== "door_type" && key !== "lock_type") // Éviter doublons
-                    .map(([key, value]) => (
-                        <div key={key} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                            <FileText className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                            <div className="min-w-0">
-                                <div className="text-xs text-gray-500">{QUESTION_LABELS[key] || key}</div>
-                                <div className="font-medium text-gray-900 truncate">{formatValue(value)}</div>
-                            </div>
-                        </div>
-                    ))
-                }
-
-                {/* Date de demande */}
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Clock className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                    <div className="min-w-0">
-                        <div className="text-xs text-gray-500">Demande créée</div>
-                        <div className="font-medium text-gray-900 truncate">{formatDate(intervention.submittedAt || intervention.createdAt)}</div>
-                    </div>
-                </div>
-
-                {/* Référence */}
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <FileText className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                    <div className="min-w-0">
-                        <div className="text-xs text-gray-500">Référence</div>
-                        <div className="font-mono text-sm text-gray-900 truncate">{intervention.trackingNumber}</div>
-                    </div>
-                </div>
             </div>
         )
     }
 
-    // Section photos
-    const PhotosSection = () => (
-        <div className="mb-4">
-            <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-1">
-                <Camera className="w-3 h-3" />
-                Photos du client
-            </h4>
-            <InterventionPhotos
-                interventionId={intervention.id}
-                thumbnailMode={false}
-                className="bg-gray-50 rounded-lg p-3"
-            />
-        </div>
-    )
-
-    // Section carte
-    const MapSection = () => (
-        <div className="mt-4">
-            <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Zone d'intervention</h4>
-            {intervention.latitude && intervention.longitude ? (
-                <Suspense fallback={
-                    <div className="h-40 lg:h-48 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
-                    </div>
-                }>
-                    <ApproximateMap
-                        latitude={intervention.latitude}
-                        longitude={intervention.longitude}
-                        className="h-40 lg:h-48 rounded-lg overflow-hidden"
-                    />
-                </Suspense>
-            ) : (
-                <div className="h-32 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500">
-                    <MapPin className="w-5 h-5 mr-2" />
-                    Position non disponible
-                </div>
-            )}
-        </div>
-    )
-
-    // Affichage du message de succès
     if (successState === "refused") {
         return (
-            <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50">
+            <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
                 <div className="bg-white rounded-2xl w-full max-w-md p-8 text-center shadow-2xl">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <XCircle className="w-8 h-8 text-gray-500" />
+                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
+                        <XCircle className="w-8 h-8 text-red-500" />
                     </div>
                     <h2 className="text-xl font-bold text-gray-900 mb-2">Mission refusée</h2>
                     <p className="text-gray-600">
@@ -364,11 +289,11 @@ export function UrgentRequestModal({
 
     if (isAccepting) {
         return (
-            <div className="fixed inset-0 z-[80] flex items-center justify-center bg-white/60 backdrop-blur-md animate-in fade-in duration-300">
-                <div className="flex flex-col items-center gap-4 p-8 bg-white/80 rounded-2xl shadow-2xl border border-white/50 backdrop-blur-xl">
+            <div className="fixed inset-0 z-[80] flex items-center justify-center bg-white/80 backdrop-blur-md animate-in fade-in duration-300">
+                <div className="flex flex-col items-center gap-4 p-8 bg-white rounded-2xl shadow-2xl border border-gray-100">
                     <div className="relative">
-                        <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full animate-pulse" />
-                        <Loader2 className="w-12 h-12 text-emerald-600 animate-spin relative z-10" />
+                        <div className="absolute inset-0 bg-[#009966]/20 blur-xl rounded-full animate-pulse" />
+                        <Loader2 className="w-12 h-12 text-[#009966] animate-spin relative z-10" />
                     </div>
                     <div className="text-center space-y-1">
                         <p className="text-lg font-semibold text-gray-900">
@@ -384,179 +309,179 @@ export function UrgentRequestModal({
     }
 
     return (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50">
-            {/* Modal - très large sur grands écrans */}
-            {/* Modal - très large sur grands écrans */}
-            <div className="bg-white rounded-2xl w-full max-w-md md:max-w-xl lg:max-w-3xl xl:max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
-                {/* Header épuré - fond blanc */}
-                <div className="relative border-b border-gray-100 p-4 lg:p-5 flex-none">
-                    <button
-                        onClick={onClose}
-                        className="absolute top-3 right-3 p-2 hover:bg-gray-100 rounded-full transition-all duration-200 ease-out touch-manipulation active:scale-90 active:duration-75 text-gray-400 hover:text-gray-600"
-                        disabled={loading || successState !== null}
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+        <div
+            className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in"
+            onClick={onClose}
+        >
+            <div
+                className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col border border-slate-200"
+                onClick={(e) => e.stopPropagation()}
+            >
 
-                    {/* Header épuré - fond blanc, typographie simple */}
-                    <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <SituationIcon className="w-5 h-5 text-gray-600" />
+                {/* Header - White & Clean (Marketplace Style) */}
+                <div className="bg-white border-b border-gray-100 px-6 py-5 flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-4">
+                        <div className="p-2.5 bg-gray-50 rounded-xl border border-gray-100">
+                            <SituationIcon className="w-6 h-6 text-gray-900" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <h2 className="font-semibold text-lg text-gray-900">{situationLabel}</h2>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h2 className="font-bold text-lg text-gray-900 uppercase tracking-tight">
+                                    {situationLabel}
+                                </h2>
                                 {intervention.urgencyLevel === 3 && (
-                                    <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">Urgent</span>
-                                )}
-                                {isViewed && (
-                                    <span className="flex items-center gap-1 text-xs text-gray-400">
-                                        <Eye className="w-3 h-3" /> Vu
+                                    <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] font-bold uppercase rounded-full border border-red-100 animate-pulse">
+                                        Urgent
                                     </span>
                                 )}
                             </div>
-                            <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                                <span>{getTimeAgo(intervention.submittedAt || intervention.createdAt)}</span>
+                            <div className="flex items-center gap-2 text-gray-400 text-sm font-medium">
+                                <span>Réf: {intervention.trackingNumber}</span>
                                 <span>•</span>
-                                <span>{intervention.postalCode} {intervention.city}</span>
+                                <span className="flex items-center gap-1">
+                                    <Eye className="w-3 h-3" /> {isViewed ? "Vu" : "Nouveau"}
+                                </span>
                             </div>
                         </div>
                     </div>
+
+                    <div className="flex items-center gap-6">
+                        {/* Price Display */}
+                        <div className="flex flex-col items-end">
+                            <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Prix Estimé</span>
+                            <span className="text-[#009966] font-bold text-xl leading-none tracking-tight">150€ - 250€</span>
+                        </div>
+
+                        <div className="h-8 w-[1px] bg-gray-100" />
+
+                        <div className="flex flex-col items-end">
+                            <span className="text-gray-400 text-[10px] font-medium uppercase tracking-wider">Reçu</span>
+                            <span className="text-gray-500 font-bold text-sm">{timeAgo}</span>
+                        </div>
+                        <button
+                            onClick={onClose}
+                            className="p-2 text-gray-400 hover:bg-gray-50 hover:text-gray-900 rounded-full transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
 
-                {/* Contenu - Layout 2 colonnes sur desktop */}
-                <div className="overflow-y-auto flex-1">
-                    <div className="lg:grid lg:grid-cols-2 lg:gap-6 p-4 lg:p-6">
-                        {/* Colonne gauche - Infos principales */}
-                        <div>
-                            {/* Stats rapides */}
-                            <div className="grid grid-cols-3 gap-3 mb-4">
-                                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                    <Navigation className="w-5 h-5 text-gray-400 mx-auto mb-1" />
-                                    <div className="text-xs text-gray-500">Distance</div>
-                                    <div className="font-semibold text-gray-900">
-                                        {intervention.distance != null ? `${intervention.distance} km` : "—"}
-                                    </div>
-                                </div>
-                                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                    <Timer className="w-5 h-5 text-gray-400 mx-auto mb-1" />
-                                    <div className="text-xs text-gray-500">Durée est.</div>
-                                    <div className="font-semibold text-gray-900">30-45 min</div>
-                                </div>
-                                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                    <Euro className="w-5 h-5 text-gray-400 mx-auto mb-1" />
-                                    <div className="text-xs text-gray-500">Fourchette</div>
-                                    <div className="font-semibold text-gray-900">80-150€</div>
-                                </div>
-                            </div>
+                {/* Content - Scrollable */}
+                <div className="overflow-y-auto flex-1 bg-white">
 
-                            {/* Description client */}
-                            {intervention.situationDetails && (
-                                <div className="mb-4">
-                                    <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                                        Description du client
-                                    </h4>
-                                    <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">
-                                        {intervention.situationDetails}
-                                    </p>
-                                </div>
-                            )}
 
-                            {/* Photos du client */}
-                            <PhotosSection />
-
-                            {/* Desktop: Détails techniques toujours visibles */}
-                            <div className="hidden lg:block">
-                                <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                                    Détails techniques
+                    <div className="p-6 space-y-8">
+                        {/* Description */}
+                        {intervention.situationDetails && (
+                            <div className="space-y-3">
+                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
+                                    <FileText className="w-4 h-4" />
+                                    Note du client
                                 </h4>
-                                <TechnicalDetails />
+                                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-gray-700 leading-relaxed italic relative">
+                                    <span className="absolute top-2 left-2 text-4xl text-gray-200 font-serif leading-none">"</span>
+                                    <p className="relative z-10 pl-4">{intervention.situationDetails}</p>
+                                </div>
                             </div>
+                        )}
 
-                            {/* Mobile: Bouton voir plus */}
-                            <div className="lg:hidden">
-                                <button
-                                    onClick={() => setShowMobileDetails(!showMobileDetails)}
-                                    className="w-full p-3 flex items-center justify-center gap-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] active:bg-gray-100 active:duration-75"
-                                >
-                                    {showMobileDetails ? (
-                                        <>
-                                            <ChevronUp className="w-4 h-4" />
-                                            Masquer les détails
-                                        </>
+                        {/* Diagnostic & Map Grid/Stack */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Diagnostic Details */}
+                            <TechnicalDetails />
+
+                            {/* Map & Location */}
+                            <div className="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 flex flex-col h-full">
+                                <h4 className="text-xs font-bold text-gray-900 uppercase tracking-widest flex items-center gap-2 mb-[22px]">
+                                    <MapPin className="w-4 h-4 text-[#009966]" />
+                                    Zone d'intervention
+                                </h4>
+                                <div className="bg-white rounded-xl border border-gray-200 flex-1 w-full isolate z-0 overflow-hidden relative group min-h-[250px]">
+                                    {intervention.latitude && intervention.longitude ? (
+                                        <Suspense fallback={
+                                            <div className="h-full w-full bg-gray-100 rounded-lg flex items-center justify-center">
+                                                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                                            </div>
+                                        }>
+                                            <ApproximateMap
+                                                latitude={intervention.latitude}
+                                                longitude={intervention.longitude}
+                                                className="w-full h-full rounded-lg"
+                                            />
+                                        </Suspense>
                                     ) : (
-                                        <>
-                                            <ChevronDown className="w-4 h-4" />
-                                            Voir les détails techniques
-                                        </>
+                                        <div className="h-full w-full bg-gray-50 rounded-lg flex items-center justify-center text-gray-400">
+                                            Position non disponible
+                                        </div>
                                     )}
-                                </button>
-                                {showMobileDetails && (
-                                    <div className="mt-3 animate-in slide-in-from-top-2">
-                                        <TechnicalDetails />
-                                        <MapSection />
-                                    </div>
-                                )}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Colonne droite - Carte (desktop only) */}
-                        <div className="hidden lg:block">
-                            <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                                Zone d'intervention
-                            </h4>
-                            {intervention.latitude && intervention.longitude ? (
-                                <Suspense fallback={
-                                    <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                                        <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
-                                    </div>
-                                }>
-                                    <ApproximateMap
-                                        latitude={intervention.latitude}
-                                        longitude={intervention.longitude}
-                                        className="h-64 rounded-lg overflow-hidden"
-                                    />
-                                </Suspense>
-                            ) : (
-                                <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500">
-                                    <MapPin className="w-5 h-5 mr-2" />
-                                    Position non disponible
-                                </div>
-                            )}
+                        {/* Photos */}
+                        <div className="space-y-3">
+                            <div className="bg-gray-50/50 rounded-2xl p-5 border border-gray-100">
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-3">
+                                    <Camera className="w-4 h-4 text-[#009966]" />
+                                    Photos du client
+                                </h4>
+                                <InterventionPhotos
+                                    interventionId={intervention.id}
+                                    thumbnailMode={false}
+                                    thumbnailSize="lg"
+                                    initialPhotos={intervention.photos?.map((p, i) => ({
+                                        id: `photo-${i}`,
+                                        url: p.url,
+                                        storagePath: p.path,
+                                        originalFilename: "photo",
+                                        mimeType: "image/jpeg",
+                                        size: 0,
+                                        fileSizeBytes: 0,
+                                        photoType: "diagnostic",
+                                        interventionId: intervention.id,
+                                        createdAt: new Date().toISOString()
+                                    }))}
+                                    gridClassName="grid-cols-2 gap-1"
+                                    showPlaceholder={true}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Erreur */}
-                {error && (
-                    <div className="mx-4 mb-2 bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-sm flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4" />
-                        {error}
-                    </div>
-                )}
+                {/* Footer - Actions */}
+                <div className="p-5 bg-white border-t border-gray-50 flex-none z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                    {/* Error Display */}
+                    {error && (
+                        <div className="w-full md:w-auto mb-2 md:mb-0 bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm flex items-center gap-2 font-medium">
+                            <AlertTriangle className="w-4 h-4" />
+                            {error}
+                        </div>
+                    )}
 
-                {/* Footer minimaliste */}
-                <div className="p-5 md:p-6 border-t border-gray-100 flex-none bg-white">
-                    <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex-1"></div> {/* Spacer */}
+
+                    <div className="flex items-center gap-4 w-full md:w-auto">
                         <Button
-                            className="flex-1 h-11 text-sm font-medium bg-gray-900 hover:bg-gray-800"
+                            variant="ghost"
+                            className="flex-none px-4 h-12 rounded-xl font-medium shadow-none text-gray-400 hover:text-red-600 hover:bg-red-50 hover:shadow-none transition-all"
+                            onClick={handleRefuse}
+                            disabled={loading}
+                        >
+                            Refuser la mission
+                        </Button>
+                        <Button
+                            className="flex-1 md:flex-none md:w-64 h-12 rounded-xl font-bold uppercase tracking-wide text-white bg-[#009966] hover:bg-[#007a52] shadow-lg shadow-[#009966]/10 active:scale-[0.98] transition-all"
                             onClick={handleAccept}
                             disabled={loading}
                         >
                             {loading ? (
                                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
                             ) : (
-                                <Check className="w-4 h-4 mr-2" />
+                                <Check className="w-5 h-5 mr-2" />
                             )}
-                            Accepter
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            className="sm:w-32 h-11 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                            onClick={handleRefuse}
-                            disabled={loading}
-                        >
-                            Refuser
+                            Accepter la mission
                         </Button>
                     </div>
                 </div>

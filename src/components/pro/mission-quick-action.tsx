@@ -69,8 +69,8 @@ const ACTION_CONFIG: Record<string, {
         shortLabel: "Commencer",
         icon: Play,
         color: "text-white",
-        bgColor: "bg-emerald-500",
-        borderColor: "border-emerald-600",
+        bgColor: "bg-[#009966]",
+        borderColor: "border-[#007a52]",
         action: "start"
     },
     diagnosing: {
@@ -78,8 +78,8 @@ const ACTION_CONFIG: Record<string, {
         shortLabel: "Terminer",
         icon: CheckCircle2,
         color: "text-white",
-        bgColor: "bg-emerald-600",
-        borderColor: "border-emerald-700",
+        bgColor: "bg-[#009966]",
+        borderColor: "border-[#007a52]",
         action: "complete"
     },
     quote_sent: {
@@ -87,8 +87,8 @@ const ACTION_CONFIG: Record<string, {
         shortLabel: "Terminer",
         icon: CheckCircle2,
         color: "text-white",
-        bgColor: "bg-emerald-600",
-        borderColor: "border-emerald-700",
+        bgColor: "bg-[#009966]",
+        borderColor: "border-[#007a52]",
         action: "complete"
     },
     quote_accepted: {
@@ -96,8 +96,8 @@ const ACTION_CONFIG: Record<string, {
         shortLabel: "Terminer",
         icon: CheckCircle2,
         color: "text-white",
-        bgColor: "bg-emerald-600",
-        borderColor: "border-emerald-700",
+        bgColor: "bg-[#009966]",
+        borderColor: "border-[#007a52]",
         action: "complete"
     },
     in_progress: {
@@ -105,8 +105,8 @@ const ACTION_CONFIG: Record<string, {
         shortLabel: "Terminer",
         icon: CheckCircle2,
         color: "text-white",
-        bgColor: "bg-emerald-600",
-        borderColor: "border-emerald-700",
+        bgColor: "bg-[#009966]",
+        borderColor: "border-[#007a52]",
         action: "complete"
     }
 }
@@ -196,7 +196,7 @@ export function MissionQuickAction({ interventionId, status }: MissionQuickActio
                         <AlertDialogCancel>Annuler</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleCompleteConfirm}
-                            className="bg-emerald-600 hover:bg-emerald-700"
+                            className="bg-[#009966] hover:bg-[#007a52]"
                         >
                             {isPending ? (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
