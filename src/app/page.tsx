@@ -24,12 +24,13 @@ import { ScrollToTop } from "@/components/ui/scroll-to-top"
  * - Le Hero est 100% statique → rendu immédiat
  * - Chaque section fetch ses propres données avec Suspense
  * - Les skeletons s'affichent instantanément pendant le chargement
+ * - Le Header reste dynamique pour afficher l'état de connexion correct
  * 
  * Résultat: FCP < 1s même sur connexion lente
  */
 
-// Force static generation - la landing page est quasi-statique
-export const dynamic = 'force-static'
+// ISR: Revalider les données toutes les heures
+// Note: pas de force-static car le Header doit être dynamique (auth)
 export const revalidate = 3600
 
 export default function Home() {
