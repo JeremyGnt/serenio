@@ -1,7 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, ReactNode, useEffect } from "react"
-import { submitIntervention } from "@/lib/interventions/actions"
+import { createContext, useContext, useState, ReactNode } from "react"
 import { PhotoPreview } from "@/components/ui/upload-photos"
 
 interface SubmissionTask {
@@ -75,37 +74,23 @@ export function InterventionSubmissionProvider({ children }: { children: ReactNo
             [interventionId]: { ...task, status: "uploading_photos" }
         }))
 
-        // 1. Upload photos
+        // Upload photos only - submission is already done before calling submitInBackground
         await uploadPhotos(interventionId, photos, rgpdConsent)
 
+        // Mark as success after photo upload
         setTasks(prev => ({
             ...prev,
-            [interventionId]: { ...prev[interventionId], status: "submitting" }
+            [interventionId]: { ...prev[interventionId], status: "success" }
         }))
 
-        // 2. Submit intervention
-        const result = await submitIntervention(interventionId)
-
-        if (result.success) {
-            setTasks(prev => ({
-                ...prev,
-                [interventionId]: { ...prev[interventionId], status: "success" }
-            }))
-
-            // Clean up successful task after delay
-            setTimeout(() => {
-                setTasks(prev => {
-                    const newTasks = { ...prev }
-                    delete newTasks[interventionId]
-                    return newTasks
-                })
-            }, 5000)
-        } else {
-            setTasks(prev => ({
-                ...prev,
-                [interventionId]: { ...prev[interventionId], status: "error", error: result.error || "Erreur soumission" }
-            }))
-        }
+        // Clean up successful task after delay
+        setTimeout(() => {
+            setTasks(prev => {
+                const newTasks = { ...prev }
+                delete newTasks[interventionId]
+                return newTasks
+            })
+        }, 5000)
     }
 
     const submitInBackground = async (payload: {
