@@ -17,12 +17,14 @@ export function HeroTrackingBanner() {
     const [activeTrackingNumber, setActiveTrackingNumber] = useState<string | null>(null)
     const [trackingData, setTrackingData] = useState<LiveTrackingData | null>(null)
     const [isUserConnected, setIsUserConnected] = useState(false)
+    const [authChecked, setAuthChecked] = useState(false)
 
     // Vérifier l'état d'authentification au montage
     useEffect(() => {
         const checkAuth = async () => {
             const { data: { session } } = await supabase.auth.getSession()
             setIsUserConnected(!!session)
+            setAuthChecked(true)
         }
         checkAuth()
 
@@ -33,8 +35,10 @@ export function HeroTrackingBanner() {
         return () => subscription.unsubscribe()
     }, [])
 
-    // Charger les données initiales
+    // Charger les données initiales - attendre que l'auth soit vérifié
     useEffect(() => {
+        if (!authChecked) return
+
         const tracking = getActiveTracking()
         if (tracking) {
             setActiveTrackingNumber(tracking)
@@ -43,7 +47,7 @@ export function HeroTrackingBanner() {
             // Si connecté mais pas de tracking local, on vérifie côté serveur
             checkServerSideTracking()
         }
-    }, [isUserConnected])
+    }, [authChecked, isUserConnected])
 
     const checkServerSideTracking = async () => {
         try {
@@ -76,8 +80,9 @@ export function HeroTrackingBanner() {
             console.log("Hero: Data received:", data?.intervention.status)
 
             if (data) {
-                // Si l'intervention appartient à un utilisateur et qu'on n'est pas connecté, on nettoie
-                if (data.intervention.clientId && !isUserConnected) {
+                // Si l'intervention appartient à un utilisateur et qu'on n'est pas connecté
+                // On ne nettoie que si l'auth a été vérifié (évite race condition)
+                if (authChecked && data.intervention.clientId && !isUserConnected) {
                     clearActiveTracking()
                     setActiveTrackingNumber(null)
                     setTrackingData(null)
