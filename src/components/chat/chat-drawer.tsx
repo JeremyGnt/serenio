@@ -47,7 +47,7 @@ export function ChatDrawer({ conversationData, currentUserId, unreadCount = 0, i
                         "bottom-20 right-4",
                         // Desktop: position standard
                         "lg:bottom-6 lg:right-6",
-                        "bg-indigo-500 hover:bg-indigo-600",
+                        "bg-[#155dfc] hover:bg-[#155dfc]/90",
                         isOpen && "hidden"
                     )}
                 >

@@ -143,9 +143,7 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                                 <h1 className="font-semibold text-gray-900 truncate max-w-[150px] sm:max-w-none">
                                     {mission.serviceType?.name || situationConfig.label}
                                 </h1>
-                                <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${statusInfo.bgColor} ${statusInfo.color} hidden sm:inline-flex`}>
-                                    {statusInfo.label}
-                                </span>
+
                             </div>
                             <p className="text-xs text-muted-foreground font-mono">
                                 #{mission.trackingNumber}
@@ -155,7 +153,7 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
 
                     <div className="flex items-center gap-2">
 
-                        <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${statusInfo.bgColor} ${statusInfo.color} sm:hidden`}>
+                        <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${statusInfo.bgColor} ${statusInfo.color}`}>
                             {statusInfo.label}
                         </span>
                     </div>
@@ -165,7 +163,7 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
             <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
                 {/* Status Stepper Card - Compact and Discreet */}
-                <div className="bg-white/60 rounded-2xl border border-gray-100 px-6 pt-4 pb-8 overflow-hidden backdrop-blur-sm">
+                <div className="bg-white rounded-2xl border border-gray-200 px-6 pt-4 pb-8 overflow-hidden shadow-sm">
                     {isRdv && (
                         <div className="flex justify-end mb-2">
                             <span className="text-[10px] text-indigo-600 bg-indigo-50/70 px-2 py-0.5 rounded-full font-semibold">
@@ -272,9 +270,7 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                                             <p className="text-sm text-gray-400 italic mt-1">{mission.addressComplement}</p>
                                         )}
                                     </div>
-                                    <div className="p-3 bg-blue-50 rounded-2xl">
-                                        <MapPin className="w-6 h-6 text-blue-500" />
-                                    </div>
+
                                 </div>
 
                                 {mission.addressInstructions && (
@@ -350,46 +346,89 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                             </div>
 
                             {/* Technical Details - Compact Grid */}
-                            {(mission.lockType || mission.doorType || mission.propertyType || mission.floorNumber !== undefined) && (
-                                <div className="mt-4 pt-4 border-t border-gray-100">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Informations techniques</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {mission.lockType && (
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-700 rounded-lg text-sm font-medium">
-                                                <Lock className="w-3.5 h-3.5" />
-                                                {mission.lockType.replace(/_/g, " ")}
-                                            </span>
-                                        )}
-                                        {mission.doorType && (
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium">
-                                                <DoorClosed className="w-3.5 h-3.5" />
-                                                {mission.doorType.replace(/_/g, " ")}
-                                            </span>
-                                        )}
-                                        {mission.propertyType && (
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium">
-                                                <Building2 className="w-3.5 h-3.5" />
-                                                {mission.propertyType.replace(/_/g, " ")}
-                                            </span>
-                                        )}
-                                        {mission.floorNumber !== undefined && (
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium">
-                                                <Layers className="w-3.5 h-3.5" />
-                                                {mission.floorNumber === 0 ? "RDC" : `${mission.floorNumber}${mission.floorNumber === 1 ? 'er' : 'ème'} étage`}
-                                                {mission.hasElevator !== undefined && (
-                                                    <span className="text-slate-500 ml-1">({mission.hasElevator ? "ascenseur" : "sans asc."})</span>
-                                                )}
-                                            </span>
-                                        )}
-                                        {mission.accessDifficulty && (
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-sm font-medium">
-                                                <AlertTriangle className="w-3.5 h-3.5" />
-                                                {mission.accessDifficulty.replace(/_/g, " ")}
-                                            </span>
-                                        )}
-                                    </div>
+                            {/* Technical Details - Compact Grid */}
+                            <div className="mt-4 pt-4 border-t border-gray-100">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Informations techniques</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {mission.lockType && (
+                                        <div className="p-3 bg-gray-50 rounded-xl flex items-center gap-3">
+                                            <div className="p-2 bg-white rounded-lg shadow-sm">
+                                                <Key className="w-4 h-4 text-gray-500" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] uppercase font-bold text-gray-400">Type de serrure</p>
+                                                <p className="text-sm font-medium text-gray-900 capitalize">
+                                                    {mission.lockType === "multipoint" ? "Multipoints" :
+                                                        mission.lockType === "electronique" ? "Électronique" :
+                                                            mission.lockType === "standard" ? "Standard" : "Autre"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {mission.doorType && (
+                                        <div className="p-3 bg-gray-50 rounded-xl flex items-center gap-3">
+                                            <div className="p-2 bg-white rounded-lg shadow-sm">
+                                                <DoorClosed className="w-4 h-4 text-gray-500" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] uppercase font-bold text-gray-400">Type de porte</p>
+                                                <p className="text-sm font-medium text-gray-900 capitalize">
+                                                    {mission.doorType === "blindee" ? "Blindée" :
+                                                        mission.doorType === "garage" ? "Garage" :
+                                                            mission.doorType === "cave" ? "Cave" :
+                                                                mission.doorType === "standard" ? "Standard" : "Autre"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {mission.propertyType && (
+                                        <div className="p-3 bg-gray-50 rounded-xl flex items-center gap-3">
+                                            <div className="p-2 bg-white rounded-lg shadow-sm">
+                                                <Building2 className="w-4 h-4 text-gray-500" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] uppercase font-bold text-gray-400">Type de bien</p>
+                                                <p className="text-sm font-medium text-gray-900 capitalize">
+                                                    {mission.propertyType === "house" ? "Maison" :
+                                                        mission.propertyType === "apartment" ? "Appartement" :
+                                                            mission.propertyType === "office" ? "Bureau" :
+                                                                mission.propertyType === "shop" ? "Commerce" : "Autre"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {mission.floorNumber !== undefined && (
+                                        <div className="p-3 bg-gray-50 rounded-xl flex items-center gap-3">
+                                            <div className="p-2 bg-white rounded-lg shadow-sm">
+                                                <Layers className="w-4 h-4 text-gray-500" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] uppercase font-bold text-gray-400">Étage</p>
+                                                <p className="text-sm font-medium text-gray-900">
+                                                    {mission.floorNumber === 0 ? "RDC" : `${mission.floorNumber}${mission.floorNumber === 1 ? 'er' : 'ème'}`}
+                                                    {mission.hasElevator && <span className="text-gray-500 font-normal ml-1">(Asc.)</span>}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {mission.accessDifficulty && (
+                                        <div className="p-3 bg-gray-50 rounded-xl flex items-center gap-3">
+                                            <div className="p-2 bg-white rounded-lg shadow-sm">
+                                                <AlertTriangle className="w-4 h-4 text-gray-500" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] uppercase font-bold text-gray-400">Accès</p>
+                                                <p className="text-sm font-medium text-gray-900 capitalize">
+                                                    {mission.accessDifficulty === "digicode" ? "Digicode" :
+                                                        mission.accessDifficulty === "keys_needed" ? "Clés nécessaires" :
+                                                            mission.accessDifficulty === "easy" ? "Facile" :
+                                                                mission.accessDifficulty === "guard" ? "Gardien" : "Autre"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                            </div>
 
                             {/* Notes Section */}
                             {(mission.situationDetails || mission.additionalNotes) && (
@@ -466,14 +505,14 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                         <div className="lg:sticky lg:top-24 space-y-6">
 
                             {/* Mission Actions Wrapper - Professional Design */}
-                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden h-[126px] hidden lg:block">
                                 <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
                                     <div className="flex items-center gap-2.5">
                                         <span className="relative flex h-2 w-2">
                                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                                         </span>
-                                        <span className="text-sm font-semibold text-gray-700">Action requise</span>
+                                        <span className="text-sm font-semibold text-gray-700">Prochaine étape</span>
                                     </div>
                                 </div>
                                 <div className="p-5">

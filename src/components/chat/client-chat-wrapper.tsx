@@ -83,7 +83,7 @@ export function ClientChatWrapper({ interventionId, currentUserId, isOpen, onOpe
                     "fixed z-50 h-14 w-14 rounded-full shadow-lg",
                     "bottom-20 right-4",
                     "lg:bottom-6 lg:right-6",
-                    "bg-indigo-400 cursor-wait"
+                    "bg-[#155dfc]/80 cursor-wait"
                 )}
             >
                 <Loader2 className="w-6 h-6 animate-spin" />

@@ -57,7 +57,7 @@ export function MissionStepper({ status, className }: MissionStepperProps) {
 
                     {/* Active Progress Gradient - s'arrête au centre du cercle actuel */}
                     <div
-                        className="absolute top-0 left-3 h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-700 ease-out"
+                        className="absolute top-0 left-3 h-full bg-slate-900 rounded-full transition-all duration-700 ease-out"
                         style={{
                             width: currentStepIndex <= 0
                                 ? '0%'
@@ -79,8 +79,8 @@ export function MissionStepper({ status, className }: MissionStepperProps) {
                                 <div
                                     className={cn(
                                         "w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 relative",
-                                        isCompleted && "bg-indigo-500 text-white",
-                                        isCurrent && "bg-white border-2 border-indigo-500 text-indigo-600 scale-105",
+                                        isCompleted && "bg-slate-900 text-white",
+                                        isCurrent && "bg-white border-2 border-slate-900 text-slate-900 scale-105",
                                         isPending && "bg-gray-50 border border-gray-200 text-gray-300"
                                     )}
                                 >
@@ -89,7 +89,7 @@ export function MissionStepper({ status, className }: MissionStepperProps) {
                                     ) : (
                                         <span className={cn(
                                             "text-[8px] font-bold",
-                                            isCurrent ? "text-indigo-600" : "text-gray-300"
+                                            isCurrent ? "text-slate-900" : "text-gray-300"
                                         )}>
                                             {index + 1}
                                         </span>
@@ -97,7 +97,7 @@ export function MissionStepper({ status, className }: MissionStepperProps) {
 
                                     {/* Subtle pulse for current step */}
                                     {isCurrent && (
-                                        <span className="absolute inset-0 rounded-full bg-indigo-500/10 animate-pulse" />
+                                        <span className="absolute inset-0 rounded-full bg-slate-900/5 animate-pulse" />
                                     )}
                                 </div>
 
@@ -105,7 +105,7 @@ export function MissionStepper({ status, className }: MissionStepperProps) {
                                 <span
                                     className={cn(
                                         "absolute top-9 whitespace-nowrap text-[10px] sm:text-xs font-medium tracking-tight text-center transition-all duration-300",
-                                        isCompleted && "text-indigo-600/70",
+                                        isCompleted && "text-slate-900",
                                         isCurrent && "text-gray-900 font-bold",
                                         isPending && "text-gray-400"
                                     )}

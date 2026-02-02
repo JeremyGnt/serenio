@@ -23,12 +23,10 @@ export default async function MissionsPage() {
 
     // Récupérer toutes les missions et les filtrer côté serveur
     const [activeMissions, completedMissions, cancelledMissions] = await Promise.all([
-        getAllArtisanMissions("active"),
-        getAllArtisanMissions("completed"),
-        getAllArtisanMissions("cancelled"),
+        getAllArtisanMissions("active", 1, 6),
+        getAllArtisanMissions("completed", 1, 6),
+        getAllArtisanMissions("cancelled", 1, 6),
     ])
-
-    const totalMissions = activeMissions.length + completedMissions.length + cancelledMissions.length
 
     return (
         <div className="p-4 md:p-6 lg:p-8">
@@ -47,9 +45,9 @@ export default async function MissionsPage() {
 
             {/* Tabs et liste */}
             <MissionsTabs
-                activeMissions={activeMissions}
-                completedMissions={completedMissions}
-                cancelledMissions={cancelledMissions}
+                initialActiveMissions={activeMissions}
+                initialCompletedMissions={completedMissions}
+                initialCancelledMissions={cancelledMissions}
                 currentUserId={user.id}
             />
         </div>

@@ -10,13 +10,14 @@ import {
     Lock,
     ShieldAlert,
     KeySquare,
-    ArrowRight,
     X,
     Check,
-    Loader2,
-    Coins
+    Coins,
+    ChevronRight,
+    HelpCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import type { AnonymizedIntervention } from "@/lib/interventions"
 import type { SituationType } from "@/types/intervention"
 import { isInterventionViewed, markAsViewed } from "@/lib/interventions/view-tracking"
@@ -37,8 +38,6 @@ const UrgentRequestModal = dynamic(
     () => import("./urgent-request-modal").then((mod) => mod.UrgentRequestModal),
     { ssr: false }
 )
-
-
 
 // Labels des situations
 const SITUATION_LABELS: Record<SituationType, string> = {
@@ -102,10 +101,9 @@ interface UrgentRequestCardProps {
     onRefuse: () => void
 }
 
-
 export function UrgentRequestCard({ intervention, onAccept, onAcceptStart, onRefuse }: UrgentRequestCardProps) {
     const router = useRouter()
-    const SituationIcon = SITUATION_ICON_COMPONENTS[intervention.situationType] || AlertTriangle
+    const SituationIcon = SITUATION_ICON_COMPONENTS[intervention.situationType] || HelpCircle
     const [locationName, setLocationName] = useState<string>(`${intervention.postalCode} - ${intervention.city}`)
 
     useEffect(() => {
@@ -151,26 +149,23 @@ export function UrgentRequestCard({ intervention, onAccept, onAcceptStart, onRef
         }
     }, [intervention.id])
 
-    // Compact time format: "< 1 min", "5 min", "2h", "3j"
+    // Compact time format
     const getCompactTimeAgo = (dateString: string): string => {
         const date = new Date(dateString)
         const now = new Date()
         const diffMs = now.getTime() - date.getTime()
         const diffMins = Math.floor(diffMs / 60000)
 
-        if (diffMins < 1) return "Il y a 1 min"
-        if (diffMins < 60) return `Il y a ${diffMins} min`
+        if (diffMins < 1) return "À l'instant"
+        if (diffMins < 60) return `${diffMins} min`
 
         const diffHours = Math.floor(diffMins / 60)
-        if (diffHours < 24) return `Il y a ${diffHours} h`
+        if (diffHours < 24) return `${diffHours} h`
 
-        const diffDays = Math.floor(diffHours / 24)
-        return `Il y a ${diffDays} j`
+        return `${Math.floor(diffHours / 24)} j`
     }
 
     const timeAgo = getCompactTimeAgo(intervention.createdAt)
-
-    // Status Logic
     const isNew = !viewed
 
     const handleOpenModal = () => {
@@ -185,7 +180,7 @@ export function UrgentRequestCard({ intervention, onAccept, onAcceptStart, onRef
         setIsRefusing(true)
         try {
             await refuseMission(intervention.id)
-            onRefuse() // Update parent state
+            onRefuse()
         } catch (error) {
             console.error("Erreur refus:", error)
         } finally {
@@ -196,11 +191,8 @@ export function UrgentRequestCard({ intervention, onAccept, onAcceptStart, onRef
 
     const handleAcceptConfirm = async () => {
         setIsAccepting(true)
-        setShowAcceptDialog(false) // Close dialog immediately
-        // Notify parent to show global loader (prevents flash when card unmounts)
-        if (onAcceptStart) {
-            onAcceptStart()
-        }
+        setShowAcceptDialog(false)
+        if (onAcceptStart) onAcceptStart()
 
         try {
             const result = await acceptMission(intervention.id)
@@ -208,7 +200,6 @@ export function UrgentRequestCard({ intervention, onAccept, onAcceptStart, onRef
                 onAccept()
                 router.push(`/pro/mission/${result.trackingNumber}`)
             } else {
-                // On error, show error
                 console.error("Erreur acceptation:", result.error)
             }
         } catch (error) {
@@ -220,139 +211,98 @@ export function UrgentRequestCard({ intervention, onAccept, onAcceptStart, onRef
 
     return (
         <>
-
-
             <div
                 onClick={handleOpenModal}
-                className={`group relative flex flex-col w-full bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl cursor-pointer ${isNew ? 'border-2 border-red-500 shadow-md' : 'border border-gray-100 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_8px_24px_rgba(0,0,0,0.04)]'} ${viewed ? 'opacity-95' : 'opacity-100'}`}
+                className={cn(
+                    "group relative flex flex-col h-full bg-white rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-gray-100 shadow-sm cursor-pointer",
+                    isNew && "border-l-[6px] border-l-blue-600"
+                )}
             >
-
-                {/* Header - Mobile & Desktop Varied */}
-                <div className="px-4 py-4 md:px-5 md:pt-5 md:pb-2 flex items-start justify-between gap-3">
-                    <div className="flex items-start md:flex-col gap-3 md:gap-1 flex-1">
-
-                        {/* Mobile Icon */}
-                        <div className="md:hidden flex-shrink-0 w-10 h-10 bg-gray-100 rounded-[12px] flex items-center justify-center">
-                            <SituationIcon className="w-5 h-5 text-gray-600" />
+                {/* Header */}
+                <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-red-100 bg-red-50">
+                            <SituationIcon className="w-6 h-6 text-red-600" />
                         </div>
-
-                        <div className="flex flex-col gap-1 flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                                {intervention.urgencyLevel === 3 && (
-                                    <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-wide rounded-full border border-red-100">
-                                        Urgent
-                                    </span>
-                                )}
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-emerald-100 text-emerald-700">
+                                    150€ - 250€
+                                </span>
 
                             </div>
-                            <h3 className="text-gray-900 font-bold text-base md:text-lg leading-tight truncate">
-                                {SITUATION_LABELS[intervention.situationType] || "Dépannage Serrurerie"}
+                            <h3 className="font-bold text-gray-900 leading-tight">
+                                {SITUATION_LABELS[intervention.situationType] || "Intervention"}
                             </h3>
-
-                            {/* Mobile Location (Line 2) */}
-                            <div className="flex md:hidden items-center gap-1.5 text-gray-700 mt-0.5">
-                                <MapPin className="w-3.5 h-3.5 text-[#009966] shrink-0" />
-                                <span className="text-sm font-medium truncate">
-                                    {locationName}
-                                </span>
-                            </div>
                         </div>
                     </div>
 
-                    {/* Time Pill */}
-                    <span className="text-slate-500 text-xs font-medium bg-slate-100/80 px-2.5 py-1 rounded-full whitespace-nowrap flex-shrink-0">
-                        {timeAgo}
-                    </span>
-                </div>
-
-                {/* Body - Mobile: Pills only / Desktop: Thumbnail + List */}
-                <div className="px-4 pb-2 md:px-5 md:py-2 flex gap-4">
-
-                    {/* Desktop Thumbnail */}
-                    <div className="hidden md:flex w-14 h-14 shrink-0 rounded-[12px] bg-[#F3F4F6] border border-gray-100 items-center justify-center overflow-hidden">
-                        {intervention.photos && intervention.photos.length > 0 ? (
-                            <img
-                                src={intervention.photos[0].url}
-                                alt="Aperçu"
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <SituationIcon className="w-7 h-7 text-gray-400" /> // taille reduite
-                        )}
-                    </div>
-
-                    {/* Content Area */}
-                    <div className="flex-1 flex flex-col gap-2 min-w-0 md:justify-center">
-
-                        {/* Desktop Location */}
-                        <div className="hidden md:flex items-center gap-2 text-gray-600">
-                            <MapPin className="w-4 h-4 text-[#009966] shrink-0" />
-                            <span className="text-sm font-medium truncate">
-                                {locationName}
-                            </span>
-                        </div>
-
-                        {/* Tech Info Cards (Mobile & Desktop) */}
-                        <div className="flex flex-wrap items-center gap-2">
-                            {/* Door Card */}
-                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-50 border border-gray-100 text-xs font-medium text-gray-600">
-                                <DoorClosed className="w-3.5 h-3.5 text-gray-400" />
-                                <span className="truncate max-w-[100px]">
-                                    {intervention.doorType ? DOOR_LABELS[intervention.doorType] || intervention.doorType : "Porte standard"}
-                                </span>
-                            </div>
-
-                            {/* Lock Card */}
-                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-50 border border-gray-100 text-xs font-medium text-gray-600">
-                                <Lock className="w-3.5 h-3.5 text-gray-400" />
-                                <span className="truncate max-w-[100px]">
-                                    {intervention.lockType ? LOCK_LABELS[intervention.lockType] || intervention.lockType : "Serrure standard"}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Price & Actions Section */}
-                <div className="px-4 pb-3 pt-2 md:mt-2 md:px-5 md:pb-3 md:pt-2 flex flex-col md:flex-row md:items-center justify-between gap-4 md:border-t md:border-gray-50">
-
-                    {/* Price Block */}
-                    <div className="self-start md:self-auto bg-white border border-gray-100 rounded-xl px-4 py-2 flex flex-col shadow-sm min-w-[120px]">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
-                            <Coins className="w-3 h-3" />
-                            Estimation
+                    <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-slate-500 text-xs font-medium bg-slate-100/80 px-2.5 py-1 rounded-full whitespace-nowrap">
+                            {timeAgo}
                         </span>
-                        <span className="text-lg font-bold text-gray-900 leading-tight">150€ - 250€</span>
+                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors duration-300 active:scale-95 touch-manipulation" />
+                    </div>
+                </div>
+
+                {/* Body - Content */}
+                <div className="px-5 pb-5 flex-1">
+                    {/* Location & Price */}
+                    <div className="flex items-center justify-between gap-3 mb-4 p-3 bg-gray-50/50 rounded-xl">
+                        <div className="flex items-start gap-2 min-w-0">
+                            <MapPin className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                            <div className="min-w-0">
+                                <p className="text-sm font-semibold text-gray-900 truncate">
+                                    {locationName}
+                                </p>
+
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
-                        {/* Mobile: Voir détails link */}
-                        <div
-                            className="md:hidden order-2 text-sm text-gray-400 font-medium py-2 w-full text-center active:text-gray-600"
-                        >
-                            Voir détails
+                    {/* Details Grid */}
+                    <div className="grid grid-cols-2 gap-3 mb-4 px-3">
+                        {/* Door Detail */}
+                        <div className="flex items-start gap-2">
+                            <DoorClosed className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Porte</span>
+                                <span className="text-xs font-semibold text-gray-900 truncate">
+                                    {intervention.doorType ? DOOR_LABELS[intervention.doorType] || intervention.doorType : "Non spécifié"}
+                                </span>
+                            </div>
                         </div>
 
-                        {/* Desktop: Voir détails button */}
+                        {/* Lock Detail */}
+                        <div className="flex items-start gap-2">
+                            <Lock className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Serrure</span>
+                                <span className="text-xs font-semibold text-gray-900 truncate">
+                                    {intervention.lockType ? LOCK_LABELS[intervention.lockType] || intervention.lockType : "Non spécifié"}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer Infos - Actions */}
+                    <div className="flex items-center gap-3 pt-2 border-t border-gray-50 mt-auto">
                         <Button
+                            variant="outline"
+                            className="flex-1 h-10 rounded-xl px-0 border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-colors"
                             onClick={(e) => {
                                 e.stopPropagation()
-                                handleOpenModal()
+                                setShowRefuseDialog(true)
                             }}
-                            variant="ghost"
-                            className="hidden md:flex h-10 px-4 text-gray-500 hover:text-gray-900 hover:bg-gray-50 font-medium rounded-xl text-sm"
                         >
-                            Voir détails
+                            Refuser
                         </Button>
-
-                        {/* Accepter Button */}
                         <Button
+                            className="flex-1 h-10 rounded-xl bg-gray-900 hover:bg-gray-800 text-white shadow-lg shadow-gray-200/50"
                             onClick={(e) => {
                                 e.stopPropagation()
                                 setShowAcceptDialog(true)
                             }}
-                            className="h-12 md:h-10 w-full md:w-auto px-6 bg-[#009966] hover:bg-[#007a52] text-white font-semibold rounded-2xl md:rounded-xl text-base md:text-sm shadow-sm shadow-[#009966]/20 active:scale-[0.98] transition-all order-1 md:order-2"
                         >
                             Accepter
                         </Button>
@@ -360,7 +310,7 @@ export function UrgentRequestCard({ intervention, onAccept, onAcceptStart, onRef
                 </div>
             </div>
 
-            {/* Modal détails */}
+            {/* Modals */}
             <UrgentRequestModal
                 intervention={intervention}
                 isOpen={showModal}
@@ -375,7 +325,6 @@ export function UrgentRequestCard({ intervention, onAccept, onAcceptStart, onRef
                 }}
             />
 
-            {/* Refuse Confirmation Dialog */}
             <AlertDialog open={showRefuseDialog} onOpenChange={setShowRefuseDialog}>
                 <AlertDialogContent className="max-w-md w-[90vw] sm:w-full p-6 bg-white rounded-2xl backdrop-blur-lg">
                     <AlertDialogHeader className="text-center sm:text-center">
@@ -401,20 +350,12 @@ export function UrgentRequestCard({ intervention, onAccept, onAcceptStart, onRef
                             disabled={isRefusing}
                             className="w-full h-12 text-base font-medium bg-red-600 hover:bg-red-700 text-white mt-0 rounded-xl"
                         >
-                            {isRefusing ? (
-                                <span className="flex items-center gap-2">
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                    Refus en cours...
-                                </span>
-                            ) : (
-                                "Oui, refuser"
-                            )}
+                            {isRefusing ? "Refus en cours..." : "Oui, refuser"}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* Accept Confirmation Dialog */}
             <AlertDialog open={showAcceptDialog} onOpenChange={setShowAcceptDialog}>
                 <AlertDialogContent className="max-w-md w-[90vw] sm:w-full p-6 bg-white rounded-2xl backdrop-blur-lg">
                     <AlertDialogHeader className="text-center sm:text-center">
@@ -440,14 +381,7 @@ export function UrgentRequestCard({ intervention, onAccept, onAcceptStart, onRef
                             disabled={isAccepting}
                             className="w-full h-12 text-base font-medium bg-[#009966] hover:bg-[#007a52] text-white mt-0 rounded-xl"
                         >
-                            {isAccepting ? (
-                                <span className="flex items-center gap-2">
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                    Acceptation...
-                                </span>
-                            ) : (
-                                "Oui, j'accepte"
-                            )}
+                            {isAccepting ? "Acceptation..." : "Oui, j'accepte"}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

@@ -74,7 +74,7 @@ export function MissionClientChatButton({ interventionId, currentUserId, onClick
         <Button
             size="icon"
             onClick={onClick}
-            className="h-10 w-10 rounded-xl active:scale-95 transition-all bg-indigo-500 hover:bg-indigo-600 relative"
+            className="h-10 w-10 rounded-xl active:scale-95 transition-all bg-[#155dfc] hover:bg-[#155dfc]/90 relative"
         >
             <MessageSquare className="w-4 h-4" />
             {unreadCount > 0 && (

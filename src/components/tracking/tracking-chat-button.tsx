@@ -75,7 +75,7 @@ export function TrackingChatButton({ interventionId, currentUserId, onClick, isO
     return (
         <Button
             onClick={onClick}
-            className={cn("bg-indigo-500 hover:bg-indigo-600 relative", className)}
+            className={cn("bg-[#155dfc] hover:bg-[#155dfc]/90 relative", className)}
         >
             <MessageSquare className="w-4 h-4 mr-2" />
             Message

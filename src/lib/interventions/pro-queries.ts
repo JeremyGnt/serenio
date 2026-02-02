@@ -526,6 +526,7 @@ export interface ActiveMission {
     interventionId: string
     trackingNumber: string
     clientFirstName: string
+    clientLastName: string
     clientPhone: string
     addressStreet: string
     addressCity: string
@@ -562,6 +563,7 @@ export async function getActiveArtisanMissions(): Promise<ActiveMission[]> {
                     id,
                     tracking_number,
                     client_first_name,
+                    client_last_name,
                     client_phone,
                     address_street,
                     address_city,
@@ -624,6 +626,7 @@ export async function getActiveArtisanMissions(): Promise<ActiveMission[]> {
                     id: string
                     tracking_number: string
                     client_first_name: string
+                    client_last_name: string
                     client_phone: string
                     address_street: string
                     address_city: string
@@ -641,6 +644,7 @@ export async function getActiveArtisanMissions(): Promise<ActiveMission[]> {
                     interventionId: intervention.id,
                     trackingNumber: intervention.tracking_number,
                     clientFirstName: intervention.client_first_name || "Client",
+                    clientLastName: intervention.client_last_name || "",
                     clientPhone: intervention.client_phone || "",
                     addressStreet: intervention.address_street || "",
                     addressCity: intervention.address_city || "",
@@ -664,16 +668,20 @@ export async function getActiveArtisanMissions(): Promise<ActiveMission[]> {
 export type MissionFilter = "all" | "active" | "completed" | "cancelled"
 
 /**
- * Récupère toutes les missions de l'artisan connecté avec possibilité de filtrage
+ * Récupère toutes les missions de l'artisan connecté avec possibilité de filtrage et pagination
  */
-export async function getAllArtisanMissions(filter: MissionFilter = "all"): Promise<ActiveMission[]> {
+export async function getAllArtisanMissions(
+    filter: MissionFilter = "all",
+    page: number = 1,
+    limit: number = 6
+): Promise<{ data: ActiveMission[], total: number }> {
     const supabase = await createClient()
     const adminClient = createAdminClient()
 
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-        return []
+        return { data: [], total: 0 }
     }
 
     try {
@@ -694,6 +702,7 @@ export async function getAllArtisanMissions(filter: MissionFilter = "all"): Prom
                     id,
                     tracking_number,
                     client_first_name,
+                    client_last_name,
                     client_phone,
                     address_street,
                     address_city,
@@ -707,7 +716,7 @@ export async function getAllArtisanMissions(filter: MissionFilter = "all"): Prom
                         storage_path
                     )
                 )
-            `)
+            `, { count: 'exact' })
             .eq("artisan_id", user.id)
             .eq("status", "accepted")
             .order("responded_at", { ascending: false })
@@ -721,12 +730,15 @@ export async function getAllArtisanMissions(filter: MissionFilter = "all"): Prom
             query = query.in("intervention_requests.status", cancelledStatuses)
         }
 
-        // Apply limit after filtering
-        const { data: assignments, error } = await query.limit(50)
+        // Pagination
+        const from = (page - 1) * limit
+        const to = from + limit - 1
+
+        const { data: assignments, count, error } = await query.range(from, to)
 
         if (error || !assignments) {
             console.error("Erreur récupération missions:", error)
-            return []
+            return { data: [], total: 0 }
         }
 
         // Récupérer les URLs signées pour toutes les photos trouvées
@@ -757,44 +769,47 @@ export async function getAllArtisanMissions(filter: MissionFilter = "all"): Prom
             }
         }
 
-        return assignments
-            .map((assignment, index) => {
-                const intervention = assignment.intervention_requests as unknown as {
-                    id: string
-                    tracking_number: string
-                    client_first_name: string
-                    client_phone: string
-                    address_street: string
-                    address_city: string
-                    address_postal_code: string
-                    status: string
-                    completed_at?: string
-                    intervention_diagnostics: { situation_type: SituationType }[] | { situation_type: SituationType }
-                }
+        const data = assignments.map((assignment, index) => {
+            const intervention = assignment.intervention_requests as unknown as {
+                id: string
+                tracking_number: string
+                client_first_name: string
+                client_last_name: string
+                client_phone: string
+                address_street: string
+                address_city: string
+                address_postal_code: string
+                status: string
+                completed_at?: string
+                intervention_diagnostics: { situation_type: SituationType }[] | { situation_type: SituationType }
+            }
 
-                const diagnostic = Array.isArray(intervention.intervention_diagnostics)
-                    ? intervention.intervention_diagnostics[0]
-                    : intervention.intervention_diagnostics
+            const diagnostic = Array.isArray(intervention.intervention_diagnostics)
+                ? intervention.intervention_diagnostics[0]
+                : intervention.intervention_diagnostics
 
-                return {
-                    id: assignment.id,
-                    interventionId: intervention.id,
-                    trackingNumber: intervention.tracking_number,
-                    clientFirstName: intervention.client_first_name || "Client",
-                    clientPhone: intervention.client_phone || "",
-                    addressStreet: intervention.address_street || "",
-                    addressCity: intervention.address_city || "",
-                    addressPostalCode: intervention.address_postal_code || "",
-                    situationType: diagnostic?.situation_type || "other",
-                    status: intervention.status,
-                    acceptedAt: assignment.responded_at,
-                    completedAt: intervention.completed_at,
-                    firstPhotoUrl: signedUrlsMap[index]
-                }
-            })
+            return {
+                id: assignment.id,
+                interventionId: intervention.id,
+                trackingNumber: intervention.tracking_number,
+                clientFirstName: intervention.client_first_name || "Client",
+                clientLastName: intervention.client_last_name || "",
+                clientPhone: intervention.client_phone || "",
+                addressStreet: intervention.address_street || "",
+                addressCity: intervention.address_city || "",
+                addressPostalCode: intervention.address_postal_code || "",
+                situationType: diagnostic?.situation_type || "other",
+                status: intervention.status,
+                acceptedAt: assignment.responded_at,
+                completedAt: intervention.completed_at,
+                firstPhotoUrl: signedUrlsMap[index]
+            }
+        })
+
+        return { data, total: count || 0 }
     } catch (error) {
         console.error("Erreur getAllArtisanMissions:", error)
-        return []
+        return { data: [], total: 0 }
     }
 }
 

@@ -29,6 +29,7 @@ interface MissionQuickActionProps {
 
 // Configuration des actions par statut
 const ACTION_CONFIG: Record<string, {
+    currentStatusLabel: string
     label: string
     shortLabel: string
     icon: typeof Truck
@@ -38,75 +39,83 @@ const ACTION_CONFIG: Record<string, {
     action: "en_route" | "arrived" | "start" | "complete" | null
 }> = {
     assigned: {
+        currentStatusLabel: "Mission assignée",
         label: "Je pars en intervention",
         shortLabel: "Je pars",
         icon: Truck,
         color: "text-white",
-        bgColor: "bg-blue-500",
-        borderColor: "border-blue-600",
+        bgColor: "bg-slate-900",
+        borderColor: "border-slate-800",
         action: "en_route"
     },
     accepted: {
+        currentStatusLabel: "Mission acceptée",
         label: "Je pars en intervention",
         shortLabel: "Je pars",
         icon: Truck,
         color: "text-white",
-        bgColor: "bg-blue-500",
-        borderColor: "border-blue-600",
+        bgColor: "bg-slate-900",
+        borderColor: "border-slate-800",
         action: "en_route"
     },
     en_route: {
+        currentStatusLabel: "En route",
         label: "Je suis sur place",
         shortLabel: "Sur place",
         icon: MapPin,
         color: "text-white",
-        bgColor: "bg-purple-500",
-        borderColor: "border-purple-600",
+        bgColor: "bg-slate-900",
+        borderColor: "border-slate-800",
         action: "arrived"
     },
     arrived: {
+        currentStatusLabel: "Sur place",
         label: "Commencer l'intervention",
         shortLabel: "Commencer",
         icon: Play,
         color: "text-white",
-        bgColor: "bg-[#009966]",
-        borderColor: "border-[#007a52]",
+        bgColor: "bg-slate-900",
+        borderColor: "border-slate-800",
         action: "start"
     },
     diagnosing: {
+        currentStatusLabel: "En diagnostic",
         label: "Terminer la mission",
         shortLabel: "Terminer",
         icon: CheckCircle2,
         color: "text-white",
-        bgColor: "bg-[#009966]",
-        borderColor: "border-[#007a52]",
+        bgColor: "bg-emerald-600",
+        borderColor: "border-emerald-700",
         action: "complete"
     },
     quote_sent: {
+        currentStatusLabel: "Devis envoyé",
         label: "Terminer la mission",
         shortLabel: "Terminer",
         icon: CheckCircle2,
         color: "text-white",
-        bgColor: "bg-[#009966]",
-        borderColor: "border-[#007a52]",
+        bgColor: "bg-emerald-600",
+        borderColor: "border-emerald-700",
         action: "complete"
     },
     quote_accepted: {
+        currentStatusLabel: "Devis accepté",
         label: "Terminer la mission",
         shortLabel: "Terminer",
         icon: CheckCircle2,
         color: "text-white",
-        bgColor: "bg-[#009966]",
-        borderColor: "border-[#007a52]",
+        bgColor: "bg-emerald-600",
+        borderColor: "border-emerald-700",
         action: "complete"
     },
     in_progress: {
+        currentStatusLabel: "En cours",
         label: "Terminer la mission",
         shortLabel: "Terminer",
         icon: CheckCircle2,
         color: "text-white",
-        bgColor: "bg-[#009966]",
-        borderColor: "border-[#007a52]",
+        bgColor: "bg-emerald-600",
+        borderColor: "border-emerald-700",
         action: "complete"
     }
 }
@@ -168,18 +177,27 @@ export function MissionQuickAction({ interventionId, status }: MissionQuickActio
                 onClick={handleAction}
                 disabled={isPending}
                 className={cn(
-                    "lg:hidden fixed z-50 bottom-20 right-4 flex items-center gap-2 px-5 py-3 rounded-full shadow-xl transition-all duration-200 active:scale-95 touch-manipulation",
+                    "lg:hidden fixed z-50 bottom-6 left-4 right-4 flex items-center justify-between px-6 py-4 rounded-2xl shadow-2xl transition-all duration-300 active:scale-95 touch-manipulation ring-1 ring-white/10",
                     config.bgColor,
                     config.color,
-                    isPending && "opacity-70"
+                    isPending && "opacity-70 cursor-not-allowed"
                 )}
             >
-                {isPending ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                    <Icon className="w-5 h-5" />
-                )}
-                <span className="font-semibold text-sm">{config.shortLabel}</span>
+                <div className="flex flex-col items-start">
+                    <span className="text-xs opacity-90 font-medium tracking-wide flex items-center gap-1.5 mb-0.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-white/60 animate-pulse" />
+                        {config.currentStatusLabel}
+                    </span>
+                    <span className="font-bold text-lg tracking-tight">{config.label}</span>
+                </div>
+
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm">
+                    {isPending ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                        <Icon className="w-5 h-5 fill-current" />
+                    )}
+                </div>
             </button>
 
             {/* Dialog de confirmation pour terminer */}

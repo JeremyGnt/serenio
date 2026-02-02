@@ -135,13 +135,13 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                 {/* 1. Bouton "Je pars" */}
                 {["assigned", "accepted"].includes(status) && (
                     <Button
-                        className="w-full h-11 bg-white hover:bg-blue-50 active:bg-blue-100 border border-blue-200 hover:border-blue-300 text-blue-700 shadow-sm transition-all duration-200 rounded-lg active:scale-[0.97] touch-manipulation"
+                        className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 rounded-xl font-medium text-base transition-all hover:scale-[1.02] active:scale-[0.98] touch-manipulation border border-slate-800"
                         onClick={handleSignalEnRoute}
                         disabled={isPending}
                     >
                         <div className="flex items-center justify-center w-full gap-2">
-                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Truck className="w-4 h-4" />}
-                            <span className="font-medium text-sm">Je pars en intervention</span>
+                            {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Truck className="w-5 h-5" />}
+                            <span>Je pars en intervention</span>
                         </div>
                     </Button>
                 )}
@@ -149,13 +149,13 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                 {/* 2. Bouton "Je suis sur place" */}
                 {status === "en_route" && (
                     <Button
-                        className="w-full h-11 bg-white hover:bg-purple-50 active:bg-purple-100 border border-purple-200 hover:border-purple-300 text-purple-700 shadow-sm transition-all duration-200 rounded-lg active:scale-[0.97] touch-manipulation"
+                        className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 rounded-xl font-medium text-base transition-all hover:scale-[1.02] active:scale-[0.98] touch-manipulation border border-slate-800"
                         onClick={handleSignalArrival}
                         disabled={isPending}
                     >
                         <div className="flex items-center justify-center w-full gap-2">
-                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
-                            <span className="font-medium text-sm">Je suis sur place</span>
+                            {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <MapPin className="w-5 h-5" />}
+                            <span>Je suis sur place</span>
                         </div>
                     </Button>
                 )}
@@ -163,13 +163,13 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                 {/* 3. Bouton "Démarrer l'intervention" */}
                 {["arrived"].includes(status) && (
                     <Button
-                        className="w-full h-11 bg-white hover:bg-[#009966]/10 active:bg-[#009966]/20 border border-[#009966]/50 hover:border-[#009966] text-[#009966] shadow-sm transition-all duration-200 rounded-lg active:scale-[0.97] touch-manipulation"
+                        className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 rounded-xl font-medium text-base transition-all hover:scale-[1.02] active:scale-[0.98] touch-manipulation border border-slate-800"
                         onClick={handleStartIntervention}
                         disabled={isPending}
                     >
                         <div className="flex items-center justify-center w-full gap-2">
-                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
-                            <span className="font-medium text-sm">Commencer l'intervention</span>
+                            {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
+                            <span>Commencer l'intervention</span>
                         </div>
                     </Button>
                 )}
@@ -177,13 +177,13 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                 {/* 4. Bouton "Terminer" */}
                 {["in_progress", "diagnosing", "quote_sent", "quote_accepted"].includes(status) && (
                     <Button
-                        className="w-full h-11 bg-white hover:bg-gray-50 active:bg-[#009966]/10 border border-gray-200 text-gray-700 hover:text-[#009966] hover:border-[#009966]/30 active:border-[#009966]/50 shadow-sm transition-all duration-200 rounded-lg active:scale-[0.97] touch-manipulation"
+                        className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 rounded-xl font-medium text-base transition-all hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
                         onClick={() => setShowCompleteDialog(true)}
                         disabled={isPending}
                     >
                         <div className="flex items-center justify-center w-full gap-2">
-                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                            <span className="font-medium text-sm">Terminer la mission</span>
+                            {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
+                            <span>Terminer la mission</span>
                         </div>
                     </Button>
                 )}
@@ -203,7 +203,7 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                         <AlertDialogCancel>Annuler</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleCompleteIntervention}
-                            className="bg-[#009966] hover:bg-[#007a52]"
+                            className="bg-emerald-600 hover:bg-emerald-700"
                         >
                             {isPending ? (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -216,29 +216,5 @@ export function MissionActions({ interventionId, trackingNumber, status }: Missi
                 </AlertDialogContent>
             </AlertDialog>
         </div>
-    )
-}
-
-function StatusBadge({ status }: { status: string }) {
-    const statusConfig: Record<string, { label: string; color: string }> = {
-        assigned: { label: "Assignée", color: "bg-amber-100 text-amber-700" },
-        accepted: { label: "Acceptée", color: "bg-amber-100 text-amber-700" },
-        en_route: { label: "En route", color: "bg-blue-100 text-blue-700" },
-        arrived: { label: "Sur place", color: "bg-purple-100 text-purple-700" },
-        diagnosing: { label: "Diagnostic", color: "bg-indigo-100 text-indigo-700" },
-        quote_sent: { label: "Devis envoyé", color: "bg-orange-100 text-orange-700" },
-        quote_accepted: { label: "Devis accepté", color: "bg-teal-100 text-teal-700" },
-        in_progress: { label: "En intervention", color: "bg-[#009966]/10 text-[#009966]" },
-        completed: { label: "Terminée", color: "bg-[#009966]/10 text-[#009966]" },
-        cancelled: { label: "Annulée", color: "bg-red-100 text-red-700" },
-        pending: { label: "En attente", color: "bg-gray-100 text-gray-700" },
-    }
-
-    const config = statusConfig[status] || { label: status, color: "bg-gray-100 text-gray-700" }
-
-    return (
-        <span className={`px-2 py-1 text-xs font-medium rounded ${config.color}`}>
-            {config.label}
-        </span>
     )
 }

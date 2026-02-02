@@ -116,6 +116,17 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
         showLoader()
     }
 
+    // Polling fallback (chaque 15 secondes)
+    useEffect(() => {
+        if (!localIsAvailable) return
+
+        const intervalId = setInterval(() => {
+            handleRefresh()
+        }, 15000)
+
+        return () => clearInterval(intervalId)
+    }, [localIsAvailable, handleRefresh])
+
     // Supabase Realtime subscription pour les nouvelles urgences
     useEffect(() => {
         if (!localIsAvailable) {
@@ -128,98 +139,76 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
         }
 
         const channel = supabase
-            .channel("urgences-realtime")
+            .channel(`urgences-realtime-${userId}`) // Unique channel per user to avoid potential conflicts
             .on(
                 "postgres_changes",
                 {
-                    event: "INSERT",
+                    event: "*", // Listen to all events
                     schema: "public",
                     table: "intervention_requests"
                 },
                 async (payload: RealtimePostgresChangesPayload<InterventionPayload>) => {
-                    const newIntervention = payload.new as InterventionPayload
+                    const eventType = payload.eventType
+                    const newRecord = payload.new as InterventionPayload
+                    const oldRecord = payload.old as InterventionPayload
 
-                    if (
-                        newIntervention.intervention_type === "urgence" &&
-                        ["pending", "searching"].includes(newIntervention.status)
-                    ) {
-                        const lat = newIntervention.latitude
-                        const lon = newIntervention.longitude
-
-                        if (artisanSettings && lat != null && lon != null) {
-                            const distance = calculateDistance(
-                                artisanSettings.baseLatitude,
-                                artisanSettings.baseLongitude,
-                                lat,
-                                lon
-                            )
-
-                            if (distance != null && distance > artisanSettings.availabilityRadius) {
-                                return
-                            }
-                        }
-
-                        // Small delay to ensure database has completed the INSERT
-                        setNewUrgenceAlert(true)
-                        await new Promise(resolve => setTimeout(resolve, 500))
-                        await handleRefresh()
-                    }
-                }
-            )
-            .on(
-                "postgres_changes",
-                {
-                    event: "UPDATE",
-                    schema: "public",
-                    table: "intervention_requests"
-                },
-                async (payload: RealtimePostgresChangesPayload<InterventionPayload>) => {
-                    const updatedIntervention = payload.new as InterventionPayload
-
-                    if (["pending", "searching"].includes(updatedIntervention.status)) {
-                        if (updatedIntervention.intervention_type === "urgence") {
-                            const lat = updatedIntervention.latitude
-                            const lon = updatedIntervention.longitude
-
-                            if (artisanSettings && lat != null && lon != null) {
+                    // Handle INSERT
+                    if (eventType === "INSERT") {
+                        if (
+                            newRecord.intervention_type === "urgence" &&
+                            ["pending", "searching"].includes(newRecord.status)
+                        ) {
+                            // Check distance if settings available
+                            if (artisanSettings && newRecord.latitude != null && newRecord.longitude != null) {
                                 const distance = calculateDistance(
                                     artisanSettings.baseLatitude,
                                     artisanSettings.baseLongitude,
-                                    lat,
-                                    lon
+                                    newRecord.latitude,
+                                    newRecord.longitude
                                 )
-
                                 if (distance != null && distance > artisanSettings.availabilityRadius) {
                                     return
                                 }
                             }
 
                             setNewUrgenceAlert(true)
-                            await handleRefresh()
+                            // Delay reload slightly to ensure DB consistency
+                            setTimeout(() => handleRefresh(), 1000)
                         }
-                    } else {
-                        setInterventions(prev =>
-                            prev.filter(i => i.id !== updatedIntervention.id)
-                        )
+                    }
+                    // Handle UPDATE
+                    else if (eventType === "UPDATE") {
+                        if (
+                            newRecord.intervention_type === "urgence" &&
+                            ["pending", "searching"].includes(newRecord.status)
+                        ) {
+                            // Check distance
+                            if (artisanSettings && newRecord.latitude != null && newRecord.longitude != null) {
+                                const distance = calculateDistance(
+                                    artisanSettings.baseLatitude,
+                                    artisanSettings.baseLongitude,
+                                    newRecord.latitude,
+                                    newRecord.longitude
+                                )
+                                if (distance != null && distance > artisanSettings.availabilityRadius) {
+                                    return
+                                }
+                            }
+                            setNewUrgenceAlert(true)
+                            handleRefresh()
+                        } else {
+                            // If status changed to something else (e.g. taken), refresh to remove it
+                            // Or just optimistically remove if we had it
+                            handleRefresh()
+                        }
                     }
                 }
             )
-            .on(
-                "postgres_changes",
-                {
-                    event: "DELETE",
-                    schema: "public",
-                    table: "intervention_requests"
-                },
-                (payload: RealtimePostgresChangesPayload<InterventionPayload>) => {
-                    const deletedIntervention = payload.old as InterventionPayload
-                    setInterventions(prev =>
-                        prev.filter(i => i.id !== deletedIntervention.id)
-                    )
-                }
-            )
-            .subscribe((status: string) => {
+            .subscribe((status) => {
                 setIsConnected(status === "SUBSCRIBED")
+                if (status === "CHANNEL_ERROR") {
+                    console.error("Realtime connection error")
+                }
             })
 
         channelRef.current = channel
@@ -229,7 +218,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                 supabase.removeChannel(channelRef.current)
             }
         }
-    }, [handleRefresh, localIsAvailable, artisanSettings])
+    }, [handleRefresh, localIsAvailable, artisanSettings, userId])
 
     const handleAvailabilityToggle = (newStatus: boolean) => {
         setLocalIsAvailable(newStatus)
@@ -328,7 +317,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                     </div>
                 ) : (
                     /* Intervention Cards Grid */
-                    <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+                    <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
                         {interventions.map((intervention) => (
                             <div key={intervention.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <UrgentRequestCard
