@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { RefreshCw, Wifi, WifiOff, Bell, Radar } from "lucide-react"
+import { Wifi, WifiOff, Bell, Radar, LayoutGrid, List } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { UrgentRequestCard } from "./urgent-request-card"
 import { AvailabilityControl } from "./availability-control"
@@ -46,6 +46,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
     const [isConnected, setIsConnected] = useState(false)
     const [newUrgenceAlert, setNewUrgenceAlert] = useState(false)
     const [localIsAvailable, setLocalIsAvailable] = useState(isAvailable)
+    const [columnLayout, setColumnLayout] = useState<1 | 2>(2) // Default to 2 columns
     const [retryCount, setRetryCount] = useState(0)
     const channelRef = useRef<RealtimeChannel | null>(null)
     const availabilityChannelRef = useRef<RealtimeChannel | null>(null)
@@ -257,18 +258,31 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                 </div>
 
                 <div className="flex items-center gap-3 self-end md:self-auto">
-
+                    {/* Column Layout Toggle - Desktop Only */}
                     {localIsAvailable && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={handleRefresh}
-                            disabled={refreshing}
-                            className="rounded-full hover:bg-gray-100 text-gray-500 hidden md:inline-flex"
-                            title="Actualiser la liste"
-                        >
-                            <RefreshCw className={`w-5 h-5 ${refreshing ? "animate-spin" : ""}`} />
-                        </Button>
+                        <div className="hidden lg:flex items-center gap-0 bg-gray-100 p-1 rounded-xl relative">
+                            {/* Sliding indicator */}
+                            <div
+                                className={`absolute top-1 bottom-1 w-8 bg-white rounded-lg shadow-sm transition-all duration-300 ease-out ${columnLayout === 2 ? "left-[calc(100%-36px)]" : "left-1"
+                                    }`}
+                            />
+                            <button
+                                onClick={() => setColumnLayout(1)}
+                                className="relative z-10 p-2 rounded-lg transition-colors duration-200 active:scale-90 touch-manipulation text-gray-500 hover:text-gray-700 data-[active=true]:text-gray-900"
+                                data-active={columnLayout === 1}
+                                title="1 colonne"
+                            >
+                                <List className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => setColumnLayout(2)}
+                                className="relative z-10 p-2 rounded-lg transition-colors duration-200 active:scale-90 touch-manipulation text-gray-500 hover:text-gray-700 data-[active=true]:text-gray-900"
+                                data-active={columnLayout === 2}
+                                title="2 colonnes"
+                            >
+                                <LayoutGrid className="w-4 h-4" />
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
@@ -332,7 +346,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                     </div>
                 ) : (
                     /* Intervention Cards Grid */
-                    <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
+                    <div className={columnLayout === 2 ? "grid gap-6 grid-cols-1 lg:grid-cols-2" : "grid gap-6 grid-cols-1"}>
                         {interventions.map((intervention) => (
                             <div key={intervention.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <UrgentRequestCard

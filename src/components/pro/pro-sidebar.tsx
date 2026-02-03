@@ -390,7 +390,7 @@ export function ProSidebar({
                                             <span className="flex-1 text-sm">{item.label}</span>
 
                                             {isMissions && unreadCount > 0 && (
-                                                <span className="bg-red-500 text-white px-1.5 py-0.5 rounded-full text-[10px] font-bold min-w-[1.25rem] text-center">
+                                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
                                                     {unreadCount > 9 ? "9+" : unreadCount}
                                                 </span>
                                             )}

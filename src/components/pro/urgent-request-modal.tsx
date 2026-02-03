@@ -393,7 +393,7 @@ export function UrgentRequestModal({
                 <div className="overflow-y-auto flex-1 bg-white">
 
 
-                    <div className="p-6 space-y-8">
+                    <div className="p-6 space-y-4">
                         {/* Description */}
                         {intervention.situationDetails && (
                             <div className="space-y-3">

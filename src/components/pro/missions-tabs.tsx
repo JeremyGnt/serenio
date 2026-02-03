@@ -7,6 +7,7 @@ import {
     Clock,
     Phone,
     ChevronRight,
+    ChevronLeft,
     ListChecks,
     CheckCircle2,
     XCircle,
@@ -16,7 +17,10 @@ import {
     ShieldAlert,
     Wrench,
     CircleDot,
-    HelpCircle
+    HelpCircle,
+    LayoutGrid,
+    List,
+    MessageSquare
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -86,6 +90,7 @@ export function MissionsTabs({
     const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({})
     const [currentPage, setCurrentPage] = useState(1)
     const [missionsData, setMissionsData] = useState<MissionsData>(initialActiveMissions)
+    const [columnLayout, setColumnLayout] = useState<1 | 2>(2)
     const [isPending, startTransition] = useTransition()
     const tabsRef = useRef<HTMLDivElement>(null)
 
@@ -207,42 +212,69 @@ export function MissionsTabs({
         <>
             {/* Tabs */}
             {/* Tabs */}
-            <div ref={tabsRef} className="flex bg-gray-100 p-1.5 rounded-2xl w-full sm:w-fit mb-8 overflow-x-auto no-scrollbar">
-                {TABS.map((tab) => {
-                    const count = getCount(tab.id)
-                    const Icon = tab.icon
-                    const isActive = activeTab === tab.id
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div ref={tabsRef} className="flex bg-gray-100 p-1.5 rounded-2xl w-full sm:w-fit overflow-x-auto no-scrollbar">
+                    {TABS.map((tab) => {
+                        const count = getCount(tab.id)
+                        const Icon = tab.icon
+                        const isActive = activeTab === tab.id
 
-                    return (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={cn(
-                                "flex-1 sm:flex-none flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary/20",
-                                isActive
-                                    ? "bg-white text-gray-900 shadow-md shadow-gray-200/50"
-                                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
-                            )}
-                        >
-                            <Icon className={cn(
-                                "w-4.5 h-4.5",
-                                isActive && tab.id === "active" && "text-amber-500",
-                                isActive && tab.id === "completed" && "text-emerald-500",
-                                isActive && tab.id === "cancelled" && "text-red-500",
-                            )} />
-                            <span className="whitespace-nowrap">{tab.label}</span>
-                            <span className={cn(
-                                "px-2 py-0.5 text-[11px] font-bold rounded-full transition-colors",
-                                isActive && tab.id === "active" && "bg-amber-100 text-amber-700",
-                                isActive && tab.id === "completed" && "bg-emerald-100 text-emerald-700",
-                                isActive && tab.id === "cancelled" && "bg-red-100 text-red-700",
-                                !isActive && "bg-gray-200 text-gray-500"
-                            )}>
-                                {count}
-                            </span>
-                        </button>
-                    )
-                })}
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => handleTabChange(tab.id)}
+                                className={cn(
+                                    "flex-1 sm:flex-none flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-primary/20",
+                                    isActive
+                                        ? "bg-white text-gray-900 shadow-md shadow-gray-200/50"
+                                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+                                )}
+                            >
+                                <Icon className={cn(
+                                    "w-4.5 h-4.5",
+                                    isActive && tab.id === "active" && "text-amber-500",
+                                    isActive && tab.id === "completed" && "text-emerald-500",
+                                    isActive && tab.id === "cancelled" && "text-red-500",
+                                )} />
+                                <span className="whitespace-nowrap">{tab.label}</span>
+                                <span className={cn(
+                                    "px-2 py-0.5 text-[11px] font-bold rounded-full transition-colors",
+                                    isActive && tab.id === "active" && "bg-amber-100 text-amber-700",
+                                    isActive && tab.id === "completed" && "bg-emerald-100 text-emerald-700",
+                                    isActive && tab.id === "cancelled" && "bg-red-100 text-red-700",
+                                    !isActive && "bg-gray-200 text-gray-500"
+                                )}>
+                                    {count}
+                                </span>
+                            </button>
+                        )
+                    })}
+                </div>
+
+                {/* Column Layout Toggle - Desktop Only */}
+                <div className="hidden lg:flex items-center gap-0 bg-gray-100 p-1 rounded-xl relative self-end md:self-auto">
+                    {/* Sliding indicator */}
+                    <div
+                        className={`absolute top-1 bottom-1 w-8 bg-white rounded-lg shadow-sm transition-all duration-300 ease-out ${columnLayout === 2 ? "left-[calc(100%-36px)]" : "left-1"
+                            }`}
+                    />
+                    <button
+                        onClick={() => setColumnLayout(1)}
+                        className="relative z-10 p-2 rounded-lg transition-colors duration-200 active:scale-90 touch-manipulation text-gray-500 hover:text-gray-700 data-[active=true]:text-gray-900"
+                        data-active={columnLayout === 1}
+                        title="1 colonne"
+                    >
+                        <List className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={() => setColumnLayout(2)}
+                        className="relative z-10 p-2 rounded-lg transition-colors duration-200 active:scale-90 touch-manipulation text-gray-500 hover:text-gray-700 data-[active=true]:text-gray-900"
+                        data-active={columnLayout === 2}
+                        title="2 colonnes"
+                    >
+                        <LayoutGrid className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
 
             {/* Liste des missions */}
@@ -270,7 +302,7 @@ export function MissionsTabs({
                 </div>
             ) : (
                 <div className="space-y-8">
-                    <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+                    <div className={columnLayout === 2 ? "grid gap-6 grid-cols-1 lg:grid-cols-2" : "grid gap-6 grid-cols-1"}>
                         {displayedMissions.map((mission) => (
                             <div key={mission.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <MissionCard
@@ -284,42 +316,40 @@ export function MissionsTabs({
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex justify-center items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="h-9 px-4 rounded-xl border-gray-200 hover:bg-gray-50 hover:text-gray-900 font-medium text-gray-600 disabled:opacity-50"
-                            >
-                                Précédent
-                            </Button>
+                        <div className="flex justify-center items-center">
+                            <div className="inline-flex items-center gap-1 bg-gray-100/80 backdrop-blur-sm p-1.5 rounded-2xl">
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="p-2.5 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:shadow-none transition-all duration-200 active:scale-90 touch-manipulation"
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
 
-                            <div className="flex items-center gap-1.5 px-3">
-                                {Array.from({ length: totalPages }).map((_, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => setCurrentPage(i + 1)}
-                                        className={cn(
-                                            "w-2.5 h-2.5 rounded-full transition-all duration-300",
-                                            currentPage === i + 1
-                                                ? "bg-gray-800 w-8"
-                                                : "bg-gray-200 hover:bg-gray-300"
-                                        )}
-                                        aria-label={`Page ${i + 1}`}
-                                    />
-                                ))}
+                                <div className="flex items-center gap-1 px-2">
+                                    {Array.from({ length: totalPages }).map((_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => setCurrentPage(i + 1)}
+                                            className={cn(
+                                                "h-2 rounded-full transition-all duration-300 ease-out",
+                                                currentPage === i + 1
+                                                    ? "w-6 bg-gray-900"
+                                                    : "w-2 bg-gray-300 hover:bg-gray-400"
+                                            )}
+                                            aria-label={`Page ${i + 1}`}
+                                        />
+                                    ))}
+                                </div>
+
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="p-2.5 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-white hover:shadow-sm disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:shadow-none transition-all duration-200 active:scale-90 touch-manipulation"
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
                             </div>
-
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                disabled={currentPage === totalPages}
-                                className="h-9 px-4 rounded-xl border-gray-200 hover:bg-gray-50 hover:text-gray-900 font-medium text-gray-600 disabled:opacity-50"
-                            >
-                                Suivant
-                            </Button>
                         </div>
                     )}
                 </div>
@@ -366,7 +396,7 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
         <Link href={`/pro/mission/${mission.trackingNumber}`} className="block h-full">
             <div className={cn(
                 "group relative flex flex-col h-full bg-white rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-gray-100 shadow-sm",
-                unreadCount > 0 && "ring-2 ring-red-500/20"
+                unreadCount > 0 && !isCompleted && !isCancelled && "border-l-[6px] border-l-blue-600"
             )}>
                 {/* Header */}
                 <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
@@ -387,10 +417,11 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
                                         {status.label}
                                     </span>
                                 )}
-                                {unreadCount > 0 && (
-                                    <span className="px-2 py-0.5 bg-red-100 text-red-600 text-[10px] font-bold uppercase tracking-wider rounded-full animate-pulse">
-                                        {unreadCount} Msg
-                                    </span>
+                                {unreadCount > 0 && !isCompleted && !isCancelled && (
+                                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100/50 shadow-sm">
+                                        <MessageSquare className="w-3 h-3" />
+                                        <span className="text-[10px] font-bold">{unreadCount}</span>
+                                    </div>
                                 )}
                             </div>
                             <h3 className="font-bold text-gray-900 leading-tight">
@@ -399,10 +430,11 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
                         </div>
                     </div>
 
-                    <div className="text-right shrink-0">
-                        <span className="text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">
+                    <div className="flex items-center gap-2.5 shrink-0">
+                        <span className="text-slate-500 text-xs font-medium bg-slate-100/80 px-2.5 py-1 rounded-full whitespace-nowrap">
                             {isCompleted && mission.completedAt ? formatDate(mission.completedAt) : getTimeAgo(mission.acceptedAt)}
                         </span>
+                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-900 transition-all duration-300 active:scale-95 touch-manipulation" />
                     </div>
                 </div>
 
@@ -427,11 +459,6 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
                                 {mission.clientFirstName} {mission.clientLastName}
                             </span>
                         </div>
-
-                        <Button variant="ghost" size="sm" className="h-8 px-0 hover:bg-transparent text-primary hover:text-primary/80 font-semibold text-xs group-hover:translate-x-1 transition-transform">
-                            Voir détails
-                            <ChevronRight className="w-3.5 h-3.5 ml-1" />
-                        </Button>
                     </div>
                 </div>
             </div>
