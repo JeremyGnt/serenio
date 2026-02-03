@@ -31,13 +31,17 @@ export interface AnonymizedIntervention {
     lockType?: LockType
     diagnosticAnswers?: Record<string, unknown> // Toutes les réponses du diagnostic
 
+    // Prix estimé
+    priceMin?: number // en euros
+    priceMax?: number // en euros
+
     // Urgence
     isUrgent: boolean
     urgencyLevel: 1 | 2 | 3
 
     // Timestamps
     createdAt: string
-    submittedAt?: string
+    submittedAt: string
 
     // Distance du pro (calculée)
     distance?: number // en km
@@ -117,7 +121,12 @@ export async function getPendingInterventions(): Promise<AnonymizedIntervention[
                         situation_type,
                         situation_details,
                         door_type,
-                        lock_type
+                        lock_type,
+                        diagnostic_answers
+                    ),
+                    price_scenarios (
+                        price_min_cents,
+                        price_max_cents
                     )
                 `)
                 .in("status", ["pending", "searching"])
@@ -152,6 +161,11 @@ export async function getPendingInterventions(): Promise<AnonymizedIntervention[
                 ? intervention.intervention_diagnostics[0]
                 : intervention.intervention_diagnostics
 
+            // Récupérer le scénario de prix
+            const priceScenario = Array.isArray(intervention.price_scenarios)
+                ? intervention.price_scenarios[0]
+                : intervention.price_scenarios
+
             // Calculer la distance
             const distance = calculateDistance(
                 artisanLat,
@@ -178,7 +192,9 @@ export async function getPendingInterventions(): Promise<AnonymizedIntervention[
                 situationDetails: diagnostic?.situation_details,
                 doorType: diagnostic?.door_type,
                 lockType: diagnostic?.lock_type,
-                // diagnosticAnswers: diagnostic?.diagnostic_answers, // Optimisation: Chargé à la demande via getInterventionDetailsForModal
+                diagnosticAnswers: diagnostic?.diagnostic_answers,
+                priceMin: priceScenario?.price_min_cents ? Math.round(priceScenario.price_min_cents / 100) : undefined,
+                priceMax: priceScenario?.price_max_cents ? Math.round(priceScenario.price_max_cents / 100) : undefined,
                 isUrgent: intervention.is_urgent,
                 urgencyLevel: intervention.urgency_level || 2,
                 createdAt: intervention.created_at,
@@ -240,6 +256,10 @@ export async function getInterventionById(interventionId: string): Promise<Anony
                     situation_details,
                     door_type,
                     lock_type
+                ),
+                price_scenarios (
+                    price_min_cents,
+                    price_max_cents
                 )
             `)
             .eq("id", interventionId)
@@ -253,6 +273,11 @@ export async function getInterventionById(interventionId: string): Promise<Anony
         const diagnostic = Array.isArray(intervention.intervention_diagnostics)
             ? intervention.intervention_diagnostics[0]
             : intervention.intervention_diagnostics
+
+        // Récupérer le scénario de prix
+        const priceScenario = Array.isArray(intervention.price_scenarios)
+            ? intervention.price_scenarios[0]
+            : intervention.price_scenarios
 
         // Calculer la distance si les coordonnées de l'artisan sont disponibles
         const distance = calculateDistance(
@@ -273,6 +298,8 @@ export async function getInterventionById(interventionId: string): Promise<Anony
             situationDetails: diagnostic?.situation_details,
             doorType: diagnostic?.door_type,
             lockType: diagnostic?.lock_type,
+            priceMin: priceScenario?.price_min_cents ? Math.round(priceScenario.price_min_cents / 100) : undefined,
+            priceMax: priceScenario?.price_max_cents ? Math.round(priceScenario.price_max_cents / 100) : undefined,
             isUrgent: intervention.is_urgent,
             urgencyLevel: intervention.urgency_level || 2,
             createdAt: intervention.created_at,
@@ -1387,7 +1414,8 @@ export async function getInterventionDetailsForModal(interventionId: string): Pr
             .select(`
                 *,
                 intervention_diagnostics (*),
-                intervention_photos (*)
+                intervention_photos (*),
+                price_scenarios (*)
             `)
             .eq("id", interventionId)
             .single()
@@ -1397,6 +1425,10 @@ export async function getInterventionDetailsForModal(interventionId: string): Pr
         const diagnostic = Array.isArray(intervention.intervention_diagnostics)
             ? intervention.intervention_diagnostics[0]
             : intervention.intervention_diagnostics
+
+        const priceScenario = Array.isArray(intervention.price_scenarios)
+            ? intervention.price_scenarios[0]
+            : intervention.price_scenarios
 
         // 🟢 Generate Signed URLs for Photos
         let signedPhotos: { url: string; path: string }[] = []
@@ -1433,6 +1465,8 @@ export async function getInterventionDetailsForModal(interventionId: string): Pr
             doorType: diagnostic?.door_type,
             lockType: diagnostic?.lock_type,
             diagnosticAnswers: diagnostic?.diagnostic_answers as Record<string, unknown> | undefined,
+            priceMin: priceScenario?.price_min_cents ? Math.round(priceScenario.price_min_cents / 100) : undefined,
+            priceMax: priceScenario?.price_max_cents ? Math.round(priceScenario.price_max_cents / 100) : undefined,
             isUrgent: intervention.is_urgent,
             urgencyLevel: intervention.urgency_level || 2,
             createdAt: intervention.created_at,

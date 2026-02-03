@@ -29,7 +29,8 @@ import {
     MessageSquare,
     Contact,
     ArrowUpRight,
-    Navigation
+    Navigation,
+    Search
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/browser"
 import type { RealtimePostgresChangesPayload, RealtimeChannel } from "@supabase/supabase-js"
@@ -457,7 +458,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                         <div className="grid gap-6 lg:grid-cols-2">
                             {/* Artisan Card */}
                             {artisan && (
-                                <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 p-5">
+                                <div className="bg-white rounded-2xl border border-gray-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:scale-[1.02] transition-all duration-300 p-5">
                                     <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                         <User className="w-5 h-5 text-emerald-600" />
                                         Votre serrurier
@@ -508,36 +509,30 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                             )}
 
                             {/* Waiting for artisan - Pas affiché pour les brouillons */}
+                            {/* Searching Card - Premium Soft Redesign */}
                             {!artisan && !isCancelled && !isCompleted && intervention.status !== "draft" && (
-                                <div className="bg-white rounded-2xl border border-amber-100 shadow-[0_4px_20px_-4px_rgba(251,191,36,0.15)] p-5 relative overflow-hidden group">
-                                    {/* Background decoration */}
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-60" />
+                                <div className="bg-white rounded-2xl border border-gray-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:scale-[1.02] transition-all duration-300 p-6 relative overflow-hidden">
+                                    {/* Background decoration - subtle amber glow */}
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-70" />
 
-                                    <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2 relative z-10">
-                                        <User className="w-5 h-5 text-amber-500" />
-                                        Votre serrurier
-                                    </h2>
-
-                                    <div className="flex items-center gap-4 relative z-10">
-                                        {/* Pulsing Avatar Placeholder */}
-                                        <div className="relative">
-                                            <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center relative z-10 border border-amber-200 shadow-sm">
-                                                <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
-                                            </div>
-                                            {/* Pulse Rings */}
-                                            <div className="absolute inset-0 bg-amber-100 rounded-full animate-ping opacity-20" />
+                                    <div className="flex items-center gap-5 relative z-10">
+                                        {/* Soft Icon Container */}
+                                        <div className="w-16 h-16 bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-2xl flex items-center justify-center shrink-0 border border-amber-200/30 shadow-sm">
+                                            <Search className="w-7 h-7 text-amber-500" />
                                         </div>
 
                                         <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-0.5">
-                                                <p className="text-lg font-bold text-gray-900">Recherche en cours...</p>
-                                                <span className="relative flex h-2 w-2">
-                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-gray-500 leading-relaxed">
-                                                Nous contactons les serruriers disponibles
+                                            <h2 className="text-lg font-bold text-gray-900 mb-1.5 flex items-center gap-3">
+                                                Recherche en cours
+                                                {/* Bouncing dots - User liked this */}
+                                                <div className="flex space-x-1">
+                                                    <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                                    <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                                    <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce"></div>
+                                                </div>
+                                            </h2>
+                                            <p className="text-sm text-gray-600 leading-relaxed">
+                                                Nous contactons les serruriers disponibles pour votre urgence.
                                             </p>
                                         </div>
                                     </div>
@@ -547,7 +542,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                             {/* Timeline - Caché pour annulé */}
                             {!isCancelled && (
                                 <div
-                                    className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 p-5 cursor-pointer group relative"
+                                    className="bg-white rounded-2xl border border-gray-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:scale-[1.02] transition-all duration-300 p-5 cursor-pointer group relative"
                                     onClick={() => setShowHistoryDialog(true)}
                                 >
                                     <div className="absolute top-5 right-5 text-gray-300 group-hover:text-emerald-600 transition-colors duration-300">
@@ -584,14 +579,14 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                     {!isCancelled && (
                         <div className="grid gap-6 lg:grid-cols-2">
                             {/* Adresse */}
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 p-5">
+                            <div className="bg-white rounded-2xl border border-gray-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:scale-[1.02] transition-all duration-300 p-5">
                                 <h2 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                     <Navigation className="w-5 h-5 text-emerald-600" />
                                     Adresse d'intervention
                                 </h2>
                                 <div className="space-y-4">
                                     <div className="flex items-start gap-3 group/item">
-                                        <div className="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center shrink-0 group-hover/item:bg-emerald-50 transition-colors duration-300">
+                                        <div className="w-9 h-9 flex items-center justify-center shrink-0 transition-colors duration-300">
                                             <MapPin className="w-4 h-4 text-gray-400 group-hover/item:text-emerald-600 transition-colors" />
                                         </div>
                                         <div>
@@ -607,7 +602,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
 
                                     {intervention.addressInstructions && (
                                         <div className="flex items-start gap-3 pt-3 border-t border-gray-50 group/item">
-                                            <div className="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center shrink-0 group-hover/item:bg-emerald-50 transition-colors duration-300">
+                                            <div className="w-9 h-9 flex items-center justify-center shrink-0 transition-colors duration-300">
                                                 <StickyNote className="w-4 h-4 text-gray-400 group-hover/item:text-emerald-600 transition-colors" />
                                             </div>
                                             <div className="text-sm text-gray-600">
@@ -620,20 +615,20 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                             </div>
 
                             {/* Contact */}
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 p-5">
+                            <div className="bg-white rounded-2xl border border-gray-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:scale-[1.02] transition-all duration-300 p-5">
                                 <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                     <Contact className="w-5 h-5 text-emerald-600" />
                                     Vos coordonnées
                                 </h2>
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-3 group">
-                                        <div className="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center group-hover:bg-emerald-50 transition-colors duration-300">
+                                        <div className="w-9 h-9 flex items-center justify-center transition-colors duration-300">
                                             <Phone className="w-4 h-4 text-gray-400 group-hover:text-emerald-600 transition-colors" />
                                         </div>
                                         <span className="text-gray-700">{intervention.clientPhone}</span>
                                     </div>
                                     <div className="flex items-center gap-3 group">
-                                        <div className="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center group-hover:bg-emerald-50 transition-colors duration-300">
+                                        <div className="w-9 h-9 flex items-center justify-center transition-colors duration-300">
                                             <Mail className="w-4 h-4 text-gray-400 group-hover:text-emerald-600 transition-colors" />
                                         </div>
                                         <span className="text-gray-700">{intervention.clientEmail}</span>
@@ -645,7 +640,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
 
                     {/* Photos uploadées - Visible si non annulé et s'il y a des photos */}
                     {!isCancelled && intervention.photos && intervention.photos.length > 0 && (
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 p-5">
+                        <div className="bg-white rounded-2xl border border-gray-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:scale-[1.02] transition-all duration-300 p-5">
                             <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                 <Camera className="w-5 h-5 text-emerald-600" />
                                 Vos photos
@@ -669,10 +664,11 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
                         <div className="flex justify-center mt-2">
                             <Button
                                 variant="outline"
-                                className="h-12 px-8 text-red-600 border-red-200 hover:bg-red-50"
+                                className="h-12 px-8 bg-white border-transparent text-gray-500 hover:border-red-500 hover:text-red-600 hover:bg-white hover:shadow-md transition-all duration-300 rounded-2xl"
                                 onClick={() => setShowCancelDialog(true)}
                                 disabled={cancelling}
                             >
+                                <AlertCircle className="w-4 h-4 mr-2" />
                                 Annuler ma demande
                             </Button>
                         </div>
@@ -699,7 +695,7 @@ export function TrackingView({ data, currentUserId, isSnapshot = false }: Tracki
 
                     {/* Cancelled Message - Premium Redesign Refined */}
                     {isCancelled && (
-                        <div className="relative overflow-hidden bg-white/80 backdrop-blur-xl border border-red-100 rounded-3xl p-6 sm:p-12 text-center shadow-2xl max-w-3xl mx-auto">
+                        <div className="relative overflow-hidden bg-white/80 backdrop-blur-xl border border-red-100 rounded-2xl p-6 sm:p-12 text-center shadow-2xl max-w-3xl mx-auto">
                             <div className="relative z-10 flex flex-col items-center">
                                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-50 rounded-2xl flex items-center justify-center mb-6 shadow-sm ring-1 ring-red-100/50">
                                     <div className="relative">

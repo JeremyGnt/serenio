@@ -428,41 +428,32 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
                   </div>
                 </div>
               ) : (
-                // Card recherche en cours - Style "Horizontal" premium
+                // Card recherche en cours - Enhanced Premium Soft
                 !isCancelled && !isCompleted && (
-                  <div className="bg-amber-50 rounded-2xl border border-amber-200 shadow-[0_4px_20px_-4px_rgba(251,191,36,0.25)] p-5 relative overflow-hidden group">
-                    {/* Background decoration */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-60" />
+                  <div className="bg-white rounded-2xl border border-gray-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:scale-[1.02] transition-all duration-300 p-6 relative overflow-hidden">
+                    {/* Background decoration - subtle amber glow */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-70" />
 
-                    <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2 relative z-10">
-                      <User className="w-5 h-5 text-amber-500" />
-                      Votre artisan
-                    </h2>
-
-                    <div className="flex items-center gap-4 relative z-10">
-                      {/* Pulsing Avatar Placeholder */}
-                      <div className="relative">
-                        <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center relative z-10 border border-amber-100 shadow-sm">
-                          <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
-                        </div>
-                        {/* Pulse Rings */}
-                        <div className="absolute inset-0 bg-amber-100 rounded-full animate-ping opacity-20" />
+                    <div className="flex items-center gap-5 relative z-10">
+                      {/* Soft Icon Container */}
+                      <div className="w-16 h-16 bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-2xl flex items-center justify-center shrink-0 border border-amber-200/30 shadow-sm">
+                        <User className="w-7 h-7 text-amber-500" />
                       </div>
 
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <p className="text-lg font-bold text-gray-900">
-                            {rdv.rdv_auto_assign ? "Recherche en cours..." : "En attente"}
-                          </p>
-                          <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-500 leading-relaxed">
+                        <h2 className="text-lg font-bold text-gray-900 mb-1.5 flex items-center gap-3">
+                          {rdv.rdv_auto_assign ? "Recherche en cours" : "En attente"}
+                          {/* Bouncing dots animation */}
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                            <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                            <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce"></div>
+                          </div>
+                        </h2>
+                        <p className="text-sm text-gray-600 leading-relaxed">
                           {rdv.rdv_auto_assign
-                            ? "Nous recherchons un artisan disponible"
-                            : "L'artisan va confirmer sa disponibilité"
+                            ? "Nous contactons les artisans disponibles pour votre rendez-vous."
+                            : "L'artisan va confirmer sa disponibilité."
                           }
                         </p>
                       </div>
@@ -698,11 +689,11 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
             <div className="flex flex-col items-center gap-4 mt-8">
               <Button
                 variant="outline"
-                className="h-12 px-8 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 transition-all active:scale-95"
+                className="h-12 px-8 bg-white border-transparent text-gray-500 hover:border-red-500 hover:text-red-600 hover:bg-white hover:shadow-md transition-all duration-300 rounded-2xl"
                 onClick={() => setShowCancelDialog(true)}
                 disabled={cancelling}
               >
-                <XCircle className="w-4 h-4 mr-2" />
+                <AlertCircle className="w-4 h-4 mr-2" />
                 Annuler le rendez-vous
               </Button>
 
@@ -739,7 +730,7 @@ export function RdvSuiviContent({ rdv, trackingNumber }: RdvSuiviContentProps) {
 
           {/* Cancelled Message - Premium Redesign */}
           {isCancelled && (
-            <div className="relative overflow-hidden bg-white/80 backdrop-blur-xl border border-red-100 rounded-3xl p-6 sm:p-12 text-center shadow-2xl max-w-3xl mx-auto">
+            <div className="relative overflow-hidden bg-white/80 backdrop-blur-xl border border-red-100 rounded-2xl p-6 sm:p-12 text-center shadow-2xl max-w-3xl mx-auto">
               <div className="relative z-10 flex flex-col items-center">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-50 rounded-2xl flex items-center justify-center mb-6 shadow-sm ring-1 ring-red-100/50">
                   <div className="relative">

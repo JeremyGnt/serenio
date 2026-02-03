@@ -46,6 +46,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
     const [isConnected, setIsConnected] = useState(false)
     const [newUrgenceAlert, setNewUrgenceAlert] = useState(false)
     const [localIsAvailable, setLocalIsAvailable] = useState(isAvailable)
+    const [retryCount, setRetryCount] = useState(0)
     const channelRef = useRef<RealtimeChannel | null>(null)
     const availabilityChannelRef = useRef<RealtimeChannel | null>(null)
 
@@ -122,7 +123,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
 
         const intervalId = setInterval(() => {
             handleRefresh()
-        }, 15000)
+        }, 60000)
 
         return () => clearInterval(intervalId)
     }, [localIsAvailable, handleRefresh])
@@ -204,10 +205,24 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                     }
                 }
             )
-            .subscribe((status) => {
+            .subscribe((status, err) => {
                 setIsConnected(status === "SUBSCRIBED")
+
                 if (status === "CHANNEL_ERROR") {
-                    console.error("Realtime connection error")
+                    console.error("Realtime connection error:", err)
+                    // Tentative de reconnexion après 5 secondes
+                    const timeout = setTimeout(() => {
+                        console.log("Retrying Realtime connection...")
+                        setLocalIsAvailable(prev => {
+                            // Force une mise à jour d'état pour redéclencher l'effet
+                            // C'est un hack simple : on garde la même valeur mais React peut ne pas re-render si c'est identique
+                            // Mieux vaut utiliser un compteur de retry
+                            return prev
+                        })
+                        // Alternative : incrémenter un retryCount
+                        setRetryCount(c => c + 1)
+                    }, 5000)
+                    return () => clearTimeout(timeout)
                 }
             })
 
@@ -218,7 +233,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                 supabase.removeChannel(channelRef.current)
             }
         }
-    }, [handleRefresh, localIsAvailable, artisanSettings, userId])
+    }, [handleRefresh, localIsAvailable, artisanSettings, userId, retryCount])
 
     const handleAvailabilityToggle = (newStatus: boolean) => {
         setLocalIsAvailable(newStatus)
@@ -249,7 +264,7 @@ export function UrgentRequestsList({ initialInterventions, isAvailable, userId, 
                             size="icon"
                             onClick={handleRefresh}
                             disabled={refreshing}
-                            className="rounded-full hover:bg-gray-100 text-gray-500"
+                            className="rounded-full hover:bg-gray-100 text-gray-500 hidden md:inline-flex"
                             title="Actualiser la liste"
                         >
                             <RefreshCw className={`w-5 h-5 ${refreshing ? "animate-spin" : ""}`} />

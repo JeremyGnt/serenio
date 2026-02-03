@@ -227,7 +227,9 @@ export function UrgentRequestCard({ intervention, onAccept, onAcceptStart, onRef
                         <div>
                             <div className="flex items-center gap-2 mb-1">
                                 <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-emerald-100 text-emerald-700">
-                                    150€ - 250€
+                                    {intervention.priceMin && intervention.priceMax
+                                        ? `${intervention.priceMin}€ - ${intervention.priceMax}€`
+                                        : "Sur devis"}
                                 </span>
 
                             </div>
@@ -260,30 +262,60 @@ export function UrgentRequestCard({ intervention, onAccept, onAcceptStart, onRef
                         </div>
                     </div>
 
-                    {/* Details Grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-4 px-3">
-                        {/* Door Detail */}
-                        <div className="flex items-start gap-2">
-                            <DoorClosed className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
-                            <div className="flex flex-col min-w-0">
-                                <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Porte</span>
-                                <span className="text-xs font-semibold text-gray-900 truncate">
-                                    {intervention.doorType ? DOOR_LABELS[intervention.doorType] || intervention.doorType : "Non spécifié"}
-                                </span>
-                            </div>
-                        </div>
+                    {/* Details Grid or Damage Report */}
+                    {intervention.situationType === 'break_in' ? (
+                        <div className="mb-4 px-3">
+                            <div className="flex items-start gap-2">
+                                <AlertTriangle className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                                <div className="flex flex-col min-w-0 w-full">
+                                    <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Dégâts signalés</span>
+                                    <p className="text-xs font-semibold text-gray-900 line-clamp-2 leading-relaxed">
+                                        {(() => {
+                                            if (intervention.situationDetails) return intervention.situationDetails;
 
-                        {/* Lock Detail */}
-                        <div className="flex items-start gap-2">
-                            <Lock className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
-                            <div className="flex flex-col min-w-0">
-                                <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Serrure</span>
-                                <span className="text-xs font-semibold text-gray-900 truncate">
-                                    {intervention.lockType ? LOCK_LABELS[intervention.lockType] || intervention.lockType : "Non spécifié"}
-                                </span>
+                                            // Fallback to damage_type selection
+                                            const damageTypes = (intervention.diagnosticAnswers as any)?.damage_type as string[] | undefined;
+                                            if (damageTypes && damageTypes.length > 0) {
+                                                const DAMAGE_LABELS: Record<string, string> = {
+                                                    "door_broken": "Porte forcée / cassée",
+                                                    "lock_broken": "Serrure endommagée",
+                                                    "frame_damaged": "Cadre endommagé",
+                                                    "window_broken": "Fenêtre cassée"
+                                                };
+                                                return damageTypes.map(d => DAMAGE_LABELS[d] || d).join(", ");
+                                            }
+
+                                            return "Dégâts non précisés";
+                                        })()}
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="grid grid-cols-2 gap-3 mb-4 px-3">
+                            {/* Door Detail */}
+                            <div className="flex items-start gap-2">
+                                <DoorClosed className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Porte</span>
+                                    <span className="text-xs font-semibold text-gray-900 truncate">
+                                        {intervention.doorType ? DOOR_LABELS[intervention.doorType] || intervention.doorType : "Non spécifié"}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Lock Detail */}
+                            <div className="flex items-start gap-2">
+                                <Lock className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Serrure</span>
+                                    <span className="text-xs font-semibold text-gray-900 truncate">
+                                        {intervention.lockType ? LOCK_LABELS[intervention.lockType] || intervention.lockType : "Non spécifié"}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Footer Infos - Actions */}
                     <div className="flex items-center gap-3 pt-2 border-t border-gray-50 mt-auto">

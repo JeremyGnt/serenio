@@ -51,7 +51,7 @@ export function TrackingQuote({ quote, interventionId }: TrackingQuoteProps) {
   const isRefused = quote.status === "refused"
 
   return (
-    <div className={`rounded-2xl border p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300 ${isAccepted ? "bg-emerald-50/50 border-emerald-200" :
+    <div className={`rounded-2xl border p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:scale-[1.02] transition-all duration-300 ${isAccepted ? "bg-emerald-50/50 border-emerald-200" :
       isRefused ? "bg-red-50/50 border-red-200" :
         "bg-white border-gray-100"
       }`}>

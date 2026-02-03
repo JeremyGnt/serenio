@@ -168,7 +168,7 @@ export function UrgentRequestModal({
             window_open: "Fenêtre ouverte",
             door_type: "Type de porte",
             lock_type: "Type de serrure",
-            key_piece_visible: "Morceau de clé visible",
+            key_piece_visible: "Le morceau de clé est-il visible dans la serrure ?",
             can_enter: "Autre accès possible",
             lock_turns: "La clé tourne",
             recent_issue: "Problème soudain",
@@ -218,17 +218,22 @@ export function UrgentRequestModal({
         const answers = detailedIntervention.diagnosticAnswers || {}
 
         // Split keys into Critical and Contextual
-        const CRITICAL_KEYS = ['door_type', 'lock_type', 'can_enter', 'location_type']
+        const isBreakIn = detailedIntervention.situationType === 'break_in'
+
+        // Pour effraction: uniquement les dégâts (gérés manuellement), le reste en contexte
+        // Pour les autres: type de porte/serrure en critique, le reste en contexte (y compris location_type, can_enter...)
+        const CRITICAL_KEYS = isBreakIn ? [] : ['door_type', 'lock_type']
+
         const CONTEXTUAL_KEYS = Object.keys(answers).filter(k =>
-            !CRITICAL_KEYS.includes(k) && k !== 'situation_description'
+            !CRITICAL_KEYS.includes(k) && k !== 'situation_description' && k !== 'damage_type'
         )
 
         const renderRow = (key: string, label: string) => {
-            if (!answers[key]) return null
+            if (answers[key] === undefined || answers[key] === null) return null
             return (
-                <div key={key} className="flex justify-between items-center py-2.5 border-b border-gray-50 last:border-0">
-                    <span className="text-gray-500 text-sm font-medium">{label || QUESTION_LABELS[key] || key}</span>
-                    <span className="font-semibold text-gray-900 text-sm">{formatValue(answers[key])}</span>
+                <div key={key} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-4 py-3 border-b border-gray-50 last:border-0">
+                    <span className="text-gray-500 text-sm font-medium leading-relaxed">{label || QUESTION_LABELS[key] || key}</span>
+                    <span className="font-semibold text-gray-900 text-sm whitespace-nowrap">{formatValue(answers[key])}</span>
                 </div>
             )
         }
@@ -251,6 +256,26 @@ export function UrgentRequestModal({
                         Infos Critiques
                     </h4>
                     <div className="flex flex-col">
+                        {/* Special case for Break-in Damages */}
+                        {detailedIntervention.situationType === 'break_in' && (
+                            <div className="flex justify-between items-center py-2.5 border-b border-gray-50 last:border-0">
+                                <span className="text-gray-500 text-sm font-medium">Dégâts signalés</span>
+                                <span className="font-semibold text-gray-900 text-sm text-right max-w-[60%]">
+                                    {(() => {
+                                        // Prioritize explicit details
+                                        if (detailedIntervention.situationDetails) return detailedIntervention.situationDetails;
+
+                                        // Fallback to structured damage answers
+                                        const damageValue = answers.damage_type;
+                                        if (Array.isArray(damageValue) && damageValue.length > 0) {
+                                            return damageValue.map(v => VALUE_LABELS[v as string] || v).join(", ");
+                                        }
+
+                                        return "Dégâts non précisés";
+                                    })()}
+                                </span>
+                            </div>
+                        )}
                         {CRITICAL_KEYS.map(key => renderRow(key, QUESTION_LABELS[key]))}
                     </div>
                 </div>
@@ -319,24 +344,35 @@ export function UrgentRequestModal({
             >
 
                 {/* Header - White & Clean (Marketplace Style) */}
-                <div className="bg-white border-b border-gray-100 px-6 py-5 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-4">
-                        <div className="p-2.5 bg-gray-50 rounded-xl border border-gray-100">
+                <div className="bg-white border-b border-gray-100 px-4 py-4 md:px-6 md:py-5 flex flex-col md:flex-row items-start md:items-center justify-between shrink-0 relative gap-2 md:gap-4">
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-50 hover:text-gray-900 rounded-full transition-colors md:hidden"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+
+                    <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto pr-8 md:pr-0">
+                        <div className="p-2.5 bg-gray-50 rounded-xl border border-gray-100 shrink-0">
                             <SituationIcon className="w-6 h-6 text-gray-900" />
                         </div>
                         <div>
-                            <div className="flex items-center gap-2">
-                                <h2 className="font-bold text-lg text-gray-900 uppercase tracking-tight">
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <h2 className="font-bold text-lg text-gray-900 uppercase tracking-tight leading-tight">
                                     {situationLabel}
                                 </h2>
                                 {intervention.urgencyLevel === 3 && (
-                                    <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] font-bold uppercase rounded-full border border-red-100 animate-pulse">
+                                    <span className="px-2 py-0.5 bg-red-50 text-red-600 text-[10px] font-bold uppercase rounded-full border border-red-100 animate-pulse shrink-0">
                                         Urgent
                                     </span>
                                 )}
                             </div>
-                            <div className="flex items-center gap-2 text-gray-400 text-sm font-medium">
-                                <span>Réf: {intervention.trackingNumber}</span>
+                            <div className="flex items-center gap-2 text-gray-400 text-sm font-medium mt-1">
+                                <span className="px-2 py-0.5 text-xs font-bold uppercase tracking-wider rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap">
+                                    {intervention.priceMin && intervention.priceMax
+                                        ? `${intervention.priceMin}€ - ${intervention.priceMax}€`
+                                        : "Sur devis"}
+                                </span>
                                 <span>•</span>
                                 <span className="flex items-center gap-1">
                                     <Eye className="w-3 h-3" /> {isViewed ? "Vu" : "Nouveau"}
@@ -345,26 +381,12 @@ export function UrgentRequestModal({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
-                        {/* Price Display */}
-                        <div className="flex flex-col items-end">
-                            <span className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Prix Estimé</span>
-                            <span className="text-[#009966] font-bold text-xl leading-none tracking-tight">150€ - 250€</span>
-                        </div>
-
-                        <div className="h-8 w-[1px] bg-gray-100" />
-
-                        <div className="flex flex-col items-end">
-                            <span className="text-gray-400 text-[10px] font-medium uppercase tracking-wider">Reçu</span>
-                            <span className="text-gray-500 font-bold text-sm">{timeAgo}</span>
-                        </div>
-                        <button
-                            onClick={onClose}
-                            className="p-2 text-gray-400 hover:bg-gray-50 hover:text-gray-900 rounded-full transition-colors"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-                    </div>
+                    <button
+                        onClick={onClose}
+                        className="p-2 text-gray-400 hover:bg-gray-50 hover:text-gray-900 rounded-full transition-colors hidden md:block"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
                 </div>
 
                 {/* Content - Scrollable */}
@@ -451,7 +473,7 @@ export function UrgentRequestModal({
                 </div>
 
                 {/* Footer - Actions */}
-                <div className="p-5 bg-white border-t border-gray-50 flex-none z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="p-4 md:p-5 bg-white border-t border-gray-50 flex-none z-10 flex flex-col md:flex-row items-center justify-between gap-4">
                     {/* Error Display */}
                     {error && (
                         <div className="w-full md:w-auto mb-2 md:mb-0 bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm flex items-center gap-2 font-medium">
@@ -460,28 +482,26 @@ export function UrgentRequestModal({
                         </div>
                     )}
 
-                    <div className="flex-1"></div> {/* Spacer */}
+                    <div className="flex-1 hidden md:block"></div> {/* Spacer desktop only */}
 
-                    <div className="flex items-center gap-4 w-full md:w-auto">
+                    <div className="flex flex-row items-center gap-3 w-full md:w-auto">
                         <Button
                             variant="ghost"
-                            className="flex-none px-4 h-12 rounded-xl font-medium shadow-none text-gray-400 hover:text-red-600 hover:bg-red-50 hover:shadow-none transition-all"
+                            className="flex-[1] md:flex-none px-2 md:px-4 h-10 rounded-xl font-medium shadow-none text-gray-400 hover:text-red-600 hover:bg-red-50 hover:shadow-none transition-all"
                             onClick={handleRefuse}
                             disabled={loading}
                         >
-                            Refuser la mission
+                            Refuser
                         </Button>
                         <Button
-                            className="flex-1 md:flex-none md:w-64 h-12 rounded-xl font-bold uppercase tracking-wide text-white bg-[#009966] hover:bg-[#007a52] shadow-lg shadow-[#009966]/10 active:scale-[0.98] transition-all"
+                            className="flex-[2] md:flex-none md:w-64 h-10 rounded-xl font-bold text-white bg-gray-900 hover:bg-gray-800 shadow-lg shadow-gray-200/50 active:scale-[0.98] transition-all"
                             onClick={handleAccept}
                             disabled={loading}
                         >
-                            {loading ? (
+                            {loading && (
                                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                            ) : (
-                                <Check className="w-5 h-5 mr-2" />
                             )}
-                            Accepter la mission
+                            Accepter
                         </Button>
                     </div>
                 </div>
