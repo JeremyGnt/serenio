@@ -31,6 +31,8 @@ import {
     CheckCircle,
     ExternalLink,
     ChevronRight,
+    ListTodo,
+    Copy,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -114,22 +116,6 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
             <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
                 <div className="w-full px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        {/* Pro Logo */}
-                        <Link
-                            href="/pro"
-                            className="flex items-center gap-2 mr-2 active:scale-95 transition-transform touch-manipulation"
-                        >
-                            <div className="relative w-7 h-7">
-                                <Image src="/logo.svg" alt="Serenio" fill className="object-contain" />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="font-bold text-base tracking-tight text-gray-900 leading-none hidden sm:block">Serenio</span>
-                                <span className="text-[8px] bg-emerald-100 text-emerald-700 px-1.5 py-[1px] rounded-full font-bold uppercase tracking-wider w-fit mt-0.5 hidden sm:block">Pro</span>
-                            </div>
-                        </Link>
-
-                        {/* Vertical Divider */}
-                        <div className="h-8 w-px bg-gray-200 hidden sm:block" />
 
                         {/* Back Button */}
                         <Link
@@ -139,92 +125,108 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
                         <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                                <h1 className="font-semibold text-gray-900 truncate max-w-[150px] sm:max-w-none">
+                            <div className="flex items-center gap-3">
+                                <div className={cn("p-2 rounded-xl shrink-0 hidden sm:flex", situationConfig.bgColor, situationConfig.iconColor)}>
+                                    <SituationIcon className="w-5 h-5" />
+                                </div>
+                                <h1 className="font-bold text-lg text-gray-900 truncate max-w-[150px] sm:max-w-none">
                                     {mission.serviceType?.name || situationConfig.label}
                                 </h1>
-
                             </div>
-                            <p className="text-xs text-muted-foreground font-mono">
-                                #{mission.trackingNumber}
-                            </p>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-
-                        <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${statusInfo.bgColor} ${statusInfo.color}`}>
-                            {statusInfo.label}
-                        </span>
+                        <button
+                            onClick={() => {
+                                navigator.clipboard.writeText(mission.trackingNumber || "")
+                                // Could add a toast here if we had one
+                            }}
+                            className="group flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100/80 hover:bg-gray-200/80 hover:text-gray-900 text-gray-600 transition-all active:scale-95"
+                        >
+                            <span className="font-semibold text-sm font-mono tracking-tight">#{mission.trackingNumber}</span>
+                            <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" />
+                        </button>
                     </div>
                 </div>
             </header >
 
             <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-                {/* Status Stepper Card - Compact and Discreet */}
-                <div className="bg-white rounded-2xl border border-gray-200 px-6 pt-4 pb-8 overflow-hidden shadow-sm">
-                    {isRdv && (
-                        <div className="flex justify-end mb-2">
-                            <span className="text-[10px] text-indigo-600 bg-indigo-50/70 px-2 py-0.5 rounded-full font-semibold">
-                                RDV
-                            </span>
-                        </div>
-                    )}
-                    <MissionStepper status={mission.status} className="py-2" />
-                </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Colonne Principale (Infos) */}
                     <div className="lg:col-span-2 space-y-6">
 
-                        {/* Client Card - Compact Design */}
-                        <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm overflow-hidden">
-                            <div className="flex items-center gap-4">
-                                {/* Avatar */}
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500 text-base font-bold shrink-0">
+                        {/* Mission Actions Wrapper - Mobile/Tablet Only */}
+                        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden lg:hidden shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group">
+                            <div className="p-5 space-y-5">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                                        <ListTodo className="w-5 h-5 text-gray-400" />
+                                        Prochaine étape
+                                    </h3>
+                                </div>
+
+                                <MissionStepper status={mission.status} className="py-0" />
+
+                                <div className="pt-2">
+                                    <MissionActions
+                                        interventionId={mission.id}
+                                        trackingNumber={mission.trackingNumber}
+                                        status={mission.status}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Client Card - Redesigned (Clean & No Repetition) */}
+                        <div className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-100 flex items-center justify-center text-gray-500 text-base font-bold shrink-0 shadow-sm">
                                     {clientInitials}
                                 </div>
-
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Client</p>
-                                    <h2 className="text-lg font-bold text-gray-900 truncate">
-                                        {mission.clientFirstName} {mission.clientLastName}
-                                    </h2>
-                                </div>
-
-                                <div className="flex gap-2 shrink-0">
-                                    <Button size="icon" variant="secondary" asChild className="h-10 w-10 rounded-xl active:scale-90 transition-all">
-                                        <a href={`tel:${mission.clientPhone}`}>
-                                            <Phone className="w-4 h-4" />
-                                        </a>
-                                    </Button>
-                                    {canChat && (
-                                        <MissionClientChatButton
-                                            interventionId={mission.id}
-                                            currentUserId={currentUserId}
-                                            onClick={() => setIsChatOpen(true)}
-                                            isOpen={isChatOpen}
-                                        />
-                                    )}
+                                <div>
+                                    <div className="flex items-center gap-2 mb-0.5">
+                                        <h2 className="text-lg font-bold text-gray-900 leading-tight">
+                                            {mission.clientFirstName} {mission.clientLastName}
+                                        </h2>
+                                    </div>
+                                    <p className="text-sm text-gray-500">Dossier client</p>
                                 </div>
                             </div>
 
-                            {/* Contact info - hidden on mobile, shown as row on larger screens */}
-                            <div className="hidden sm:flex items-center gap-4 mt-3 pt-3 border-t border-gray-100 text-sm text-gray-500">
-                                <a href={`tel:${mission.clientPhone}`} className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors">
-                                    <Phone className="w-3.5 h-3.5" />
-                                    {mission.clientPhone}
-                                </a>
-                                <a href={`mailto:${mission.clientEmail}`} className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors truncate">
-                                    <Mail className="w-3.5 h-3.5" />
-                                    {mission.clientEmail}
-                                </a>
+                            <div className="grid grid-cols-2 gap-3">
+                                <Button
+                                    variant="outline"
+                                    className="group h-11 rounded-xl border-gray-200 hover:bg-gray-50 hover:text-gray-900 text-gray-700 font-semibold gap-2 active:scale-95 transition-all touch-manipulation shadow-sm"
+                                    asChild
+                                >
+                                    <a href={`tel:${mission.clientPhone}`}>
+                                        <Phone className="w-4 h-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300" />
+                                        Appeler
+                                    </a>
+                                </Button>
+                                {canChat ? (
+                                    <MissionClientChatButton
+                                        interventionId={mission.id}
+                                        currentUserId={currentUserId}
+                                        onClick={() => setIsChatOpen(true)}
+                                        isOpen={isChatOpen}
+                                        showLabel={true}
+                                        className="active:scale-95 transition-all touch-manipulation shadow-sm"
+                                    />
+                                ) : (
+                                    <Button disabled variant="outline" className="group h-11 rounded-xl gap-2 bg-gray-50 text-gray-400 border-gray-100">
+                                        <MessageSquare className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                                        Message
+                                    </Button>
+                                )}
                             </div>
                         </div>
 
                         {/* Address Card with Map Integrated */}
-                        <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm flex flex-col">
+                        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group">
                             {/* Map Header */}
                             <div className="h-48 w-full relative group">
                                 {mission.latitude && mission.longitude ? (
@@ -243,7 +245,7 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                                     variant="outline"
                                     size="sm"
                                     asChild
-                                    className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm border-gray-200 shadow-xl rounded-full h-10 px-4 active:scale-95 transition-all text-gray-900 font-semibold"
+                                    className="absolute bottom-3 right-4 bg-white/90 backdrop-blur-sm border-gray-200 shadow-xl rounded-full h-10 px-4 active:scale-95 transition-all text-gray-900 font-semibold"
                                 >
                                     <a
                                         href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
@@ -261,7 +263,10 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                             <div className="p-6 space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-1">
-                                        <p className="text-sm font-medium text-blue-600 mb-1">Lieu d'intervention</p>
+                                        <p className="text-sm font-medium text-blue-600 mb-1 flex items-center gap-2">
+                                            <MapPin className="w-4 h-4" />
+                                            Lieu d'intervention
+                                        </p>
                                         <p className="text-xl font-bold text-gray-900 leading-tight">{mission.addressStreet}</p>
                                         <p className="text-gray-500">
                                             {mission.addressPostalCode} {mission.addressCity}
@@ -287,141 +292,159 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                             </div>
                         </div>
 
-                        {/* Détails Intervention - Clean List Design */}
-                        <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-                            <div className="flex items-center justify-between mb-5">
-                                <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-                                    <Layers className="w-5 h-5 text-gray-400" />
-                                    Détails de l'intervention
-                                </h2>
-                                <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full ${isRdv ? "bg-indigo-100 text-indigo-700" : "bg-red-100 text-red-700"}`}>
-                                    {isRdv ? "RDV" : "Urgence"}
-                                </span>
+                        {/* Détails Intervention - Redesigned */}
+                        <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
+                                    <Layers className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h2 className="font-bold text-gray-900 leading-tight">Détails de l'intervention</h2>
+                                    <p className="text-xs text-gray-500 font-medium mt-0.5">Informations et spécificités</p>
+                                </div>
                             </div>
 
-                            {/* Main Info List */}
-                            <div className="space-y-3">
-                                {/* Symptom/Service */}
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                                    <div className={cn("p-2 rounded-lg", situationConfig.bgColor, situationConfig.iconColor)}>
-                                        <SituationIcon className="w-4 h-4" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{isRdv && mission.serviceType ? "Service" : "Symptôme"}</p>
-                                        <p className="font-semibold text-gray-900">{isRdv && mission.serviceType ? mission.serviceType.name : situationConfig.label}</p>
-                                    </div>
-                                </div>
-
-                                {/* Date */}
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                                    <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
-                                        <Calendar className="w-4 h-4" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Date de demande</p>
-                                        <p className="font-semibold text-gray-900">
-                                            {new Date(mission.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
-                                            <span className="text-gray-500 font-normal ml-2">
-                                                à {new Date(mission.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                                            </span>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* RDV Scheduled Date */}
-                                {isRdv && mission.scheduledDate && (
-                                    <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-xl">
-                                        <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600">
-                                            <Clock className="w-4 h-4" />
+                            {/* Section: Contexte */}
+                            <div className="space-y-4">
+                                <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-1">Contexte</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {/* Motif */}
+                                    <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-start gap-3 relative overflow-hidden">
+                                        <div className={cn("p-2 rounded-xl shrink-0 mt-0.5", situationConfig.bgColor, situationConfig.iconColor)}>
+                                            <SituationIcon className="w-5 h-5" />
                                         </div>
-                                        <div className="flex-1">
-                                            <p className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider">RDV prévu</p>
-                                            <p className="font-semibold text-indigo-900">
-                                                {new Date(mission.scheduledDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
-                                                {mission.scheduledTimeStart && <span className="ml-2">{mission.scheduledTimeStart}{mission.scheduledTimeEnd && ` - ${mission.scheduledTimeEnd}`}</span>}
+                                        <div>
+                                            <p className="text-xs font-medium text-gray-500 mb-0.5">{isRdv && mission.serviceType ? "Service demandé" : "Symptôme déclaré"}</p>
+                                            <p className="font-bold text-gray-900 line-clamp-2">
+                                                {isRdv && mission.serviceType ? mission.serviceType.name : situationConfig.label}
                                             </p>
                                         </div>
                                     </div>
-                                )}
+
+                                    {/* Date */}
+                                    <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-start gap-3">
+                                        <div className="p-2 rounded-xl bg-blue-50 text-blue-600 shrink-0 mt-0.5">
+                                            <Calendar className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-medium text-gray-500 mb-0.5">Date de la demande</p>
+                                            <p className="font-bold text-gray-900">
+                                                {new Date(mission.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                                            </p>
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                à {new Date(mission.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* RDV Slot */}
+                                    {isRdv && mission.scheduledDate && (
+                                        <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-start gap-3 md:col-span-2">
+                                            <div className="p-2 rounded-xl bg-white text-indigo-600 shrink-0 mt-0.5 shadow-sm">
+                                                <Clock className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-0.5">
+                                                    <p className="text-xs font-bold text-indigo-500 uppercase tracking-wider">Créneau réservé</p>
+                                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-white text-indigo-700 border border-indigo-100">
+                                                        Confirmé
+                                                    </span>
+                                                </div>
+                                                <p className="font-bold text-indigo-900 text-lg">
+                                                    {new Date(mission.scheduledDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+                                                </p>
+                                                {mission.scheduledTimeStart && (
+                                                    <p className="text-sm font-medium text-indigo-700/80">
+                                                        Entre {mission.scheduledTimeStart} et {mission.scheduledTimeEnd || "?"}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
-                            {/* Technical Details - Compact Grid */}
-                            {/* Technical Details - Compact Grid */}
-                            <div className="mt-4 pt-4 border-t border-gray-100">
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">Informations techniques</p>
+                            <div className="my-6 border-t border-dashed border-gray-200" />
+
+                            {/* Section: Technique */}
+                            <div className="space-y-4">
+                                <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-1">Configuration technique</h3>
+
                                 <div className="grid grid-cols-2 gap-3">
-                                    {mission.lockType && (
-                                        <div className="p-3 bg-gray-50 rounded-xl flex items-center gap-3">
-                                            <div className="p-2 bg-white rounded-lg shadow-sm">
-                                                <Key className="w-4 h-4 text-gray-500" />
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] uppercase font-bold text-gray-400">Type de serrure</p>
-                                                <p className="text-sm font-medium text-gray-900 capitalize">
-                                                    {mission.lockType === "multipoint" ? "Multipoints" :
-                                                        mission.lockType === "electronique" ? "Électronique" :
-                                                            mission.lockType === "standard" ? "Standard" : "Autre"}
-                                                </p>
-                                            </div>
+                                    {/* Property Type */}
+                                    <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                                        <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                                            <Building2 className="w-5 h-5" />
                                         </div>
-                                    )}
-                                    {mission.doorType && (
-                                        <div className="p-3 bg-gray-50 rounded-xl flex items-center gap-3">
-                                            <div className="p-2 bg-white rounded-lg shadow-sm">
-                                                <DoorClosed className="w-4 h-4 text-gray-500" />
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] uppercase font-bold text-gray-400">Type de porte</p>
-                                                <p className="text-sm font-medium text-gray-900 capitalize">
-                                                    {mission.doorType === "blindee" ? "Blindée" :
-                                                        mission.doorType === "garage" ? "Garage" :
-                                                            mission.doorType === "cave" ? "Cave" :
-                                                                mission.doorType === "standard" ? "Standard" : "Autre"}
-                                                </p>
-                                            </div>
+                                        <div className="min-w-0">
+                                            <p className="text-[10px] font-medium text-gray-500 uppercase">Type de bien</p>
+                                            <p className="font-bold text-gray-900 truncate capitalize">
+                                                {mission.propertyType === "house" ? "Maison" :
+                                                    mission.propertyType === "apartment" ? "Appartement" :
+                                                        mission.propertyType === "office" ? "Bureau" :
+                                                            mission.propertyType === "shop" ? "Commerce" : "Non spécifié"}
+                                            </p>
                                         </div>
-                                    )}
-                                    {mission.propertyType && (
-                                        <div className="p-3 bg-gray-50 rounded-xl flex items-center gap-3">
-                                            <div className="p-2 bg-white rounded-lg shadow-sm">
-                                                <Building2 className="w-4 h-4 text-gray-500" />
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] uppercase font-bold text-gray-400">Type de bien</p>
-                                                <p className="text-sm font-medium text-gray-900 capitalize">
-                                                    {mission.propertyType === "house" ? "Maison" :
-                                                        mission.propertyType === "apartment" ? "Appartement" :
-                                                            mission.propertyType === "office" ? "Bureau" :
-                                                                mission.propertyType === "shop" ? "Commerce" : "Autre"}
-                                                </p>
-                                            </div>
+                                    </div>
+
+                                    {/* Floor */}
+                                    <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                                        <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
+                                            <Layers className="w-5 h-5" />
                                         </div>
-                                    )}
-                                    {mission.floorNumber !== undefined && (
-                                        <div className="p-3 bg-gray-50 rounded-xl flex items-center gap-3">
-                                            <div className="p-2 bg-white rounded-lg shadow-sm">
-                                                <Layers className="w-4 h-4 text-gray-500" />
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] uppercase font-bold text-gray-400">Étage</p>
-                                                <p className="text-sm font-medium text-gray-900">
-                                                    {mission.floorNumber === 0 ? "RDC" : `${mission.floorNumber}${mission.floorNumber === 1 ? 'er' : 'ème'}`}
-                                                    {mission.hasElevator && <span className="text-gray-500 font-normal ml-1">(Asc.)</span>}
-                                                </p>
-                                            </div>
+                                        <div className="min-w-0">
+                                            <p className="text-[10px] font-medium text-gray-500 uppercase">Étage</p>
+                                            <p className="font-bold text-gray-900 truncate">
+                                                {mission.floorNumber === 0 ? "RDC" :
+                                                    mission.floorNumber !== undefined ? `${mission.floorNumber}${mission.floorNumber === 1 ? 'er' : 'ème'}` : "Non spécifié"}
+                                                {mission.hasElevator && <span className="text-gray-400 font-normal ml-1">(Asc.)</span>}
+                                            </p>
                                         </div>
-                                    )}
+                                    </div>
+
+                                    {/* Door Type */}
+                                    <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                                        <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600 shrink-0">
+                                            <DoorClosed className="w-5 h-5" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-[10px] font-medium text-gray-500 uppercase">Porte</p>
+                                            <p className="font-bold text-gray-900 truncate capitalize">
+                                                {mission.doorType === "blindee" ? "Blindée" :
+                                                    mission.doorType === "garage" ? "Garage" :
+                                                        mission.doorType === "cave" ? "Cave" :
+                                                            "Standard"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Lock Type */}
+                                    <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                                        <div className="w-10 h-10 rounded-full bg-cyan-50 flex items-center justify-center text-cyan-600 shrink-0">
+                                            <Key className="w-5 h-5" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-[10px] font-medium text-gray-500 uppercase">Serrure</p>
+                                            <p className="font-bold text-gray-900 truncate capitalize">
+                                                {mission.lockType === "multipoint" ? "Multipoints" :
+                                                    mission.lockType === "electronique" ? "Électronique" :
+                                                        "Standard"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Access */}
                                     {mission.accessDifficulty && (
-                                        <div className="p-3 bg-gray-50 rounded-xl flex items-center gap-3">
-                                            <div className="p-2 bg-white rounded-lg shadow-sm">
-                                                <AlertTriangle className="w-4 h-4 text-gray-500" />
+                                        <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 col-span-2">
+                                            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 shrink-0">
+                                                <AlertTriangle className="w-5 h-5" />
                                             </div>
-                                            <div>
-                                                <p className="text-[10px] uppercase font-bold text-gray-400">Accès</p>
-                                                <p className="text-sm font-medium text-gray-900 capitalize">
+                                            <div className="min-w-0">
+                                                <p className="text-[10px] font-medium text-gray-500 uppercase">Conditions d'accès</p>
+                                                <p className="font-bold text-gray-900 truncate capitalize">
                                                     {mission.accessDifficulty === "digicode" ? "Digicode" :
                                                         mission.accessDifficulty === "keys_needed" ? "Clés nécessaires" :
-                                                            mission.accessDifficulty === "easy" ? "Facile" :
+                                                            mission.accessDifficulty === "easy" ? "Accès facile" :
                                                                 mission.accessDifficulty === "guard" ? "Gardien" : "Autre"}
                                                 </p>
                                             </div>
@@ -455,7 +478,7 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
 
                         {/* Photos - Modern Gallery */}
                         {mission.photos?.length > 0 && (
-                            <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm">
+                            <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group">
                                 <div className="flex items-center justify-between mb-6">
                                     <h2 className="font-semibold text-gray-900 flex items-center gap-2">
                                         <ImageIcon className="w-5 h-5 text-gray-400" />
@@ -504,23 +527,25 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                     <div className="space-y-6">
                         <div className="lg:sticky lg:top-24 space-y-6">
 
-                            {/* Mission Actions Wrapper - Professional Design */}
-                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden h-[126px] hidden lg:block">
-                                <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
-                                    <div className="flex items-center gap-2.5">
-                                        <span className="relative flex h-2 w-2">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                        </span>
-                                        <span className="text-sm font-semibold text-gray-700">Prochaine étape</span>
+                            {/* Mission Actions Wrapper - Simplified Design */}
+                            <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden hidden lg:block shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group">
+                                <div className="p-5 space-y-5">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                                            <ListTodo className="w-5 h-5 text-gray-400" />
+                                            Prochaine étape
+                                        </h3>
                                     </div>
-                                </div>
-                                <div className="p-5">
-                                    <MissionActions
-                                        interventionId={mission.id}
-                                        trackingNumber={mission.trackingNumber}
-                                        status={mission.status}
-                                    />
+
+                                    <MissionStepper status={mission.status} className="py-0" />
+
+                                    <div className="pt-2">
+                                        <MissionActions
+                                            interventionId={mission.id}
+                                            trackingNumber={mission.trackingNumber}
+                                            status={mission.status}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
@@ -551,14 +576,6 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
                                 </div>
                             )}
 
-                            {/* Help Box */}
-                            <div className="p-6 bg-secondary/50 rounded-3xl border border-gray-200 space-y-4">
-                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Besoin d'aide ?</p>
-                                <Button variant="link" className="p-0 h-auto text-blue-600 text-sm font-semibold group flex items-center gap-1">
-                                    Support Serenio Pro
-                                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                </Button>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -578,6 +595,8 @@ export function MissionView({ mission, currentUserId }: MissionViewProps) {
             }
 
             {/* Quick Action FAB - Mobile only */}
+            {/* Quick Action FAB - Mobile only */}
+
             <MissionQuickAction interventionId={mission.id} status={mission.status} />
         </div >
     )
