@@ -19,8 +19,7 @@ import {
     CircleDot,
     HelpCircle,
     LayoutGrid,
-    List,
-    MessageSquare
+    List
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -417,12 +416,6 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
                                         {status.label}
                                     </span>
                                 )}
-                                {unreadCount > 0 && !isCompleted && !isCancelled && (
-                                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100/50 shadow-sm">
-                                        <MessageSquare className="w-3 h-3" />
-                                        <span className="text-[10px] font-bold">{unreadCount}</span>
-                                    </div>
-                                )}
                             </div>
                             <h3 className="font-bold text-gray-900 leading-tight">
                                 {situationLabel}
@@ -452,8 +445,15 @@ function MissionCard({ mission, tabType, unreadCount = 0 }: { mission: ActiveMis
                     {/* Footer Infos */}
                     <div className="flex items-center justify-between pt-2 border-t border-gray-50 mt-auto">
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-[10px] font-bold text-indigo-600 border border-indigo-100">
-                                {mission.clientFirstName.charAt(0)}{mission.clientLastName.charAt(0)}
+                            <div className="relative">
+                                <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-[10px] font-bold text-indigo-600 border border-indigo-100">
+                                    {mission.clientFirstName.charAt(0)}{mission.clientLastName.charAt(0)}
+                                </div>
+                                {unreadCount > 0 && !isCompleted && !isCancelled && (
+                                    <div className="absolute -top-1 -right-1.5 flex items-center bg-blue-600 text-white rounded-full shadow-sm h-4 min-w-[16px] px-1 justify-center">
+                                        <span className="text-[8px] font-bold leading-none">{unreadCount}</span>
+                                    </div>
+                                )}
                             </div>
                             <span className="text-sm font-medium text-gray-600">
                                 {mission.clientFirstName} {mission.clientLastName}
